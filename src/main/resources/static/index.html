@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Index</title>
+		
+		<link rel="stylesheet" href="css/bootstrap.min.css" />
+		<link rel="stylesheet" href="css/bootstrap-theme.min.css" />
+		<link rel="stylesheet" href="css/system.css" />
+		<link rel="stylesheet" href="css/pagination.css"/>
+
+		<script src="js/jquery-1.11.3.min.js"></script>
+		<script src="js/jquery.pagination.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/system/common.js"></script>
+		<script src="js/system/cluster-management/cluster-management-view-cluster.js"
+		<script src="js/system/cluster-management-maintance.js"></script>
+		<script src="js/system/node-management.js"></script>
+		<script src="js/system/search-management.js"></script>
+		<script src="js/system/service-management.js"></script>
+		<script src="js/system/system.js"></script>
+
+	</head>
+	<body>
+	<div class="navbar navbar-duomi navbar-static-top" role="navigation">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<h2 class="navbar-brand">服务模糊搜索、智能推荐和可信评估系统
+				</h2>
+			</div>
+		</div>
+	</div>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-2">
+				<ul id="main-nav" class="nav nav-tabs nav-stacked" style="">
+					<li class="active">
+						<a href="#">
+							首页
+						</a>
+					</li>
+					<li>
+						<a href="#clusterManagement" class="nav-header collapsed" data-toggle="collapse">
+							集群管理
+							<span class="pull-right glyphicon glyphicon-chevron-down"></span>
+						</a>
+						<ul id="clusterManagement" class="nav nav-list collapse secondmenu" style="height: 0px;">
+							<li><a onclick="clusterManagementViewCluster()">集群浏览</a></li>
+							<li><a onclick="clusterManagementMaintaince()">集群维护</a></li>
+						</ul>
+					</li>
+					<li>
+						<a href="#nodeManagement" class="nav-header collapsed" data-toggle="collapse">
+							节点管理
+							<span class="pull-right glyphicon glyphicon-chevron-down"></span>
+						</a>
+						<ul id="nodeManagement" class="nav nav-list collapse secondmenu" style="height: 0px;">
+							<li><a onclick="nodeView()">节点浏览</a></li>
+							<li><a onclick="nodeMaintenance()">节点维护</a></li>
+						</ul>
+					</li>
+
+					<li>
+						<a href="#serviceManagement" class="nav-header collapsed" data-toggle="collapse">
+							服务管理
+							<span class="pull-right glyphicon glyphicon-chevron-down"></span>
+						</a>
+						<ul id="serviceManagement" class="nav nav-list collapse secondmenu" style="height: 0px;">
+							<li><a onclick="servicesViewer()">服务浏览</a></li>
+							<li><a onclick="serviceStandardization()">服务标准化</a></li>
+							<li><a onclick="servicesReserved()">服务维护</a></li>
+							<li><a href="#">服务分配</a></li>
+						</ul>
+					</li>
+					<li>
+						<a onclick="serviceSearch()">
+							服务搜索
+						</a>
+					</li>
+					<li>
+						<a href="#">
+							服务推荐
+						</a>
+					</li>
+					<li>
+						<a href="#">
+							可信评估
+						</a>
+					</li>
+
+				</ul>
+			</div>
+			<div class="col-md-10">
+				<div id="location" class="row">
+					<span>位置：</span>
+				</div>
+				<div id="main_content" class="row">
+
+				</div>
+			</div>
+		</div>
+	</div>
+	</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>节点配置</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css" />
+
+    <script src="js/jquery-1.11.3.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script>
+        function nodeConfiguration() {
+            $.ajax({
+                type: "GET",
+                data: {"clusterID": $("#cluster_id").val()},
+                url: "/api/test/node/configure",
+                dataType: "json",
+                success: function (data) {
+                    $("#node_table").html("");
+                    for(var i=0;i<data.data.length;i++){
+                        $("#node_table").append($("<tr/>").append($("<td/>")
+                            .append($("<div class='row'/>").append($("<label/>").html("节点ID:" + data.data[i].id)))
+                            .append($("<div class='row'/>").append($("<label/>").html("节点名:" + data.data[i].name)))
+                            .append($("<div class='row'/>").append($("<label/>").html("节点属性:" + data.data[i].attributes)))
+                            .append($("<div class='row'/>").append($("<label/>").html("节点服务数量:" + data.data[i].serviceNumber)))
+                            .append($("<div class='row'/>").append($("<label/>").html("节点位置:" + data.data[i].position)))
+                            .append($("<div class='row'/>").append($("<label/>").html("节点所在集群ID:" + data.data[i].cluster)))
+                            .append($("<div class='row'/>").append($("<label/>").html("节点关联节点:" + data.data[i].associatedNodes)))
+                            .append($("<div class='row'/>").append($("<label/>").html("节点等级:" + data.data[i].level)))
+                            .append($("<div class='row'/>").append($("<label/>").html("节点创建时间:" + data.data[i].createTime)))
+                            .append($("<div class='row'/>").append($("<label/>").html("节点修改时间:" + data.data[i].modifyTime)))
+                        ).append($("<hr/>")));
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+
+            <label>节点配置：<input id="cluster_id" type="text"></label> <button class="btn btn-info" onclick="nodeConfiguration()">配置</button>
+        </div>
+
+        <div id="node_table" style="border: 1px" class="table table-bordered table-responsive table-hover">
+
+        </div>
+    </div>
+
+</body>
+</html>
