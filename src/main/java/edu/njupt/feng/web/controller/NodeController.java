@@ -1,13 +1,14 @@
 package edu.njupt.feng.web.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.njupt.feng.web.entity.common.JsonData;
-import edu.njupt.feng.web.mapper.NodeMapper;
 import edu.njupt.feng.web.service.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * node相关后端接口
+ */
 @RestController
 public class NodeController {
 

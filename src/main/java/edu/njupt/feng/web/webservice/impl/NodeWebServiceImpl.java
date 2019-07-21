@@ -136,4 +136,35 @@ public class NodeWebServiceImpl implements NodeWebService {
 
         return results;
     }
+
+    @Override
+    public List<ServiceServiceInfo> testRecommend(String keyword) {
+        List<ServiceServiceInfo> results = new ArrayList<>();
+
+        //首先，检查自己的服务列表有没有符合要求服务
+        for(NodeServiceListItem item : serviceInfoList.values()){
+            ServiceServiceInfo serviceInfo = getServiceInfo(item.getServiceAddress());
+            if(serviceInfo.getContent().contains(keyword)){
+                results.add(serviceInfo);
+            }
+        }
+
+        //遍历关联节点
+        for(AssociatedNodeServiceInfo associatedNode : nodeServiceInfo.getAssociatedNodeServiceInfos()){
+
+            //获取关联节点的节点信息
+            NodeServiceInfo associatedNodeInfo = getNodeServiceInfo(associatedNode.getServiceAddress());
+            //获取关联节点的服务列表
+            List<NodeServiceListItem> associatedNodeServicesList = getServiceList(associatedNode.getServiceAddress());
+
+            for(NodeServiceListItem item : associatedNodeServicesList){
+                ServiceServiceInfo serviceInfo = getServiceInfo(item.getServiceAddress());
+                if(serviceInfo.getContent().contains(keyword)){
+                    results.add(serviceInfo);
+                }
+            }
+        }
+
+        return results;
+    }
 }

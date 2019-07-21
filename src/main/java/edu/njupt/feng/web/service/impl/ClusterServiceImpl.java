@@ -46,4 +46,14 @@ public class ClusterServiceImpl implements ClusterService {
     public boolean uninstallCluster(int clusterID) {
         return false;
     }
+
+    @Override
+    public boolean addCluster(int clusterID, String clusterName, String clusterAttr) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteCluster(int clusterID) {
+        return false;
+    }
 }

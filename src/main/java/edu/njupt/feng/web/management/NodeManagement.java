@@ -88,6 +88,24 @@ public class NodeManagement {
         return null;
     }
 
+    /**
+     * 推荐测试示例
+     * @param nodeId
+     * @param keyword
+     * @return
+     */
+    public List<ServiceServiceInfo> testRecommend(Integer nodeId,String keyword){
+        if(nodeServices.get(nodeId) != null){
+            JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+
+            factoryBean.setServiceClass(NodeWebService.class);
+            factoryBean.setAddress(nodeServices.get(nodeId).getServiceAddress());
+            NodeWebService service = factoryBean.create(NodeWebService.class);
+            return service.testSearch(keyword);
+        }
+        return null;
+    }
+
     public void testUpdateNodeAttr(Integer nodeId){
         JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
 
