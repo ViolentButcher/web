@@ -36,5 +36,19 @@ public interface ClusterService {
      */
     public boolean uninstallCluster(int clusterID);
 
+    /**
+     * 添加集群
+     * @param clusterID
+     * @param clusterName
+     * @param clusterAttr
+     */
+    public boolean addCluster(int clusterID,String clusterName,String clusterAttr);
 
+
+    /**
+     * 删除集群
+     * @param clusterID
+     * @return
+     */
+    public boolean deleteCluster(int clusterID);
 }
