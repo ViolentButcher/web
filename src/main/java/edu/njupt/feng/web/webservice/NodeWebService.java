@@ -95,4 +95,11 @@ public interface NodeWebService {
      * @return
      */
     public List<ServiceServiceInfo> testSearch(String keyword);
+
+    /**
+     * 推荐测试示例
+     * @param keyword
+     * @return
+     */
+    public List<ServiceServiceInfo> testRecommend(String keyword);
 }

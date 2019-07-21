@@ -58,6 +58,13 @@ public class TestController {
         return data;
     }
 
+    @RequestMapping("/test/api/recommend/test")
+    public JsonData testRecommend(Integer nodeId,String keyword){
+        JsonData data = new JsonData();
+        data.setData(nodeManagement.testRecommend(nodeId,keyword));
+        return data;
+    }
+
     @RequestMapping("/test/api/search/stress")
     public JsonData testStress(Integer nodeId){
         JsonData data = new JsonData();
