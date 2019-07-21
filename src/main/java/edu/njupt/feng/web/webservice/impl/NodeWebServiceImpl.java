@@ -118,18 +118,20 @@ public class NodeWebServiceImpl implements NodeWebService {
             }
         }
 
-        //遍历关联节点
-        for(AssociatedNodeServiceInfo associatedNode : nodeServiceInfo.getAssociatedNodeServiceInfos()){
+        if ( nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
+            //遍历关联节点
+            for(AssociatedNodeServiceInfo associatedNode : nodeServiceInfo.getAssociatedNodeServiceInfos()){
 
-            //获取关联节点的节点信息
-            NodeServiceInfo associatedNodeInfo = getNodeServiceInfo(associatedNode.getServiceAddress());
-            //获取关联节点的服务列表
-            List<NodeServiceListItem> associatedNodeServicesList = getServiceList(associatedNode.getServiceAddress());
+                //获取关联节点的节点信息
+                NodeServiceInfo associatedNodeInfo = getNodeServiceInfo(associatedNode.getServiceAddress());
+                //获取关联节点的服务列表
+                List<NodeServiceListItem> associatedNodeServicesList = getServiceList(associatedNode.getServiceAddress());
 
-            for(NodeServiceListItem item : associatedNodeServicesList){
-                ServiceServiceInfo serviceInfo = getServiceInfo(item.getServiceAddress());
-                if(serviceInfo.getContent().contains(keyword)){
-                    results.add(serviceInfo);
+                for(NodeServiceListItem item : associatedNodeServicesList){
+                    ServiceServiceInfo serviceInfo = getServiceInfo(item.getServiceAddress());
+                    if(serviceInfo.getContent().contains(keyword)){
+                        results.add(serviceInfo);
+                    }
                 }
             }
         }
@@ -149,21 +151,24 @@ public class NodeWebServiceImpl implements NodeWebService {
             }
         }
 
-        //遍历关联节点
-        for(AssociatedNodeServiceInfo associatedNode : nodeServiceInfo.getAssociatedNodeServiceInfos()){
+        if ( nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
+            //遍历关联节点
+            for(AssociatedNodeServiceInfo associatedNode : nodeServiceInfo.getAssociatedNodeServiceInfos()){
 
-            //获取关联节点的节点信息
-            NodeServiceInfo associatedNodeInfo = getNodeServiceInfo(associatedNode.getServiceAddress());
-            //获取关联节点的服务列表
-            List<NodeServiceListItem> associatedNodeServicesList = getServiceList(associatedNode.getServiceAddress());
+                //获取关联节点的节点信息
+                NodeServiceInfo associatedNodeInfo = getNodeServiceInfo(associatedNode.getServiceAddress());
+                //获取关联节点的服务列表
+                List<NodeServiceListItem> associatedNodeServicesList = getServiceList(associatedNode.getServiceAddress());
 
-            for(NodeServiceListItem item : associatedNodeServicesList){
-                ServiceServiceInfo serviceInfo = getServiceInfo(item.getServiceAddress());
-                if(serviceInfo.getContent().contains(keyword)){
-                    results.add(serviceInfo);
+                for(NodeServiceListItem item : associatedNodeServicesList){
+                    ServiceServiceInfo serviceInfo = getServiceInfo(item.getServiceAddress());
+                    if(serviceInfo.getContent().contains(keyword)){
+                        results.add(serviceInfo);
+                    }
                 }
             }
         }
+
 
         return results;
     }
