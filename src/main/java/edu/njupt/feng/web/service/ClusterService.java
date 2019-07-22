@@ -13,7 +13,7 @@ public interface ClusterService {
      * 获取cluster列表信息
      * @return
      */
-    public PageInfo getClusterInfoList(int pageNum);
+    public PageInfo getClusterInfoList(Integer pageNum,String filter,String order,String desc);
 
     /**
      * 获取集群的节点的分页信息
@@ -38,11 +38,10 @@ public interface ClusterService {
 
     /**
      * 添加集群
-     * @param clusterID
      * @param clusterName
      * @param clusterAttr
      */
-    public boolean addCluster(int clusterID,String clusterName,String clusterAttr);
+    public boolean addCluster(String clusterName,String clusterAttr);
 
 
     /**

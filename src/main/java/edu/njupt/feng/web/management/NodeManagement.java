@@ -95,13 +95,14 @@ public class NodeManagement {
      * @return
      */
     public List<ServiceServiceInfo> testRecommend(Integer nodeId,String keyword){
+        System.out.println("----recommend-----");
         if(nodeServices.get(nodeId) != null){
             JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
 
             factoryBean.setServiceClass(NodeWebService.class);
             factoryBean.setAddress(nodeServices.get(nodeId).getServiceAddress());
             NodeWebService service = factoryBean.create(NodeWebService.class);
-            return service.testSearch(keyword);
+            return service.testRecommend(keyword);
         }
         return null;
     }

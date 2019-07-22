@@ -10,6 +10,7 @@ import edu.njupt.feng.web.service.ClusterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -22,9 +23,9 @@ public class ClusterServiceImpl implements ClusterService {
     private NodeMapper nodeMapper;
 
     @Override
-    public PageInfo getClusterInfoList(int pageNum) {
+    public PageInfo getClusterInfoList(Integer pageNum, String filter, String order, String desc) {
         PageHelper.startPage(pageNum,10);
-        List<ClusterInfo> clusterInfos = clusterMapper.getClusterList();
+        List<ClusterInfo> clusterInfos = clusterMapper.getClusterListWithParams(filter, order, desc);
         PageInfo<ClusterInfo> pageInfo = new PageInfo<ClusterInfo>(clusterInfos);
         return pageInfo;
     }
@@ -48,7 +49,17 @@ public class ClusterServiceImpl implements ClusterService {
     }
 
     @Override
-    public boolean addCluster(int clusterID, String clusterName, String clusterAttr) {
+    public boolean addCluster(String clusterName, String clusterAttr) {
+        if(clusterMapper.countClustersByName(clusterName) == 0){
+            ClusterInfo clusterInfo = new ClusterInfo();
+            clusterInfo.setName(clusterName);
+            clusterInfo.setAttribute(clusterAttr);
+            clusterInfo.setCreateTime(new Date());
+            clusterInfo.setModifyTime(new Date());
+            clusterInfo.setState(0);
+            clusterMapper.addCluster(clusterInfo);
+            return true;
+        }
         return false;
     }
 
