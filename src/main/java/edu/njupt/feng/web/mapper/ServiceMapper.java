@@ -37,6 +37,11 @@ public interface ServiceMapper {
     })
     public List<ServiceInfo> getServicesInfoByNodeCluster(@Param("nodeID") Integer nodeID);
 
+    /**
+     * 根据服务id获取服务信息
+     * @param serviceID
+     * @return
+     */
     @Select("SELECT * from service WHERE id = #{serviceID}")
     @Results({
             @Result(column = "create_time",property = "createTime"),
@@ -44,6 +49,13 @@ public interface ServiceMapper {
     })
     public ServiceInfo getServiceInfo(Integer serviceID);
 
+    /**
+     * 更新服务属性
+     * @param attributes
+     * @param serviceID
+     */
     @Update("UPDATE service SET attributes = #{attributes} WHERE id = #{serviceID}")
     public void updateServiceAttr(@Param("attributes")String attributes,@Param("serviceID")Integer serviceID);
+
+
 }
