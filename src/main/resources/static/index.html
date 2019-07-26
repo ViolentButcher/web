@@ -14,11 +14,15 @@
 		<script src="js/bootstrap.min.js"></script>
 		<script src="js/system/common.js"></script>
 		<script src="js/system/cluster-management/cluster-management-view-cluster.js"></script>
-		<script src="js/system/cluster-management-maintance.js"></script>
-		<script src="js/system/node-management.js"></script>
-		<script src="js/system/search-management.js"></script>
-		<script src="js/system/service-management.js"></script>
-		<script src="js/system/system.js"></script>
+		<script src="js/system/cluster-management/cluster-management-maintain.js"></script>
+		<script src="js/system/node-management/node-management-view.js"></script>
+		<script src="js/system/service-management/service-management-view.js"></script>
+		<script src="js/system/service-management/service-management-maintain.js"></script>
+<!--		<script src="js/system/cluster-management-maintance.js"></script>-->
+<!--		<script src="js/system/node-management.js"></script>-->
+<!--		<script src="js/system/search-management.js"></script>-->
+<!--		<script src="js/system/service-management.js"></script>-->
+<!--		<script src="js/system/system.js"></script>-->
 
 	</head>
 	<body>
@@ -46,7 +50,7 @@
 						</a>
 						<ul id="clusterManagement" class="nav nav-list collapse secondmenu" style="height: 0px;">
 							<li><a onclick="clusterManagementViewCluster()">集群浏览</a></li>
-							<li><a onclick="clusterManagementMaintaince()">集群维护</a></li>
+							<li><a onclick="clusterManagementMaintain()">集群维护</a></li>
 						</ul>
 					</li>
 					<li>
@@ -55,7 +59,7 @@
 							<span class="pull-right glyphicon glyphicon-chevron-down"></span>
 						</a>
 						<ul id="nodeManagement" class="nav nav-list collapse secondmenu" style="height: 0px;">
-							<li><a onclick="nodeView()">节点浏览</a></li>
+							<li><a onclick="nodeManagementViewNode()">节点浏览</a></li>
 							<li><a onclick="nodeMaintenance()">节点维护</a></li>
 						</ul>
 					</li>
@@ -66,9 +70,9 @@
 							<span class="pull-right glyphicon glyphicon-chevron-down"></span>
 						</a>
 						<ul id="serviceManagement" class="nav nav-list collapse secondmenu" style="height: 0px;">
-							<li><a onclick="servicesViewer()">服务浏览</a></li>
-							<li><a onclick="serviceStandardization()">服务标准化</a></li>
-							<li><a onclick="servicesReserved()">服务维护</a></li>
+							<li><a onclick="serviceManagementView()">服务浏览</a></li>
+							<li><a onclick="serviceManagementStandardization()">服务标准化</a></li>
+							<li><a onclick="serviceManagementMaintain()">服务维护</a></li>
 							<li><a href="#">服务分配</a></li>
 						</ul>
 					</li>

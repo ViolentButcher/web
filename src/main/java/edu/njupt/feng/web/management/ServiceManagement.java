@@ -40,10 +40,17 @@ public class ServiceManagement {
 
             System.out.println("启动服务。。。。。。服务地址：" + serviceInfo.getServiceAddress());
 
+            //全局service字典添加service
+            ServiceMap.addService(serviceInfo);
+
             services.put(serviceInfo.getId(),serverFactoryBean);
         }
     }
 
+    /**
+     * 测试服务属性的更新
+     * @param id
+     */
     public void testUpdateAttr(Integer id){
         if(services.get(id) != null){
             JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
@@ -56,6 +63,11 @@ public class ServiceManagement {
         }
     }
 
+    /**
+     * 服务信息获取的测试
+     * @param id
+     * @return
+     */
     public ServiceServiceInfo testGetServiceInfo(Integer id){
         if(services.get(id) != null){
             JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
