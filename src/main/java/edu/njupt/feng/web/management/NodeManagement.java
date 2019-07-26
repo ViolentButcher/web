@@ -101,7 +101,7 @@ public class NodeManagement {
             factoryBean.setServiceClass(NodeWebService.class);
             factoryBean.setAddress(nodeServices.get(nodeId).getServiceAddress());
             NodeWebService service = factoryBean.create(NodeWebService.class);
-            return service.testSearch(keyword);
+            return service.testRecommend(keyword);
         }
         return null;
     }
