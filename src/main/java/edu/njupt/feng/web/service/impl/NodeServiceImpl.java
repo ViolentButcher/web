@@ -70,4 +70,12 @@ public class NodeServiceImpl implements NodeService {
     public void deleteNode(Integer nodeID) {
         nodeMapper.deleteNode(nodeID);
     }
+
+    @Override
+    public PageInfo getAllNodeList(Integer pageNum, String filter, String order, String desc) {
+        PageHelper.startPage(pageNum,10);
+        List<NodeInfo> nodeInfos = nodeMapper.getAllNodeList(filter, order, desc);
+        PageInfo<NodeInfo> pageInfo = new PageInfo<>(nodeInfos);
+        return pageInfo;
+    }
 }

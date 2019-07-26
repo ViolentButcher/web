@@ -4,8 +4,10 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import edu.njupt.feng.web.entity.database.ClusterInfo;
 import edu.njupt.feng.web.entity.database.NodeInfo;
+import edu.njupt.feng.web.management.ClusterManagement;
 import edu.njupt.feng.web.mapper.ClusterMapper;
 import edu.njupt.feng.web.mapper.NodeMapper;
+import edu.njupt.feng.web.mapper.ServiceMapper;
 import edu.njupt.feng.web.service.ClusterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,12 @@ public class ClusterServiceImpl implements ClusterService {
 
     @Autowired
     private NodeMapper nodeMapper;
+
+    @Autowired
+    private ServiceMapper serviceMapper;
+
+    @Autowired
+    private ClusterManagement clusterManagement;
 
     @Override
     public PageInfo getClusterInfoList(Integer pageNum, String filter, String order, String desc) {
@@ -64,7 +72,17 @@ public class ClusterServiceImpl implements ClusterService {
     }
 
     @Override
-    public boolean deleteCluster(int clusterID) {
-        return false;
+    public String deleteCluster(int clusterID) {
+        if(clusterMapper.getClusterByID(clusterID) != null){
+            if(clusterManagement.isStart(clusterID)){
+                return "对不起，集群正在运行";
+            }
+            clusterMapper.deleteCluster(clusterID);
+            nodeMapper.deleteNodesByCluster(clusterID);
+            serviceMapper.deleteServiceByCluster(clusterID);
+            return "删除集群成功";
+        }
+        return "对不起，该集群不存在";
+
     }
 }

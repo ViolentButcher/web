@@ -1,6 +1,7 @@
 package edu.njupt.feng.web.mapper;
 
 import edu.njupt.feng.web.entity.database.NodeInfo;
+import edu.njupt.feng.web.provider.ClusterProvider;
 import edu.njupt.feng.web.provider.NodeProvider;
 import org.apache.ibatis.annotations.*;
 
@@ -105,5 +106,27 @@ public interface NodeMapper {
     @Delete("DELETE FROM node WHERE id = #{nodeID}")
     public void deleteNode(Integer nodeID);
 
+    /**
+     * 删除集群所属节点
+     * @param clusterID
+     */
+    @Delete("DELETE FROM cluster WHERE cluster = #{clusterID}")
+    public void deleteNodesByCluster(Integer clusterID);
+
+    /**
+     * 获取所有节点的列表
+     * @param filter
+     * @param order
+     * @param desc
+     * @return
+     */
+    @SelectProvider(type = NodeProvider.class,method = "getAllNodeList")
+    @Results({
+            @Result(column = "service_number",property = "serviceNumber"),
+            @Result(column = "associated_nodes",property = "associatedNodes"),
+            @Result(column = "create_time",property = "createTime"),
+            @Result(column = "modify_time",property = "modifyTime"),
+    })
+    public List<NodeInfo> getAllNodeList(String filter,String order,String desc);
 }
 

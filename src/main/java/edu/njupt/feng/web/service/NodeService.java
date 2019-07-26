@@ -57,4 +57,14 @@ public interface NodeService {
      * @param nodeID
      */
     public void deleteNode(Integer nodeID);
+
+    /**
+     * 获取所有节点的列表
+     * @param pageNum
+     * @param filter
+     * @param order
+     * @param desc
+     * @return
+     */
+    public PageInfo getAllNodeList(Integer pageNum, String filter, String order, String desc);
 }

@@ -2,6 +2,7 @@ package edu.njupt.feng.web.webservice.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
+import edu.njupt.feng.web.management.ServiceMap;
 import edu.njupt.feng.web.utils.constants.Constants;
 import edu.njupt.feng.web.utils.mysql.MySQLUtil;
 import edu.njupt.feng.web.webservice.NodeWebService;
@@ -41,6 +42,9 @@ public class ServiceWebServiceImpl implements ServiceWebService {
         factoryBean.setServiceClass(NodeWebService.class);
         NodeWebService webService = factoryBean.create(NodeWebService.class);
         webService.updateServiceAttributes(attributes,serviceServiceInfo.getId());
+
+        //节点更新信息
+        ServiceMap.updateServiceAttributes(serviceServiceInfo.getServiceAddress(),attributes);
     }
 
     @Override

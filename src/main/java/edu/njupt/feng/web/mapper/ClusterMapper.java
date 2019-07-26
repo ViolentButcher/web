@@ -69,4 +69,6 @@ public interface ClusterMapper {
      */
     @Delete("DELETE FROM cluster WHERE id = #{clusterID}")
     public void deleteCluster(int clusterID);
+
+
 }

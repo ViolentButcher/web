@@ -37,4 +37,30 @@ public class NodeProvider {
 
     }
 
+    /**
+     * 获取所有节点的列表
+     * @param filter
+     * @param order
+     * @param desc
+     * @return
+     */
+    public String getAllNodeList(String filter,String order,String desc){
+        if(filter == null){
+            return new SQL(){{
+                SELECT("*");
+                FROM("node");
+                ORDER_BY(order);
+
+            }}.toString() + " " + desc;
+        }else {
+            return new SQL(){{
+                SELECT("*");
+                FROM("node");
+                WHERE(filter);
+                ORDER_BY(order);
+
+            }}.toString() + " " + desc;
+        }
+
+    }
 }

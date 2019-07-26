@@ -102,6 +102,12 @@ public class NodeController {
         return data;
     }
 
+    @RequestMapping("/api/node/node_list_all")
+    public JsonData getAllNodeList(@RequestParam(defaultValue = "1")Integer pageNum, String filter, @RequestParam(defaultValue = "id")String order, @RequestParam(defaultValue = "asc")String desc){
+        JsonData data = new JsonData();
+        data.setData(nodeService.getAllNodeList(pageNum, filter, order, desc));
+        return data;
+    }
 
 
 }

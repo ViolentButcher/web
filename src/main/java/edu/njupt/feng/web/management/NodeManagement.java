@@ -52,6 +52,9 @@ public class NodeManagement {
             System.out.println("启动节点服务：" + webService.getNodeInfo().getServiceAddress());
             nodeServices.put(nodeID,node);
 
+            //全局节点字典添加
+            NodeMap.addNode(webService.getNodeInfo(),webService.getNodeServiceList());
+
             for(Integer serviceID : serviceMapper.getServiceIDsByNodeID(nodeID)){
                 serviceManagement.startService(serviceID);
             }
@@ -76,14 +79,14 @@ public class NodeManagement {
      * @param keyword
      * @return
      */
-    public List<ServiceServiceInfo> testSearch(Integer nodeId,String keyword){
+    public List<ServiceServiceInfo> testSearch(Integer nodeId,String keyword,Integer type){
         if(nodeServices.get(nodeId) != null){
             JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
 
             factoryBean.setServiceClass(NodeWebService.class);
             factoryBean.setAddress(nodeServices.get(nodeId).getServiceAddress());
             NodeWebService service = factoryBean.create(NodeWebService.class);
-            return service.testSearch(keyword);
+            return service.testSearch(keyword,type);
         }
         return null;
     }
@@ -94,19 +97,22 @@ public class NodeManagement {
      * @param keyword
      * @return
      */
-    public List<ServiceServiceInfo> testRecommend(Integer nodeId,String keyword){
-        System.out.println("----recommend-----");
+    public List<ServiceServiceInfo> testRecommend(Integer nodeId,String keyword,Integer type){
         if(nodeServices.get(nodeId) != null){
             JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
 
             factoryBean.setServiceClass(NodeWebService.class);
             factoryBean.setAddress(nodeServices.get(nodeId).getServiceAddress());
             NodeWebService service = factoryBean.create(NodeWebService.class);
-            return service.testRecommend(keyword);
+            return service.testRecommend(keyword,type);
         }
         return null;
     }
 
+    /**
+     * 更新节点属性的测试
+     * @param nodeId
+     */
     public void testUpdateNodeAttr(Integer nodeId){
         JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
 

@@ -71,9 +71,9 @@ public class ClusterController {
      * @return
      */
     @RequestMapping("/api/cluster/delete")
-    public JsonData deleteCluster(){
+    public JsonData deleteCluster(Integer clusterID){
         JsonData data = new JsonData();
-
+        data.setMsg(clusterService.deleteCluster(clusterID));
         return data;
     }
 

@@ -52,28 +52,19 @@ public class TestController {
     }
 
     @RequestMapping("/test/api/search/test")
-    public JsonData testSearch(Integer nodeId,String keyword){
+    public JsonData testSearch(Integer nodeId,String keyword,Integer type){
         JsonData data = new JsonData();
-        data.setData(nodeManagement.testSearch(nodeId,keyword));
+        data.setData(nodeManagement.testSearch(nodeId,keyword,type));
         return data;
     }
 
     @RequestMapping("/test/api/recommend/test")
-    public JsonData testRecommend(Integer nodeId,String keyword){
+    public JsonData testRecommend(Integer nodeId,String keyword,Integer type){
         JsonData data = new JsonData();
-        data.setData(nodeManagement.testRecommend(nodeId,keyword));
+        data.setData(nodeManagement.testRecommend(nodeId,keyword,type));
         return data;
     }
 
-    @RequestMapping("/test/api/search/stress")
-    public JsonData testStress(Integer nodeId){
-        JsonData data = new JsonData();
-        for(int i=0;i<100;i++){
-            nodeManagement.testSearch(nodeId,String.valueOf(i));
-        }
-        data.setData(nodeManagement.testSearch(nodeId,String.valueOf(100)));
-        return data;
-    }
 
     @RequestMapping("/test/api/node/update")
     public JsonData testUpdateNodeAttr(Integer id){

@@ -49,5 +49,5 @@ public interface ClusterService {
      * @param clusterID
      * @return
      */
-    public boolean deleteCluster(int clusterID);
+    public String deleteCluster(int clusterID);
 }

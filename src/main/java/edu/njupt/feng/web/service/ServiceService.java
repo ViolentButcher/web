@@ -2,10 +2,12 @@ package edu.njupt.feng.web.service;
 
 
 import com.github.pagehelper.PageInfo;
+import org.springframework.stereotype.Service;
 
 /**
  * 服务接口
  */
+@Service
 public interface ServiceService {
 
     /**
@@ -29,4 +31,20 @@ public interface ServiceService {
      */
     public boolean addService(String name,String content,String attributes,Integer nodeID);
 
+    /**
+     * 获取所有的服务信息
+     * @param pageNum
+     * @param filter
+     * @param order
+     * @param desc
+     * @return
+     */
+    public PageInfo getAllServicesList(Integer pageNum, String filter, String order, String desc);
+
+    /**
+     * 删除指定服务
+     * @param serviceID
+     * @return
+     */
+    public String deleteService(Integer serviceID);
 }
