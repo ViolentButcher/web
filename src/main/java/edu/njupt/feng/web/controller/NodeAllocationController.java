@@ -22,7 +22,7 @@ public class NodeAllocationController {
 
         nodeAllocationService.testNodeAllocation(clusterID);
 
-        data.setData(nodeService.getNodeServiceInfo(1));
+        data.setData(nodeService.getNodeServiceInfo(4));
         return data;
     }
 
