@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import edu.njupt.feng.web.entity.database.ServiceInfo;
+import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
 import edu.njupt.feng.web.management.ClusterManagement;
 import edu.njupt.feng.web.management.NodeMap;
 import edu.njupt.feng.web.mapper.NodeMapper;
 import edu.njupt.feng.web.mapper.ServiceMapper;
 import edu.njupt.feng.web.service.ServiceService;
+import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -97,5 +99,10 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     public void updateModifyTime(Date modifyTime, Integer serviceID) {
         serviceMapper.updateModifyTime(modifyTime, serviceID);
+    }
+
+    @Override
+    public ServiceServiceInfo getServiceInfo(Integer serviceID) {
+        return Convert2ServiceInfo.serviceInfo2ServiceInfo(serviceMapper.getServiceInfo(serviceID));
     }
 }
