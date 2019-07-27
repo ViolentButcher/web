@@ -6,6 +6,7 @@ import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -107,4 +108,18 @@ public interface ServiceService {
      * @return
      */
     public ServiceServiceInfo getServiceInfo(Integer serviceID);
+
+    /**
+     * 获取集群所有服务
+     * @param clusterID
+     * @return
+     */
+    public List<ServiceServiceInfo> getServiceInfoByClusterID(Integer clusterID);
+
+    /**
+     * 获取节点所有服务
+     * @param nodeID
+     * @return
+     */
+    public List<ServiceServiceInfo> getServiceInfoByNodeID(Integer nodeID);
 }

@@ -39,6 +39,13 @@ public interface ServiceMapper {
     })
     public List<ServiceInfo> getServicesInfoByNodeCluster(@Param("nodeID") Integer nodeID);
 
+    @Select("SELECT * FROM service WHERE node = #{clusterID}")
+    @Results({
+            @Result(column = "create_time",property = "createTime"),
+            @Result(column = "modify_time",property = "modifyTime"),
+    })
+    public List<ServiceInfo> getServicesInfoByCluster(@Param("clusterID") Integer clusterID);
+
     /**
      * 根据服务id获取服务信息
      * @param serviceID
