@@ -2,6 +2,7 @@ package edu.njupt.feng.web.service;
 
 
 import com.github.pagehelper.PageInfo;
+import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -99,4 +100,11 @@ public interface ServiceService {
      * @param serviceID
      */
     public void updateModifyTime(Date modifyTime,Integer serviceID);
+
+    /**
+     * 获取服务信息
+     * @param serviceID
+     * @return
+     */
+    public ServiceServiceInfo getServiceInfo(Integer serviceID);
 }
