@@ -55,8 +55,11 @@ public class NodeAllocationServiceImpl implements NodeAllocationService {
         List<ServiceServiceInfo> serviceInfoList = serviceService.getServiceInfoByClusterID(clusterID);
         for (ServiceServiceInfo serviceItem: serviceInfoList) {
             Integer nodeIndex = random.nextInt(nodeInfoList.size());
+            System.out.println("nodeIndex = " + nodeIndex);
             Integer nodeId = nodeInfoList.get(nodeIndex).getId();
+            System.out.println("nodeId = " + nodeId);
             Integer serviceId = serviceItem.getId();
+            System.out.println("serviceId = " + serviceId);
             serviceService.updateNode(nodeId, serviceId);
         }
     }
