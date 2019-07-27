@@ -128,5 +128,11 @@ public interface NodeService {
      */
     public NodeServiceInfo getNodeServiceInfo(Integer nodeID);
 
+    /**
+     * 获取集群中节点列表
+     * @param clusterID
+     * @return
+     */
+    public List<NodeServiceInfo> getNodeServiceInfoListByClusterID(Integer clusterID);
 
 }

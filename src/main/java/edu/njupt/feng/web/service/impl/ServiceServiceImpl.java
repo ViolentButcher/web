@@ -105,4 +105,14 @@ public class ServiceServiceImpl implements ServiceService {
     public ServiceServiceInfo getServiceInfo(Integer serviceID) {
         return Convert2ServiceInfo.serviceInfo2ServiceInfo(serviceMapper.getServiceInfo(serviceID));
     }
+
+    @Override
+    public List<ServiceServiceInfo> getServiceInfoByClusterID(Integer clusterID) {
+        return Convert2ServiceInfo.listServiceInfo2ServiceInfo(serviceMapper.getServicesInfoByCluster(clusterID));
+    }
+
+    @Override
+    public List<ServiceServiceInfo> getServiceInfoByNodeID(Integer nodeID) {
+        return Convert2ServiceInfo.listServiceInfo2ServiceInfo(serviceMapper.getServicesInfoByNodeCluster(nodeID));
+    }
 }
