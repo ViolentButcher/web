@@ -6,8 +6,10 @@ import com.github.pagehelper.PageInfo;
 import edu.njupt.feng.web.entity.common.AssociatedNodeInfo;
 import edu.njupt.feng.web.entity.common.Position;
 import edu.njupt.feng.web.entity.database.NodeInfo;
+import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import edu.njupt.feng.web.mapper.NodeMapper;
 import edu.njupt.feng.web.service.NodeService;
+import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -125,4 +127,8 @@ public class NodeServiceImpl implements NodeService {
         return pageInfo;
     }
 
+    @Override
+    public NodeServiceInfo getNodeServiceInfo(Integer nodeID) {
+        return Convert2ServiceInfo.nodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfoByNodeID(nodeID));
+    }
 }
