@@ -1,5 +1,6 @@
 package edu.njupt.feng.web.webservice;
 
+import edu.njupt.feng.web.entity.common.NodeMapItem;
 import edu.njupt.feng.web.entity.database.NodeInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceListItem;
@@ -94,12 +95,26 @@ public interface NodeWebService {
      * @param keyword
      * @return
      */
-    public List<ServiceServiceInfo> testSearch(String keyword);
+    public List<ServiceServiceInfo> testSearch(String keyword,Integer type);
 
     /**
      * 推荐测试示例
      * @param keyword
      * @return
      */
-    public List<ServiceServiceInfo> testRecommend(String keyword);
+    public List<ServiceServiceInfo> testRecommend(String keyword,Integer type);
+
+    /**
+     * 根据全局节点字典返回节点信息
+     * @param address
+     * @return
+     */
+    public NodeMapItem getNodeServiceInfoByNodeMap(String address);
+
+    /**
+     * 从字典获取节点信息
+     * @param address
+     * @return
+     */
+    public ServiceServiceInfo getServiceInfoByServiceMap(String address);
 }
