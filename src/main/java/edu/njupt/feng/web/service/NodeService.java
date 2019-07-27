@@ -2,10 +2,13 @@ package edu.njupt.feng.web.service;
 
 import com.github.pagehelper.PageInfo;
 import edu.njupt.feng.web.entity.common.AssociatedNodeInfo;
+import edu.njupt.feng.web.entity.common.Position;
 import edu.njupt.feng.web.entity.database.NodeInfo;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 节点相关服务
@@ -19,6 +22,55 @@ public interface NodeService {
      * @param associatedNodeInfos
      */
     public void updateAssoicatedNodes(Integer nodeID, List<AssociatedNodeInfo> associatedNodeInfos);
+
+    /**
+     * 更新节点属性
+     * @param attributes
+     * @param nodeID
+     */
+    public void updateAttributes(Map<String,String> attributes, Integer nodeID);
+
+    /**
+     * 更新节点位置
+     * @param position
+     * @param nodeID
+     */
+    public void updatePosition(Position position,Integer nodeID);
+
+    /**
+     * 更新所属集群
+     * @param cluster
+     * @param nodeID
+     */
+    public void updateCluster(Integer cluster,Integer nodeID);
+
+    /**
+     * 更新服务数量
+     * @param serviceNumber
+     * @param nodeID
+     */
+    public void updateServiceNumber(Integer serviceNumber,Integer nodeID);
+
+    /**
+     * 更新节点level
+     * @param level
+     * @param nodeID
+     */
+    public void updateLevel(Integer level,Integer nodeID);
+
+    /**
+     * 更新创建时间
+     * @param createTime
+     * @param nodeID
+     */
+    public void updateCreateTime(Date createTime, Integer nodeID);
+
+    /**
+     * 更新修改时间
+     * @param modifyTime
+     * @param nodeID
+     */
+    public void updateModifyTime(Date modifyTime,Integer nodeID);
 
     /**
      * 获取节点列表
@@ -67,4 +119,6 @@ public interface NodeService {
      * @return
      */
     public PageInfo getAllNodeList(Integer pageNum, String filter, String order, String desc);
+
+
 }
