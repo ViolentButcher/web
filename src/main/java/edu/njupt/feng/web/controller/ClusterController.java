@@ -23,9 +23,9 @@ public class ClusterController {
      * @return
      */
     @RequestMapping("/api/cluster/cluster_list")
-    public JsonData getClusterList(@RequestParam(defaultValue = "1")Integer pageNum){
+    public JsonData getClusterList(@RequestParam(defaultValue = "1")Integer pageNum, String filter,@RequestParam(defaultValue = "id")String order,@RequestParam(defaultValue = "asc")String desc){
         JsonData data = new JsonData();
-        data.setData(clusterService.getClusterInfoList(pageNum));
+        data.setData(clusterService.getClusterInfoList(pageNum,filter,order,desc));
         return data;
     }
 
@@ -45,9 +45,13 @@ public class ClusterController {
      * @return
      */
     @RequestMapping("/api/cluster/add")
-    public JsonData addCluster(){
+    public JsonData addCluster(String name,String attributes){
         JsonData data = new JsonData();
-
+        if(clusterService.addCluster(name,attributes)){
+            data.setMsg("添加集群成功！！！");
+        }else {
+            data.setMsg("对不起，该名称已被占用！！！");
+        }
         return data;
     }
 
@@ -67,9 +71,9 @@ public class ClusterController {
      * @return
      */
     @RequestMapping("/api/cluster/delete")
-    public JsonData deleteCluster(){
+    public JsonData deleteCluster(Integer clusterID){
         JsonData data = new JsonData();
-
+        data.setMsg(clusterService.deleteCluster(clusterID));
         return data;
     }
 
