@@ -5,6 +5,7 @@ import edu.njupt.feng.web.provider.ClusterProvider;
 import edu.njupt.feng.web.provider.NodeProvider;
 import org.apache.ibatis.annotations.*;
 
+import java.util.Date;
 import java.util.List;
 
 @Mapper
@@ -71,6 +72,62 @@ public interface NodeMapper {
     public void updateAssoicatedNode(@Param("assoicatedNodes")String associatedNodes,@Param("nodeID")Integer nodeID);
 
     /**
+     * 更新节点名称
+     * @param name
+     * @param nodeID
+     */
+    @Update("UPDATE node SET name = #{name} WHERE id = #{nodeID}")
+    public void updateName(@Param("name")String name,@Param("nodeID")Integer nodeID);
+
+    /**
+     * 更新节点服务数量
+     * @param servcieNumber
+     * @param nodeID
+     */
+    @Update("UPDATE node SET service_number = #{servcieNumber} WHERE id = #{nodeID}")
+    public void updateServiceNumber(@Param("servcieNumber")Integer servcieNumber,@Param("nodeID")Integer nodeID);
+
+    /**
+     * 更新节点位置
+     * @param position
+     * @param nodeID
+     */
+    @Update("UPDATE node SET position = #{position} WHERE id = #{nodeID}")
+    public void updatePosition(@Param("position")String position,@Param("nodeID")Integer nodeID);
+
+    /**
+     * 更新节点集群
+     * @param cluster
+     * @param nodeID
+     */
+    @Update("UPDATE node SET cluster = #{cluster} WHERE id = #{nodeID}")
+    public void updateCluster(@Param("cluster")Integer cluster,@Param("nodeID")Integer nodeID);
+
+    /**
+     * 更新节点level
+     * @param level
+     * @param nodeID
+     */
+    @Update("UPDATE node SET level = #{level} WHERE id = #{nodeID}")
+    public void updateLevel(@Param("level")Integer level,@Param("nodeID")Integer nodeID);
+
+    /**
+     * 更新修改时间
+     * @param modifyTime
+     * @param nodeID
+     */
+    @Update("UPDATE node SET modify_time = #{modifyTime} WHERE id = #{nodeID}")
+    public void updateModifyTime(@Param("modifyTime") Date modifyTime, @Param("nodeID")Integer nodeID);
+
+    /**
+     * 更新创建时间
+     * @param createTime
+     * @param nodeID
+     */
+    @Update("UPDATE node SET create_time = #{createTime} WHERE id = #{nodeID}")
+    public void updateCreateTime(@Param("createTime")Date createTime,@Param("nodeID")Integer nodeID);
+
+    /**
      * 获取节点列表
      * @return
      */
@@ -128,5 +185,7 @@ public interface NodeMapper {
             @Result(column = "modify_time",property = "modifyTime"),
     })
     public List<NodeInfo> getAllNodeList(String filter,String order,String desc);
+
+
 }
 

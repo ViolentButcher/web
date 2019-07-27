@@ -4,6 +4,9 @@ package edu.njupt.feng.web.service;
 import com.github.pagehelper.PageInfo;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.Map;
+
 /**
  * 服务接口
  */
@@ -47,4 +50,53 @@ public interface ServiceService {
      * @return
      */
     public String deleteService(Integer serviceID);
+
+    /**
+     * 更新名称
+     * @param name
+     * @param serviceID
+     */
+    public void updateName(String name,Integer serviceID);
+
+    /**
+     * 更新属性
+     * @param attributes
+     * @param serviceID
+     */
+    public void updateAttributes(Map<String,String> attributes,Integer serviceID);
+
+    /**
+     * 更新节点
+     * @param cluster
+     * @param serviceID
+     */
+    public void updateCluster(Integer cluster,Integer serviceID);
+
+    /**
+     * 更新节点
+     * @param node
+     * @param serviceID
+     */
+    public void updateNode(Integer node,Integer serviceID);
+
+    /**
+     * 更新内容
+     * @param content
+     * @param serviceID
+     */
+    public void updateContent(String content,Integer serviceID);
+
+    /**
+     * 更新创建时间
+     * @param createTime
+     * @param serviceID
+     */
+    public void updateCreateTime(Date createTime, Integer serviceID);
+
+    /**
+     * 更新修改时间
+     * @param modifyTime
+     * @param serviceID
+     */
+    public void updateModifyTime(Date modifyTime,Integer serviceID);
 }
