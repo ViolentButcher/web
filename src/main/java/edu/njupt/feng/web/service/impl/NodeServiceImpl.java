@@ -131,4 +131,9 @@ public class NodeServiceImpl implements NodeService {
     public NodeServiceInfo getNodeServiceInfo(Integer nodeID) {
         return Convert2ServiceInfo.nodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfoByNodeID(nodeID));
     }
+
+    @Override
+    public List<NodeServiceInfo> getNodeServiceInfoListByClusterID(Integer clusterID) {
+        return Convert2ServiceInfo.listNodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfosListByClusterID(clusterID));
+    }
 }
