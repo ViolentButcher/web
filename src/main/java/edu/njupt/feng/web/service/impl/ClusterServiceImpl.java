@@ -1,5 +1,6 @@
 package edu.njupt.feng.web.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import edu.njupt.feng.web.entity.database.ClusterInfo;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ClusterServiceImpl implements ClusterService {
@@ -84,5 +86,46 @@ public class ClusterServiceImpl implements ClusterService {
         }
         return "对不起，该集群不存在";
 
+    }
+
+    @Override
+    public void updateAttributes(Map<String, String> attributes, Integer clusterID) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            clusterMapper.updateAttributes(mapper.writeValueAsString(attributes),clusterID);
+        }catch (Exception e){
+
+        }
+
+    }
+
+    @Override
+    public void updateName(String name, Integer clusterID) {
+        clusterMapper.updateName(name, clusterID);
+    }
+
+    @Override
+    public void updateConfiguration(String configuration, Integer clusterID) {
+        clusterMapper.updateConfiguration(configuration, clusterID);
+    }
+
+    @Override
+    public void updateCreateTime(Date createTime, Integer clusterID) {
+        clusterMapper.updateCreateTime(createTime, clusterID);
+    }
+
+    @Override
+    public void updateModifyTime(Date modifyTime, Integer clusterID) {
+        clusterMapper.updateModifyTime(modifyTime, clusterID);
+    }
+
+    @Override
+    public void updateState(Integer state, Integer clusterID) {
+        clusterMapper.updateState(state, clusterID);
+    }
+
+    @Override
+    public void updateNodeNumber(Integer nodeNumber, Integer clusterID) {
+        clusterMapper.updateNodeNumber(nodeNumber, clusterID);
     }
 }
