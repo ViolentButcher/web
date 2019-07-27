@@ -4,6 +4,7 @@ import edu.njupt.feng.web.entity.database.ServiceInfo;
 import edu.njupt.feng.web.provider.ServiceProvider;
 import org.apache.ibatis.annotations.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,6 +58,54 @@ public interface ServiceMapper {
      */
     @Update("UPDATE service SET attributes = #{attributes} WHERE id = #{serviceID}")
     public void updateServiceAttr(@Param("attributes")String attributes,@Param("serviceID")Integer serviceID);
+
+    /**
+     * 更新名称
+     * @param name
+     * @param serviceID
+     */
+    @Update("UPDATE service SET name = #{name} WHERE id = #{serviceID}")
+    public void updateName(@Param("name")String name,@Param("serviceID")Integer serviceID);
+
+    /**
+     * 更新节点
+     * @param node
+     * @param serviceID
+     */
+    @Update("UPDATE service SET node = #{node} WHERE id = #{serviceID}")
+    public void updateNode(@Param("node")Integer node,@Param("serviceID")Integer serviceID);
+
+    /**
+     * 更新集群
+     * @param cluster
+     * @param serviceID
+     */
+    @Update("UPDATE service SET cluster = #{cluster} WHERE id = #{serviceID}")
+    public void updateCluster(@Param("attributes")Integer cluster,@Param("serviceID")Integer serviceID);
+
+    /**
+     * 更新服务内容
+     * @param content
+     * @param serviceID
+     */
+    @Update("UPDATE service SET attributes = #{content} WHERE id = #{serviceID}")
+    public void updateContent(@Param("content")String content,@Param("serviceID")Integer serviceID);
+
+    /**
+     * 更新修改时间
+     * @param modifyTime
+     * @param serviceID
+     */
+    @Update("UPDATE service SET modify_time = #{modifyTime} WHERE id = #{serviceID}")
+    public void updateModifyTime(@Param("modifyTime") Date modifyTime, @Param("serviceID")Integer serviceID);
+
+    /**
+     * 更新创建时间
+     * @param createTime
+     * @param serviceID
+     */
+    @Update("UPDATE service SET create_time = #{createTime} WHERE id = #{serviceID}")
+    public void updateCreateTime(@Param("createTime")Date createTime,@Param("serviceID")Integer serviceID);
 
     /**
      * 获取服务列表
