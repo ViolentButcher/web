@@ -1,6 +1,7 @@
 package edu.njupt.feng.web.service;
 
 import com.github.pagehelper.PageInfo;
+import edu.njupt.feng.web.entity.service.ClusterServiceInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -102,5 +103,12 @@ public interface ClusterService {
      * @param clusterID
      */
     public void updateNodeNumber(Integer nodeNumber,Integer clusterID);
+
+    /**
+     * 获取集群信息
+     * @param clusterID
+     * @return
+     */
+    public ClusterServiceInfo getClusterServiceInfo(Integer clusterID);
 
 }

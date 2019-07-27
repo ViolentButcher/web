@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import edu.njupt.feng.web.entity.common.AssociatedNodeInfo;
 import edu.njupt.feng.web.entity.common.Position;
 import edu.njupt.feng.web.entity.database.NodeInfo;
+import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -119,6 +120,13 @@ public interface NodeService {
      * @return
      */
     public PageInfo getAllNodeList(Integer pageNum, String filter, String order, String desc);
+
+    /**
+     * 获取节点信息
+     * @param nodeID
+     * @return
+     */
+    public NodeServiceInfo getNodeServiceInfo(Integer nodeID);
 
 
 }
