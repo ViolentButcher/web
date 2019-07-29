@@ -8,6 +8,7 @@ import edu.njupt.feng.web.entity.common.Position;
 import edu.njupt.feng.web.entity.database.NodeInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import edu.njupt.feng.web.mapper.NodeMapper;
+import edu.njupt.feng.web.mapper.ServiceMapper;
 import edu.njupt.feng.web.service.NodeService;
 import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class NodeServiceImpl implements NodeService {
 
     @Autowired
     private NodeMapper nodeMapper;
+
+    @Autowired
+    private ServiceMapper serviceMapper;
 
     @Override
     public void updateAssoicatedNodes(Integer nodeID, List<AssociatedNodeInfo> associatedNodeInfos) {
@@ -135,5 +139,12 @@ public class NodeServiceImpl implements NodeService {
     @Override
     public List<NodeServiceInfo> getNodeServiceInfoListByClusterID(Integer clusterID) {
         return Convert2ServiceInfo.listNodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfosListByClusterID(clusterID));
+    }
+
+    @Override
+    public void updateAllNodeServiceNumber(Integer clusterID) {
+        for(Integer nodeID : nodeMapper.getNodeListsByClusterID(clusterID)){
+            updateServiceNumber(serviceMapper.countNodeServiceNumber(nodeID),nodeID);
+        }
     }
 }

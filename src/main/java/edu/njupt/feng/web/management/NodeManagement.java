@@ -7,12 +7,14 @@ import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
 import edu.njupt.feng.web.mapper.NodeMapper;
 import edu.njupt.feng.web.mapper.ServiceMapper;
+import edu.njupt.feng.web.utils.CXFClientUtil;
 import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
 import edu.njupt.feng.web.webservice.NodeWebService;
 import edu.njupt.feng.web.webservice.impl.NodeWebServiceImpl;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -61,6 +63,7 @@ public class NodeManagement {
         }
     }
 
+
     public NodeServiceInfo testGetNodeServiceInfo(Integer nodeID){
         if(nodeServices.get(nodeID) != null){
             JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
@@ -86,6 +89,7 @@ public class NodeManagement {
             factoryBean.setServiceClass(NodeWebService.class);
             factoryBean.setAddress(nodeServices.get(nodeId).getServiceAddress());
             NodeWebService service = factoryBean.create(NodeWebService.class);
+            CXFClientUtil.configTimeout(service);
             return service.testSearch(keyword,type);
         }
         return null;

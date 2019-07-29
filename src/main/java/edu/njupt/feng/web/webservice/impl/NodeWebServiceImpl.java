@@ -181,6 +181,11 @@ public class NodeWebServiceImpl implements NodeWebService {
             results =  recommendMethodTest02ByMap(keyword);
             long endTime = System.currentTimeMillis();
             System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
+        }else if(type == 3){
+            long startTime = System.currentTimeMillis();
+            results =  recommendMethodTest03(keyword);
+            long endTime = System.currentTimeMillis();
+            System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
         }
         return results;
     }
@@ -254,14 +259,40 @@ public class NodeWebServiceImpl implements NodeWebService {
             }
         }
         //遍历关联节点
-        for(AssociatedNodeServiceInfo nodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()){
-            NodeMapItem item = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
-            //遍历关联节点管理的服务
-            for (NodeServiceListItem serviceItem :item.getServiceList()){
-                ServiceServiceInfo serviceInfo = getServiceInfoByServiceMap(serviceItem.getServiceAddress());
-                if(serviceInfo.getContent().contains(keyword)){
-                    results.add(serviceInfo);
+        if(nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
+            for(AssociatedNodeServiceInfo nodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()){
+                NodeMapItem item = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
+                //遍历关联节点管理的服务
+                for (NodeServiceListItem serviceItem :item.getServiceList()){
+                    ServiceServiceInfo serviceInfo = getServiceInfoByServiceMap(serviceItem.getServiceAddress());
+                    if(serviceInfo.getContent().contains(keyword)){
+                        results.add(serviceInfo);
+                    }
                 }
+            }
+        }
+        return results;
+    }
+
+    public List<ServiceServiceInfo> recommendMethodTest03(String keyword){
+        List<ServiceServiceInfo> results = new ArrayList<>();
+
+        List<ServiceServiceInfo> own = searchServiceInfosOwn(nodeServiceInfo.getId(),keyword);
+        if(own != null){
+            results.addAll(own);
+        }
+
+        if(nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
+            for (AssociatedNodeServiceInfo associatedNodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()){
+                JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+                factoryBean.setAddress(associatedNodeServiceInfo.getServiceAddress());
+                factoryBean.setServiceClass(NodeWebService.class);
+                NodeWebService service = factoryBean.create(NodeWebService.class);
+                List<ServiceServiceInfo> part = service.searchServiceInfosOwn(nodeServiceInfo.getId(),keyword);
+                if(part != null){
+                    results.addAll(part);
+                }
+
             }
         }
         return results;
@@ -288,4 +319,26 @@ public class NodeWebServiceImpl implements NodeWebService {
     public ServiceServiceInfo getServiceInfoByServiceMap(String address) {
         return ServiceMap.getServiceInfo(address);
     }
+
+    /**
+     * 搜索自身符合要求的节点
+     * @param nodeID
+     * @param keyword
+     * @return
+     */
+    @Override
+    public List<ServiceServiceInfo> searchServiceInfosOwn(Integer nodeID, String keyword) {
+        List<ServiceServiceInfo> results = new ArrayList<>();
+
+        //首先，检查自己的服务列表有没有符合要求服务
+        for(NodeServiceListItem item : serviceInfoList.values()){
+            ServiceServiceInfo serviceInfo = getServiceInfo(item.getServiceAddress());
+            if(serviceInfo.getContent().contains(keyword)){
+                results.add(serviceInfo);
+            }
+        }
+        return results;
+    }
+
+
 }

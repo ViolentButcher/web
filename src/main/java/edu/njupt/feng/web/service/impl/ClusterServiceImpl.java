@@ -11,6 +11,7 @@ import edu.njupt.feng.web.mapper.ClusterMapper;
 import edu.njupt.feng.web.mapper.NodeMapper;
 import edu.njupt.feng.web.mapper.ServiceMapper;
 import edu.njupt.feng.web.service.ClusterService;
+import edu.njupt.feng.web.service.NodeService;
 import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,9 @@ public class ClusterServiceImpl implements ClusterService {
 
     @Autowired
     private ClusterManagement clusterManagement;
+
+    @Autowired
+    private NodeService nodeService;
 
     @Override
     public PageInfo getClusterInfoList(Integer pageNum, String filter, String order, String desc) {
@@ -134,5 +138,14 @@ public class ClusterServiceImpl implements ClusterService {
     @Override
     public ClusterServiceInfo getClusterServiceInfo(Integer clusterID) {
         return Convert2ServiceInfo.clusterInfo2ServiceInfo(clusterMapper.getClusterByID(clusterID));
+    }
+
+    @Override
+    public void updateAllNodeNumver() {
+        for(ClusterInfo clusterInfo : clusterMapper.getClusterList()){
+            clusterMapper.updateNodeNumber(nodeMapper.countClusterNodeNumber(clusterInfo.getId()),clusterInfo.getId());
+
+            nodeService.updateAllNodeServiceNumber(clusterInfo.getId());
+        }
     }
 }

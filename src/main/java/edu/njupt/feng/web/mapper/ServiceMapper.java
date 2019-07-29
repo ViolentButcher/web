@@ -39,7 +39,7 @@ public interface ServiceMapper {
     })
     public List<ServiceInfo> getServicesInfoByNodeCluster(@Param("nodeID") Integer nodeID);
 
-    @Select("SELECT * FROM service WHERE node = #{clusterID}")
+    @Select("SELECT * FROM service WHERE clusterID = #{clusterID}")
     @Results({
             @Result(column = "create_time",property = "createTime"),
             @Result(column = "modify_time",property = "modifyTime"),
@@ -171,4 +171,12 @@ public interface ServiceMapper {
      */
     @Delete("DELETE FROM service WHERE id = #{serviceID}")
     public void deleteServiceByServiceID(Integer serviceID);
+
+    /**
+     * 统计节点的服务数量
+     * @param nodeID
+     * @return
+     */
+    @Select("SELECT COUNT(*) FROM service WHERE node = #{nodeID}")
+    public Integer countNodeServiceNumber(Integer nodeID);
 }
