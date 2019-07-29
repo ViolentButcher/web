@@ -117,4 +117,12 @@ public interface NodeWebService {
      * @return
      */
     public ServiceServiceInfo getServiceInfoByServiceMap(String address);
+
+    /**
+     * 查找节点管理的服务中符合要求的节点
+     * @param nodeID
+     * @param keyword
+     * @return
+     */
+    public List<ServiceServiceInfo> searchServiceInfosOwn(Integer nodeID,String keyword);
 }

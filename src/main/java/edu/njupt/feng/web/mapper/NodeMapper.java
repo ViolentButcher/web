@@ -186,6 +186,12 @@ public interface NodeMapper {
     })
     public List<NodeInfo> getAllNodeList(String filter,String order,String desc);
 
-
+    /**
+     *
+     * @param clusterID
+     * @return
+     */
+    @Select("SELECT COUNT(*) FROM node WHERE cluster = #{clusterID}")
+    public Integer countClusterNodeNumber(Integer clusterID);
 }
 

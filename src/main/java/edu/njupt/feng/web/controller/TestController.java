@@ -4,6 +4,7 @@ import edu.njupt.feng.web.entity.common.JsonData;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import edu.njupt.feng.web.management.ClusterManagement;
 import edu.njupt.feng.web.management.NodeManagement;
+import edu.njupt.feng.web.management.NodeMap;
 import edu.njupt.feng.web.management.ServiceManagement;
 import edu.njupt.feng.web.mapper.ClusterMapper;
 import edu.njupt.feng.web.mapper.NodeMapper;
@@ -82,6 +83,15 @@ public class TestController {
 
         serviceManagement.testUpdateAttr(id);
         data.setData(serviceManagement.testGetServiceInfo(id));
+
+        return data;
+    }
+
+    @RequestMapping("/api/test/map/node")
+    public JsonData testMapNode(){
+        JsonData data = new JsonData();
+
+        data.setData(NodeMap.getNodeMap());
 
         return data;
     }

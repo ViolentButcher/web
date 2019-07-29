@@ -128,4 +128,6 @@ public interface ClusterMapper {
      */
     @Update("UPDATE cluster SET configuration = #{configuration} WHERE id = #{clusterID}")
     public void updateConfiguration(@Param("configuration")String configuration,@Param("clusterID")Integer clusterID);
+
+
 }

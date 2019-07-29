@@ -135,4 +135,8 @@ public interface NodeService {
      */
     public List<NodeServiceInfo> getNodeServiceInfoListByClusterID(Integer clusterID);
 
+    /**
+     * 更新节点所有节点的服务数量
+     */
+    public void updateAllNodeServiceNumber(Integer clusterID);
 }
