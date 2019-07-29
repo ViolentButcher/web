@@ -113,4 +113,9 @@ public interface ClusterService {
      */
     public ClusterServiceInfo getClusterServiceInfo(Integer clusterID);
 
+    /**
+     * 更新所有集群的nodeNumber
+     */
+    public void updateAllNodeNumver();
+
 }

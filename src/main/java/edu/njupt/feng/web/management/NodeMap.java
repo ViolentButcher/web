@@ -41,4 +41,8 @@ public class NodeMap {
     public static NodeMapItem getNodeServiceInfo(String address){
         return nodeMap.get(address);
     }
+
+    public static Map<String, NodeMapItem> getNodeMap() {
+        return nodeMap;
+    }
 }

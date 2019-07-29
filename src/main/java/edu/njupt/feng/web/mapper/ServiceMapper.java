@@ -171,4 +171,12 @@ public interface ServiceMapper {
      */
     @Delete("DELETE FROM service WHERE id = #{serviceID}")
     public void deleteServiceByServiceID(Integer serviceID);
+
+    /**
+     * 统计节点的服务数量
+     * @param nodeID
+     * @return
+     */
+    @Select("SELECT COUNT(*) FROM service WHERE node = #{nodeID}")
+    public Integer countNodeServiceNumber(Integer nodeID);
 }

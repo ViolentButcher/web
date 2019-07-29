@@ -6,11 +6,16 @@ import edu.njupt.feng.web.entity.database.ServiceInfo;
 import edu.njupt.feng.web.mapper.ClusterMapper;
 import edu.njupt.feng.web.mapper.NodeMapper;
 import edu.njupt.feng.web.mapper.ServiceMapper;
+import edu.njupt.feng.web.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 @Component
 public class ClusterManagement {
@@ -27,6 +32,9 @@ public class ClusterManagement {
     @Autowired
     private NodeManagement nodeManagement;
 
+    @Autowired
+    private Task task;
+
     private Map<Integer, Integer> clusters = new HashMap<>();
 
     /**
@@ -40,6 +48,20 @@ public class ClusterManagement {
         }
     }
 
+    public void initAsync(){
+        for(ClusterInfo clusterInfo : clusterMapper.getClusterList()){
+            if(clusterInfo.getState() == 1){
+                try {
+                    startClusterAsync(clusterInfo.getId());
+                }catch (Exception e){
+
+                }
+
+            }
+        }
+    }
+
+
     /**
      * 启动集群
      * @param clusterID
@@ -51,6 +73,30 @@ public class ClusterManagement {
             }
             clusters.put(clusterID,clusterID);
         }
+    }
+
+    public void startClusterAsync(Integer clusterID) throws Exception{
+        long startTime=System.currentTimeMillis();   //获取开始时间
+        if(clusters.get(clusterID) == null){
+            List<Future<String>> tasks = new ArrayList<>();
+            for(Integer nodeID : nodeMapper.getNodeListsByClusterID(clusterID)){
+                Future<String> t = task.startNode(nodeID);
+                tasks.add(t);
+            }
+            boolean finished = false;
+            while(!finished){
+                finished = true;
+                for(Future<String> t : tasks){
+                    if(!t.isDone()){
+                        finished = false;
+                        break;
+                    }
+                }
+            }
+            clusters.put(clusterID,clusterID);
+        }
+        long endTime=System.currentTimeMillis(); //获取结束时间
+        System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
     }
 
     /**
