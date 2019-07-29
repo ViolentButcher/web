@@ -32,6 +32,7 @@ public class NodeServiceImpl implements NodeService {
         ObjectMapper mapper = new ObjectMapper();
         try{
             String associatedNodes = mapper.writeValueAsString(associatedNodeInfos);
+            System.out.println(associatedNodes + "-----------------");
             nodeMapper.updateAssoicatedNode(associatedNodes,nodeID);
         }catch (Exception e){
 

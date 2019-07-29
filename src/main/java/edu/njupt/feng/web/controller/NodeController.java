@@ -1,11 +1,15 @@
 package edu.njupt.feng.web.controller;
 
+import edu.njupt.feng.web.entity.common.AssociatedNodeInfo;
 import edu.njupt.feng.web.entity.common.JsonData;
 import edu.njupt.feng.web.service.NodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * node相关后端接口
@@ -37,9 +41,39 @@ public class NodeController {
      * @return
      */
     @RequestMapping("/api/node/configure/manual")
-    public JsonData configureNodeWithManual(){
+    public JsonData configureNodeWithManual(Integer nodeID,String associatedNode,Integer level,String associatedType){
         JsonData data = new JsonData();
 
+        boolean associatedNodeFlag = true;
+        String message = null;
+
+        if(associatedNode != null){
+            String[] associatedNodeListStr = associatedNode.split(",");
+            List<AssociatedNodeInfo> toUpdateAssocaitedNodeList = new ArrayList<>();
+
+            for(String node : associatedNodeListStr){
+                if(nodeService.getNodeServiceInfo(Integer.valueOf(node)) != null){
+                    AssociatedNodeInfo associatedNodeInfo = new AssociatedNodeInfo();
+                    associatedNodeInfo.setId(Integer.valueOf(node));
+                    associatedNodeInfo.setAssociatedType(associatedType);
+                    toUpdateAssocaitedNodeList.add(associatedNodeInfo);
+                }else {
+                    associatedNodeFlag = false;
+                    break;
+                }
+            }
+
+            if(associatedNodeFlag){
+                nodeService.updateAssoicatedNodes(nodeID,toUpdateAssocaitedNodeList);
+                message = "更新节点" + nodeID + "关联节点：" + associatedNode + "，类型：" + associatedType;
+            }
+        }
+
+        if(level != null){
+            nodeService.updateLevel(level,nodeID);
+            message.concat("\n更新节点" + nodeID + " level：" + level);
+        }
+        data.setMsg(message);
         return data;
     }
 

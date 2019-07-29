@@ -68,8 +68,8 @@ public interface NodeMapper {
      * @param associatedNodes
      * @param nodeID
      */
-    @Update("UPDATE node SET assoicated_nodes = #{associatedNodes} WHERE id = #{nodeID}")
-    public void updateAssoicatedNode(@Param("assoicatedNodes")String associatedNodes,@Param("nodeID")Integer nodeID);
+    @Update("UPDATE node SET associated_nodes = #{associatedNodes} WHERE id = #{nodeID}")
+    public void updateAssoicatedNode(@Param("associatedNodes")String associatedNodes,@Param("nodeID")Integer nodeID);
 
     /**
      * 更新节点名称

@@ -6,10 +6,6 @@ var service_management_view_orderBy = "id";
  */
 function serviceManagementView(){
 
-    service_management_view_filter = null;
-    service_management_view_desc = "asc";
-    service_management_view_orderBy = "id";
-
     $("#main_content").html('');
     $("#main_content").html('<h3>现有服务列表</h3> ' +
         '<div class="row div-row">' +

@@ -39,7 +39,7 @@ public interface ServiceMapper {
     })
     public List<ServiceInfo> getServicesInfoByNodeCluster(@Param("nodeID") Integer nodeID);
 
-    @Select("SELECT * FROM service WHERE clusterID = #{clusterID}")
+    @Select("SELECT * FROM service WHERE cluster = #{clusterID}")
     @Results({
             @Result(column = "create_time",property = "createTime"),
             @Result(column = "modify_time",property = "modifyTime"),
