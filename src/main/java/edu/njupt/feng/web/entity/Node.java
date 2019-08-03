@@ -1,22 +1,22 @@
 package edu.njupt.feng.web.entity;
 
 import edu.njupt.feng.web.webservice.NodeWebService;
+import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxws.JaxWsServerFactoryBean;
-
 
 
 public class Node {
 
-    private JaxWsServerFactoryBean service = new JaxWsServerFactoryBean();
+    private Server server;
     private String address;
 
     public void init(String address, NodeWebService webService){
+        JaxWsServerFactoryBean service = new JaxWsServerFactoryBean();
         this.address = address;
 
         service.setServiceBean(webService);
         service.setAddress(address);
-        service.create();
-
+        server = service.create();
     }
 
     /**
@@ -27,5 +27,11 @@ public class Node {
         return address;
     }
 
+    public Server getServer() {
+        return server;
+    }
 
+    public void setServer(Server server) {
+        this.server = server;
+    }
 }

@@ -3,6 +3,7 @@ package edu.njupt.feng.web.webservice.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.njupt.feng.web.entity.common.AssociatedNodeServiceInfo;
 import edu.njupt.feng.web.entity.common.NodeMapItem;
+import edu.njupt.feng.web.entity.common.ResultInfoWithoutContent;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceListItem;
 import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
@@ -63,23 +64,6 @@ public class NodeWebServiceImpl implements NodeWebService {
         }
     }
 
-    /**
-     * 在节点上注册服务信息
-     * @param service
-     */
-    @Override
-    public void registerService(NodeServiceListItem service) {
-        serviceInfoList.put(service.getId(),service);
-    }
-
-    /**
-     * 移除节点上的某个服务信息
-     * @param serviceID
-     */
-    @Override
-    public void removeService(Integer serviceID) {
-        serviceInfoList.remove(serviceID);
-    }
 
     /**
      * 更新节点属性信息（自身）
@@ -110,7 +94,11 @@ public class NodeWebServiceImpl implements NodeWebService {
         serviceInfoList.get(serviceID).setAttributes(attributes);
     }
 
-
+    /**
+     * 更新其它节点的属性
+     * @param attributes
+     * @param nodeID
+     */
     @Override
     public void updateOtherNodeAttributes(Map<String, String> attributes, Integer nodeID) {
         JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
@@ -150,27 +138,13 @@ public class NodeWebServiceImpl implements NodeWebService {
     }
 
     /**
-     * 获取服务信息
-     * @param address
-     * @return
-     */
-    @Override
-    public ServiceServiceInfo getServiceInfo(String address) {
-        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
-        factoryBean.setAddress(address);
-        factoryBean.setServiceClass(ServiceWebService.class);
-        ServiceWebService service = factoryBean.create(ServiceWebService.class);
-        return service.getServiceInfo();
-    }
-
-    /**
      * 搜索测试
      * @param keyword
      * @return
      */
     @Override
-    public List<ServiceServiceInfo> testSearch(String keyword,Integer type) {
-        List<ServiceServiceInfo> results = null;
+    public ResultInfoWithoutContent testSearch(String keyword,Integer type) {
+        ResultInfoWithoutContent results = new ResultInfoWithoutContent();
         if(type ==1){
             long startTime = System.currentTimeMillis();
             results = recommendMethodTest01ByWebservice(keyword);
@@ -179,11 +153,6 @@ public class NodeWebServiceImpl implements NodeWebService {
         }else if (type == 2){
             long startTime = System.currentTimeMillis();
             results =  recommendMethodTest02ByMap(keyword);
-            long endTime = System.currentTimeMillis();
-            System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
-        }else if(type == 3){
-            long startTime = System.currentTimeMillis();
-            results =  recommendMethodTest03(keyword);
             long endTime = System.currentTimeMillis();
             System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
         }
@@ -196,20 +165,8 @@ public class NodeWebServiceImpl implements NodeWebService {
      * @return
      */
     @Override
-    public List<ServiceServiceInfo> testRecommend(String keyword,Integer type) {
-        List<ServiceServiceInfo> results = null;
-        if(type ==1){
-            long startTime = System.currentTimeMillis();
-            results = recommendMethodTest01ByWebservice(keyword);
-            long endTime = System.currentTimeMillis();
-            System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
-        }else if (type == 2){
-            long startTime = System.currentTimeMillis();
-            results =  recommendMethodTest02ByMap(keyword);
-            long endTime = System.currentTimeMillis();
-            System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
-        }
-        return results;
+    public ResultInfoWithoutContent testRecommend(String keyword,Integer type) {
+        return testSearch(keyword,type);
     }
 
     /**
@@ -217,15 +174,13 @@ public class NodeWebServiceImpl implements NodeWebService {
      * @param keyword
      * @return
      */
-    public List<ServiceServiceInfo> recommendMethodTest01ByWebservice(String keyword){
-        List<ServiceServiceInfo> results = new ArrayList<>();
+    public ResultInfoWithoutContent recommendMethodTest01ByWebservice(String keyword){
+
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
 
         //首先，检查自己的服务列表有没有符合要求服务
-        for(NodeServiceListItem item : serviceInfoList.values()){
-            ServiceServiceInfo serviceInfo = getServiceInfo(item.getServiceAddress());
-            if(serviceInfo.getContent().contains(keyword)){
-                results.add(serviceInfo);
-            }
+        if(serviceInfoList!= null && serviceInfoList.values() != null){
+            resultInfoWithoutContent.add(sortNodeServiceListItem(new ArrayList<>(serviceInfoList.values()),keyword));
         }
 
         if ( nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
@@ -234,68 +189,35 @@ public class NodeWebServiceImpl implements NodeWebService {
 
                 //获取关联节点的节点信息
                 NodeServiceInfo associatedNodeInfo = getNodeServiceInfo(associatedNode.getServiceAddress());
+
                 //获取关联节点的服务列表
                 List<NodeServiceListItem> associatedNodeServicesList = getServiceList(associatedNode.getServiceAddress());
 
-                for(NodeServiceListItem item : associatedNodeServicesList){
-                    ServiceServiceInfo serviceInfo = getServiceInfo(item.getServiceAddress());
-                    if(serviceInfo.getContent().contains(keyword)){
-                        results.add(serviceInfo);
-                    }
+                if (associatedNodeServicesList!=null){
+                    resultInfoWithoutContent.add(sortNodeServiceListItem(associatedNodeServicesList,keyword));
                 }
+
             }
         }
 
-        return results;
+        return resultInfoWithoutContent;
     }
 
-    public List<ServiceServiceInfo> recommendMethodTest02ByMap(String keyword){
-        List<ServiceServiceInfo> results = new ArrayList<>();
-        //遍历自己管理的服务
-        for(NodeServiceListItem item : serviceInfoList.values()){
-            ServiceServiceInfo serviceInfo = getServiceInfoByServiceMap(item.getServiceAddress());
-            if(serviceInfo.getContent().contains(keyword)){
-                results.add(serviceInfo);
-            }
+    public ResultInfoWithoutContent recommendMethodTest02ByMap(String keyword){
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
+
+        //首先，检查自己的服务列表有没有符合要求服务
+        if(serviceInfoList!= null && serviceInfoList.values() != null){
+            resultInfoWithoutContent.add(sortNodeServiceListItem(new ArrayList<>(serviceInfoList.values()),keyword));
         }
         //遍历关联节点
         if(nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
             for(AssociatedNodeServiceInfo nodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()){
                 NodeMapItem item = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
-                //遍历关联节点管理的服务
-                for (NodeServiceListItem serviceItem :item.getServiceList()){
-                    ServiceServiceInfo serviceInfo = getServiceInfoByServiceMap(serviceItem.getServiceAddress());
-                    if(serviceInfo.getContent().contains(keyword)){
-                        results.add(serviceInfo);
-                    }
-                }
+                resultInfoWithoutContent.add(sortNodeServiceListItem(item.getServiceList(),keyword));
             }
         }
-        return results;
-    }
-
-    public List<ServiceServiceInfo> recommendMethodTest03(String keyword){
-        List<ServiceServiceInfo> results = new ArrayList<>();
-
-        List<ServiceServiceInfo> own = searchServiceInfosOwn(nodeServiceInfo.getId(),keyword);
-        if(own != null){
-            results.addAll(own);
-        }
-
-        if(nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
-            for (AssociatedNodeServiceInfo associatedNodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()){
-                JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
-                factoryBean.setAddress(associatedNodeServiceInfo.getServiceAddress());
-                factoryBean.setServiceClass(NodeWebService.class);
-                NodeWebService service = factoryBean.create(NodeWebService.class);
-                List<ServiceServiceInfo> part = service.searchServiceInfosOwn(nodeServiceInfo.getId(),keyword);
-                if(part != null){
-                    results.addAll(part);
-                }
-
-            }
-        }
-        return results;
+        return resultInfoWithoutContent;
     }
 
 
@@ -320,25 +242,37 @@ public class NodeWebServiceImpl implements NodeWebService {
         return ServiceMap.getServiceInfo(address);
     }
 
+
     /**
-     * 搜索自身符合要求的节点
-     * @param nodeID
+     * 测试方法：
+     * @param serviceList
      * @param keyword
      * @return
      */
-    @Override
-    public List<ServiceServiceInfo> searchServiceInfosOwn(Integer nodeID, String keyword) {
-        List<ServiceServiceInfo> results = new ArrayList<>();
+    private ResultInfoWithoutContent sortNodeServiceListItem(List<NodeServiceListItem> serviceList,String keyword){
 
-        //首先，检查自己的服务列表有没有符合要求服务
-        for(NodeServiceListItem item : serviceInfoList.values()){
-            ServiceServiceInfo serviceInfo = getServiceInfo(item.getServiceAddress());
-            if(serviceInfo.getContent().contains(keyword)){
-                results.add(serviceInfo);
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
+        List<NodeServiceListItem> results = new ArrayList<>();
+
+        long startTime = System.nanoTime();
+        if(serviceList != null){
+            //首先，检查自己的服务列表有没有符合要求服务
+            for(NodeServiceListItem item : serviceList){
+                //检查服务的属性信息是否包含关键字
+                if(item.getAttributes() != null && item.getAttributes().values() != null){
+                    for(String attrValue : item.getAttributes().values()){
+                        if (attrValue.contains(keyword)){
+                            results.add(item);
+                            break;
+                        }
+                    }
+                }
             }
         }
-        return results;
+        long endTime = System.nanoTime();
+        resultInfoWithoutContent.setResult(results);
+        resultInfoWithoutContent.setCostTime(endTime - startTime);
+
+        return resultInfoWithoutContent;
     }
-
-
 }

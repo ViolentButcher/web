@@ -12,6 +12,7 @@ public class CXFClientUtil {
 
     public static void configTimeout(Object service) {
         Client proxy = ClientProxy.getClient(service);
+        proxy.getEndpoint().put("org.apache.cxf.stax.maxChildElements", "50000000");
         HTTPConduit conduit = (HTTPConduit) proxy.getConduit();
         HTTPClientPolicy policy = new HTTPClientPolicy();
         policy.setConnectionTimeout(CXF_CLIENT_CONNECT_TIMEOUT);

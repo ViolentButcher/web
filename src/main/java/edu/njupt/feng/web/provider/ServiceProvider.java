@@ -16,7 +16,7 @@ public class ServiceProvider {
      * @return
      */
     public String getServiceList(Integer nodeID,String filter,String order,String desc){
-        if(filter == null){
+        if(filter == null || filter.length() == 0){
             return new SQL(){{
                 SELECT("*");
                 FROM("service");

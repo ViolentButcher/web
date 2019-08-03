@@ -3,10 +3,19 @@ var node_management_view_node_desc = "asc";
 var node_management_view_node_orderBy = "id";
 
 var node_management_view_current_node;
+
+var node_management_view_service_filter;
+var node_management_view_service_desc = "asc";
+var node_management_view_service_orderBy = "id";
 /**
  * 节点浏览
  */
 function nodeManagementViewNode() {
+
+    node_management_view_node_filter = null;
+    node_management_view_node_desc = "asc";
+    node_management_view_node_orderBy = "id";
+
     $("#main_content").html('');
     $("#main_content").html('<h4>现有节点列表：</h4>' +
         '<div class="row div-row">' +
@@ -35,40 +44,56 @@ function nodeManagementViewNode() {
         '</div> ' +
         '<div class="row div-row">' +
             '<div class="col-md-2 col-md-offset-1">' +
-                '<button class="btn btn-default btn-sm" onclick="nodeManagementViewRefresh()">刷新</button>' +
+                '<button class="btn btn-default btn-sm" onclick="nodeManagementViewNodeRefreshButton()">刷新</button>' +
             '</div>' +
             '<div class="col-md-2">' +
-                '<button class="btn btn-default btn-sm" id="node_view_filter" data-toggle="modal" data-target="#cluster_management_filter_modal">筛选</button>' +
+                '<button class="btn btn-default btn-sm" id="node_view_filter" data-toggle="modal" data-target="#node_management_view_node_filter_modal">筛选</button>' +
             '</div>' +
             '<div class="col-md-2">' +
-                '<button class="btn btn-default btn-sm" id="node_view_export" data-toggle="modal" data-target="#cluster_management_export_modal">导出</button>' +
+                '<button class="btn btn-default btn-sm" id="node_view_export" data-toggle="modal" data-target="#node_management_view_node_export_modal">导出</button>' +
             '</div>' +
             '<div class="col-md-2">' +
                 '<button class="btn btn-default btn-sm" onclick="nodeManagementViewNodeDetail()">查看服务信息</button>' +
             '</div>' +
         '</div>');
-    $("#main_content").append($("<div class='modal fade' id='cluster_management_filter_modal' tabindex='-1' role='dialog' aria-labelledby='modal_filter_title' aria-hidden='true'/>")
+    $("#main_content").append($("<div class='modal fade' id='node_management_view_node_filter_modal' tabindex='-1' role='dialog' aria-labelledby='modal_filter_title' aria-hidden='true'/>")
         .append($("<div class='modal-dialog'/>")
             .append($("<div class='modal-content'/>")
                 .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_filter_title'/>").html("筛选记录")))
-                .append($("<div class='modal-body'/>").append($("<label for='cluster_management_filter_label'/>").html("约束表达式：")).append($("<input id='cluster_management_filter_input' class='form-control'/>")))
+                .append($("<div class='modal-body'/>").append($("<label for='node_management_view_node_filter_input'/>").html("约束表达式：")).append($("<input id='node_management_view_node_filter_input' class='form-control'/>")))
                 .append($("<div class='modal-footer'/>")
-                    .append($("<button class='btn btn-default' onclick='clusterManagementFilter()' data-dismiss='modal'/>").html("确定"))
+                    .append($("<button class='btn btn-default' onclick='nodeManagementViewNodeFilter()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
-    $("#main_content").append($("<div class='modal fade' id='cluster_management_export_modal' tabindex='-1' role='dialog' aria-labelledby='modal_export_title' aria-hidden='true'/>")
+    $("#main_content").append($("<div class='modal fade' id='node_management_view_node_export_modal' tabindex='-1' role='dialog' aria-labelledby='modal_export_title' aria-hidden='true'/>")
         .append($("<div class='modal-dialog'/>")
             .append($("<div class='modal-content'/>")
                 .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_export_title'/>").html("导出数据")))
                 .append($("<div class='modal-body'/>")
                     .append($("<div class='row'/>").append("<label/>").html("导出数据格式").append($("<label/>").append($("<input type='radio' name='export_way' value='txt'/>")).append("txt")).append($("<label/>").append($("<input type='radio' name='export_way' value='xls'/>")).append("xls")).append($("<label/>").append($("<input type='radio' name='export_way' value='xml'/>")).append("xml"))))
                 .append($("<div class='modal-footer'/>")
-                    .append($("<button class='btn btn-default' onclick='clusterManagementExport()' data-dismiss='modal'/>").html("确定"))
+                    .append($("<button class='btn btn-default' onclick='nodeManagementViewExport()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
     nodeManagementViewRefresh(1);
     $("#location").html('');
 
     //展示位置信息
-    $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNode(1)'/>").html(">> 节点浏览"));
+    $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNode()'/>").html(">> 节点浏览"));
+}
+
+/**
+ * 节点筛选
+ */
+function nodeManagementViewNodeFilter() {
+    node_management_view_node_filter = $("#node_management_view_node_filter_input").val();
+    $("#node_management_view_node_filter_label").html(node_management_view_node_filter);
+    nodeManagementViewRefresh(1);
+}
+
+/**
+ * 数据导出
+ */
+function nodeManagementViewExport() {
+    alert("该功能还未实现，您选中的导出数据的格式为：" + $("input[name='export_way']:checked").val());
 }
 
 /**
@@ -86,10 +111,10 @@ function nodeManagementViewRefresh(pageNum) {
                 $("#node_management_view_node_table").append($("<tr onclick='nodeManagementViewNodeTRClick(this)'/>")
                     .append($("<td/>").html(data.data.list[i].id))
                     .append($("<td/>").html(data.data.list[i].name))
-                    .append($("<td/>").html(data.data.list[i].attrs))
+                    .append($("<td/>").html(data.data.list[i].attributes))
                     .append($("<td/>").html(data.data.list[i].serviceNumber))
                     .append($("<td/>").html(data.data.list[i].position))
-                    .append($("<td/>").html(data.data.list[i].associatedNode))
+                    .append($("<td/>").html(data.data.list[i].associatedNodes))
                     .append($("<td/>").html(data.data.list[i].level))
                     .append($("<td/>").html(data.data.list[i].createTime))
                     .append($("<td/>").html(data.data.list[i].modifyTime)).attr("node_id",data.data.list[i].id));
@@ -120,6 +145,18 @@ function nodeManagementViewRefresh(pageNum) {
 }
 
 /**
+ * 节点刷新按钮
+ */
+function nodeManagementViewNodeRefreshButton() {
+    node_management_view_node_filter = null;
+    node_management_view_node_desc = "asc";
+    node_management_view_node_orderBy = "id";
+
+    $("#node_management_view_node_filter_label").html("无");
+    nodeManagementViewRefresh(1);
+}
+
+/**
  * 每行选中事件
  * @param obj
  */
@@ -144,48 +181,56 @@ function nodeManagementViewNodeDetail() {
     }
 }
 
+/**
+ * 详情页面加载
+ */
 function nodeManagementViewNodeDetailLoad() {
+
+    node_management_view_service_filter = null;
+    node_management_view_service_desc = "asc";
+    node_management_view_service_orderBy = "id";
+
     $("#main_content").html('');
     $("#main_content").html('<h3>现有服务列表</h3> ' +
         '<div class="row div-row">' +
-        '<table id="node_management_view_service_table" class="table table-bordered table-hover table-responsive">' +
-        '<tr>' +
-        '<th>ID</th>' +
-        '<th>名称</th>' +
-        '<th>属性</th>' +
-        '<th>所属集群</th>' +
-        '<th>所属节点</th>' +
-        '<th>内容</th>' +
-        '<th>创建时间</th>' +
-        '<th>修改时间</th>' +
-        '</tr>' +
-        '</table>' +
+            '<table id="node_management_view_service_table" class="table table-bordered table-hover table-responsive">' +
+                '<tr>' +
+                    '<th>ID</th>' +
+                    '<th>名称</th>' +
+                    '<th>属性</th>' +
+                    '<th>所属集群</th>' +
+                    '<th>所属节点</th>' +
+                    '<th>内容</th>' +
+                    '<th>创建时间</th>' +
+                    '<th>修改时间</th>' +
+                '</tr>' +
+            '</table>' +
         '</div>' +
         '<div class="row">' +
-        '<label>当前筛选条件：</label>' +
-        '<label id="node_management_view_service_filter_label">无</label>' +
+            '<label>当前筛选条件：</label>' +
+            '<label id="node_management_view_service_filter_label">无</label>' +
         '</div>' +
         '<div class="row text-center div-row">' +
-        '<nav aria-label="Page navigation">' +
-        '<ul id="node_management_view_service_pagination" class="pagination"></ul>' +
-        '</nav>' +
+            '<nav aria-label="Page navigation">' +
+                '<ul id="node_management_view_service_pagination" class="pagination"></ul>' +
+            '</nav>' +
         '</div>' +
         '<div class="row div-row">' +
-        '<div class="col-md-2 col-md-offset-2">' +
-        '<button class="btn btn-default btn-sm" onclick="nodeManagementViewServiceRefresh(1)">刷新</button>' +
-        '</div>' +
-        '<div class="col-md-2">' +
-        '<button class="btn btn-default btn-sm" data-toggle="modal" data-target="#service_management_view_filter_modal">筛选</button>' +
-        '</div>' +
-        '<div class="col-md-2">' +
-        '<button class="btn btn-default btn-sm" data-toggle="modal" data-target="#service_management_view_export_modal">导出</button>' +
-        '</div>' +
+            '<div class="col-md-2 col-md-offset-2">' +
+                '<button class="btn btn-default btn-sm" onclick="nodeManagementViewServiceRefreshButton()">刷新</button>' +
+            '</div>' +
+            '<div class="col-md-2">' +
+                '<button class="btn btn-default btn-sm" data-toggle="modal" data-target="#node_management_view_service_filter_modal">筛选</button>' +
+            '</div>' +
+            '<div class="col-md-2">' +
+                '<button class="btn btn-default btn-sm" data-toggle="modal" data-target="#service_management_view_export_modal">导出</button>' +
+            '</div>' +
         '</div>');
-    $("#main_content").append($("<div class='modal fade' id='service_management_view_filter_modal' tabindex='-1' role='dialog' aria-labelledby='modal_filter_title' aria-hidden='true'/>")
+    $("#main_content").append($("<div class='modal fade' id='node_management_view_service_filter_modal' tabindex='-1' role='dialog' aria-labelledby='modal_filter_title' aria-hidden='true'/>")
         .append($("<div class='modal-dialog'/>")
             .append($("<div class='modal-content'/>")
                 .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_filter_title'/>").html("筛选记录")))
-                .append($("<div class='modal-body'/>").append($("<label for='service_management_view_filter_input'/>").html("约束表达式：")).append($("<input id='service_management_view_filter_input' class='form-control'/>")))
+                .append($("<div class='modal-body'/>").append($("<label for='node_management_view_service_filter_input'/>").html("约束表达式：")).append($("<input id='node_management_view_service_filter_input' class='form-control'/>")))
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='nodeManagementViewServiceFilter()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
@@ -199,6 +244,11 @@ function nodeManagementViewNodeDetailLoad() {
                     .append($("<button class='btn btn-default' onclick='nodeManagementViewServiceExport()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
 
+    $("#location").html('');
+
+    //展示位置信息
+    $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNode()'/>").html(">> 节点浏览")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNodeDetailLoad()'/>").html(">> 服务浏览"));
+
     nodeManagementViewServiceRefresh(1);
 }
 
@@ -209,7 +259,7 @@ function nodeManagementViewServiceRefresh(pageNum) {
     $.ajax({
         type : "GET",
         url  : "/api/service/service_list",
-        data : {"nodeID":node_management_view_current_node,"pageNum" : pageNum,"filter" : service_management_view_filter,"desc" : service_management_view_desc,"orderBy" : service_management_view_orderBy},
+        data : {"nodeID":node_management_view_current_node,"pageNum" : pageNum,"filter" : node_management_view_service_filter,"desc" : node_management_view_service_desc,"orderBy" : node_management_view_service_orderBy},
         dataType : "json",
         success : function (data) {
             $("#node_management_view_service_table tr").nextAll().remove();
@@ -248,6 +298,18 @@ function nodeManagementViewServiceRefresh(pageNum) {
 }
 
 /**
+ * 服务刷新按钮
+ */
+function nodeManagementViewServiceRefreshButton() {
+    node_management_view_service_filter = null;
+    node_management_view_service_desc = "asc";
+    node_management_view_service_orderBy = "id";
+
+    $("#node_management_view_service_filter_label").html("无");
+    nodeManagementViewServiceRefresh(1);
+}
+
+/**
  * 每行选中事件
  * @param obj
  */
@@ -263,12 +325,14 @@ function nodeManagementServiceViewTRClick(obj) {
  * 筛选按钮
  */
 function nodeManagementViewServiceFilter() {
-
+    node_management_view_service_filter = $("#node_management_view_service_filter_input").val();
+    $("#node_management_view_service_filter_label").html(node_management_view_service_filter);
+    nodeManagementViewServiceRefresh(1);
 }
 
 /**
  * 服务导出按钮
  */
 function nodeManagementViewServiceExport() {
-
+    alert("该功能还未实现，您选中的导出数据的格式为：" + $("input[name='export_way']:checked").val());
 }

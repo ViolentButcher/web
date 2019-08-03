@@ -68,8 +68,8 @@ public interface NodeMapper {
      * @param associatedNodes
      * @param nodeID
      */
-    @Update("UPDATE node SET assoicated_nodes = #{associatedNodes} WHERE id = #{nodeID}")
-    public void updateAssoicatedNode(@Param("assoicatedNodes")String associatedNodes,@Param("nodeID")Integer nodeID);
+    @Update("UPDATE node SET associated_nodes = #{associatedNodes} WHERE id = #{nodeID}")
+    public void updateAssoicatedNode(@Param("associatedNodes")String associatedNodes,@Param("nodeID")Integer nodeID);
 
     /**
      * 更新节点名称
@@ -81,11 +81,11 @@ public interface NodeMapper {
 
     /**
      * 更新节点服务数量
-     * @param servcieNumber
+     * @param serviceNumber
      * @param nodeID
      */
-    @Update("UPDATE node SET service_number = #{servcieNumber} WHERE id = #{nodeID}")
-    public void updateServiceNumber(@Param("servcieNumber")Integer servcieNumber,@Param("nodeID")Integer nodeID);
+    @Update("UPDATE node SET service_number = #{serviceNumber} WHERE id = #{nodeID}")
+    public void updateServiceNumber(@Param("serviceNumber")Integer serviceNumber,@Param("nodeID")Integer nodeID);
 
     /**
      * 更新节点位置
