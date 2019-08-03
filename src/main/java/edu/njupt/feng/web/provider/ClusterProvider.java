@@ -18,7 +18,7 @@ public class ClusterProvider {
         return new SQL(){{
             SELECT("*");
             FROM("cluster");
-            if(filter != null) {
+            if(filter != null && filter.length() > 0) {
                 WHERE(filter);
             }
             ORDER_BY(order);

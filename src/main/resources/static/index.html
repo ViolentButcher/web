@@ -12,12 +12,16 @@
 		<script src="js/jquery-1.11.3.min.js"></script>
 		<script src="js/jquery.pagination.js"></script>
 		<script src="js/bootstrap.min.js"></script>
-		<script src="js/system/common.js"></script>
 		<script src="js/system/cluster-management/cluster-management-view-cluster.js"></script>
 		<script src="js/system/cluster-management/cluster-management-maintain.js"></script>
 		<script src="js/system/node-management/node-management-view.js"></script>
+		<script src="js/system/node-management/node-management-maintain.js"></script>
 		<script src="js/system/service-management/service-management-view.js"></script>
 		<script src="js/system/service-management/service-management-maintain.js"></script>
+		<script src="js/system/service-management/service-management-standardization.js"></script>
+		<script src="js/system/service-management/service-management-distribution.js"></script>
+		<script src="js/system/search-management/search-management-test.js"></script>
+		<script src="js/system/recommend-management/test-recommend-management.js"></script>
 <!--		<script src="js/system/cluster-management-maintance.js"></script>-->
 <!--		<script src="js/system/node-management.js"></script>-->
 <!--		<script src="js/system/search-management.js"></script>-->
@@ -60,7 +64,7 @@
 						</a>
 						<ul id="nodeManagement" class="nav nav-list collapse secondmenu" style="height: 0px;">
 							<li><a onclick="nodeManagementViewNode()">节点浏览</a></li>
-							<li><a onclick="nodeMaintenance()">节点维护</a></li>
+							<li><a onclick="nodeManagementMaintain()">节点维护</a></li>
 						</ul>
 					</li>
 
@@ -73,16 +77,16 @@
 							<li><a onclick="serviceManagementView()">服务浏览</a></li>
 							<li><a onclick="serviceManagementStandardization()">服务标准化</a></li>
 							<li><a onclick="serviceManagementMaintain()">服务维护</a></li>
-							<li><a href="#">服务分配</a></li>
+							<li><a onclick="serviceManagementDistribution()">服务分配</a></li>
 						</ul>
 					</li>
 					<li>
-						<a onclick="serviceSearch()">
+						<a onclick="testSearchManagement()">
 							服务搜索
 						</a>
 					</li>
 					<li>
-						<a href="#">
+						<a onclick="testRecommendManagement()">
 							服务推荐
 						</a>
 					</li>

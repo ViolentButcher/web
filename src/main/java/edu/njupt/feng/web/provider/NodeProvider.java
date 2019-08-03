@@ -16,7 +16,7 @@ public class NodeProvider {
      * @return
      */
     public String getNodeList(Integer clusterID,String filter,String order,String desc){
-        if(filter == null){
+        if(filter == null || filter.length() == 0){
             return new SQL(){{
                 SELECT("*");
                 FROM("node");
@@ -45,7 +45,7 @@ public class NodeProvider {
      * @return
      */
     public String getAllNodeList(String filter,String order,String desc){
-        if(filter == null){
+        if(filter == null || filter.length() == 0){
             return new SQL(){{
                 SELECT("*");
                 FROM("node");

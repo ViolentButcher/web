@@ -37,7 +37,7 @@ function serviceManagementView(){
         '</div>' +
         '<div class="row div-row">' +
             '<div class="col-md-2 col-md-offset-2">' +
-                '<button class="btn btn-default btn-sm" onclick="serviceManagementViewRefresh(1)">刷新</button>' +
+                '<button class="btn btn-default btn-sm" onclick="serviceManagementViewRefreshButton()">刷新</button>' +
             '</div>' +
         '<div class="col-md-2">' +
         '<button class="btn btn-default btn-sm" data-toggle="modal" data-target="#service_management_view_filter_modal">筛选</button>' +
@@ -118,6 +118,19 @@ function serviceManagementViewRefresh(pageNum) {
             }
         }
     });
+}
+
+/**
+ * 刷新按钮
+ */
+function serviceManagementViewRefreshButton() {
+    service_management_view_filter = null;
+    service_management_view_desc = "asc";
+    service_management_view_orderBy = "id";
+
+    $("#service_management_view_filter_label").html("无");
+
+    serviceManagementViewRefresh(1);
 }
 
 /**

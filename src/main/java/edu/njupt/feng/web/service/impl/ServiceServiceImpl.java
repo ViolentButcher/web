@@ -40,7 +40,25 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public boolean addService(String name, String content, String attributes, Integer nodeID) {
-        return false;
+        ServiceInfo service = new ServiceInfo();
+        try{
+            service.setName(name);
+            service.setContent(content);
+            service.setNode(nodeID);
+            service.setCluster(nodeMapper.getClusterIDByNodeID(nodeID));
+            service.setAttributes(attributes);
+            service.setCreateTime(new Date());
+            service.setModifyTime(new Date());
+            serviceMapper.addService(service);
+        }catch (Exception e){
+            return false;
+        }
+        nodeMapper.updateServiceNumber(serviceMapper.countNodeServiceNumber(nodeID),nodeID);
+
+//        if(clusterManagement.serviceStart(service.getId())){
+//
+//        }
+        return true;
     }
 
     @Override
@@ -84,6 +102,7 @@ public class ServiceServiceImpl implements ServiceService {
     public void updateNode(Integer node, Integer serviceID) {
         serviceMapper.updateNode(node,serviceID);
         updateCluster(nodeMapper.getNodeInfoByNodeID(node).getCluster(),serviceID);
+
     }
 
     @Override
@@ -114,5 +133,10 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     public List<ServiceServiceInfo> getServiceInfoByNodeID(Integer nodeID) {
         return Convert2ServiceInfo.listServiceInfo2ServiceInfo(serviceMapper.getServicesInfoByNodeCluster(nodeID));
+    }
+
+    @Override
+    public void startService(Integer serviceID) {
+
     }
 }
