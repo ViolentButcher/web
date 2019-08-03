@@ -81,11 +81,11 @@ public interface NodeMapper {
 
     /**
      * 更新节点服务数量
-     * @param servcieNumber
+     * @param serviceNumber
      * @param nodeID
      */
-    @Update("UPDATE node SET service_number = #{servcieNumber} WHERE id = #{nodeID}")
-    public void updateServiceNumber(@Param("servcieNumber")Integer servcieNumber,@Param("nodeID")Integer nodeID);
+    @Update("UPDATE node SET service_number = #{serviceNumber} WHERE id = #{nodeID}")
+    public void updateServiceNumber(@Param("serviceNumber")Integer serviceNumber,@Param("nodeID")Integer nodeID);
 
     /**
      * 更新节点位置

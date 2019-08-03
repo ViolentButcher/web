@@ -5,6 +5,11 @@ var service_management_maintain_orderBy = "id";
  * 服务维护界面加载
  */
 function serviceManagementMaintain() {
+
+    service_management_maintain_filter = null;
+    service_management_maintain_desc = "asc";
+    service_management_maintain_orderBy = "id";
+
     $("#main_content").html('');
     $("#main_content").html('<h4>现有服务列表：</h4>' +
         '<div class="row div-row">' +
@@ -32,7 +37,7 @@ function serviceManagementMaintain() {
         '</div>' +
         '<div class="row div-row">' +
             '<div class="col-md-1 col-md-offset-2">' +
-                '<button class="btn btn-default btn-sm" onclick="serviceManagementMaintainRefresh(1)">刷新</button>' +
+                '<button class="btn btn-default btn-sm" onclick="serviceManagementMantainRefreshButton()">刷新</button>' +
             '</div>' +
             '<div class="col-md-1">' +
                 '<button class="btn btn-default btn-sm" data-toggle="modal" data-target="#cluster_management_filter_modal">筛选</button>' +
@@ -84,9 +89,12 @@ function serviceManagementMaintain() {
             .append($("<div class='modal-content'/>")
                 .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_change_title'/>").html("修改数据")))
                 .append($("<div class='modal-body'/>")
-                    .append($("<div class='row'/>").append("<label/>").html("字段1").append($("<input type='text'>"))))
+                    .append($("<div class='row'/>").append("<label/>").html("服务名称：").append($("<input type='text' id='service_management_maintain_modify_name'>")))
+                    .append($("<div class='row'/>").append("<label/>").html("服务属性：").append($("<input type='text' id='service_management_maintain_modify_attributes'>")))
+                    .append($("<div class='row'/>").append("<label/>").html("服务内容：").append($("<input type='text' id='service_management_maintain_modify_content'>")))
+                    .append($("<div class='row'/>").append("<label/>").html("服务所属节点：").append($("<input type='text' id='service_management_maintain_modify_node'>"))))
                 .append($("<div class='modal-footer'/>")
-                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("确定"))
+                    .append($("<button class='btn btn-default' data-dismiss='modal'onclick='serviceManagementMaintainModify()'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
     $("#main_content").append($("<div class='modal fade' id='cluster_management_delete_modal' tabindex='-1' role='dialog' aria-labelledby='modal_delete_title' aria-hidden='true'/>")
         .append($("<div class='modal-dialog'/>")
@@ -172,12 +180,45 @@ function serviceManagementMaintainTRClick(obj) {
 }
 
 /**
+ * 修改服务信息
+ */
+function serviceManagementMaintainModify() {
+    var on_tr = $("#service_management_maintain_table").find("tr.tr-on");
+    if(on_tr != null){
+        $.ajax({
+            type : "GET",
+            url : "/api/service/modify",
+            data : {"serviceID" : on_tr.attr("service_id"),"name" : $("#service_management_maintain_modify_name").val(),"attributes" : $("#service_management_maintain_modify_attributes").val(),"content" : $("#service_management_maintain_modify_content").val(),"node" : $("#service_management_maintain_modify_node").val()},
+            dataType : "json",
+            success : function (data) {
+                alert(data.msg);
+            }
+        });
+    }else{
+        alert("请选中对应服务！")
+    }
+}
+
+/**
  * 筛选按钮
  */
 function serviceManagementMaintainFilter() {
     service_management_maintain_filter = $("#service_management_maintain_filter_input").val();
     $("#service_management_maintain_filter_label").html(service_management_view_filter);
     serviceManagementMaintainRefresh(1);
+}
+
+/**
+ *
+ */
+function serviceManagementMantainRefreshButton() {
+    service_management_maintain_filter = null;
+    service_management_maintain_desc = "asc";
+    service_management_maintain_orderBy = "id";
+
+    serviceManagementMaintainRefresh(1);
+
+    $("#service_management_maintain_filter_label").html("无");
 }
 
 /**
@@ -217,7 +258,7 @@ function serviceManagementMaintainAdd() {
         $.ajax({
             type : "GET",
             url : "/api/service/add",
-            data : {"name" : $("#service_management_maintain_add_name").val(),"attributes" : $("#service_management_maintain_add_attributes").val(),"content" : $("#service_management_maintain_add_content").val(),"node" : $("#service_management_maintain_add_node")},
+            data : {"name" : $("#service_management_maintain_add_name").val(),"attributes" : $("#service_management_maintain_add_attributes").val(),"content" : $("#service_management_maintain_add_content").val(),"node" : $("#service_management_maintain_add_node").val()},
             dataType : "json",
             success : function (data) {
                 alert(data.msg);

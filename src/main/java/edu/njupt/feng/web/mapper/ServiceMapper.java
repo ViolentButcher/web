@@ -141,7 +141,8 @@ public interface ServiceMapper {
      * 添加Service
      * @param serviceInfo
      */
-    @Insert("INSERT INTO service(name,attributes,content,node,cluster,create_time,modify_time) VALUES()")
+    @Insert("INSERT INTO service(name,attributes,content,node,cluster,create_time,modify_time) VALUES(#{name},#{attributes},#{content},#{node},#{cluster},#{createTime},#{modifyTime})")
+    @Options(useGeneratedKeys = true,keyColumn = "id",keyProperty = "id")
     public void addService(ServiceInfo serviceInfo);
 
     /**

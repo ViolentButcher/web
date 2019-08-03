@@ -1,6 +1,7 @@
 package edu.njupt.feng.web.service;
 
 import com.github.pagehelper.PageInfo;
+import edu.njupt.feng.web.entity.database.ClusterInfo;
 import edu.njupt.feng.web.entity.service.ClusterServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import org.springframework.stereotype.Service;
@@ -117,5 +118,19 @@ public interface ClusterService {
      * 更新所有集群的nodeNumber
      */
     public void updateAllNodeNumver();
+
+    /**
+     * 获取所有的集群信息，不分页
+     * @return
+     */
+    public List<ClusterInfo> getClusterListWithoutPageInfo();
+
+
+    /**
+     * 加载、卸载集群
+     * @param clusterID
+     * @return
+     */
+    public String loadCluster(Integer clusterID);
 
 }

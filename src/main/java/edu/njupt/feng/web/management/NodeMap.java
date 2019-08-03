@@ -3,6 +3,7 @@ package edu.njupt.feng.web.management;
 import edu.njupt.feng.web.entity.common.NodeMapItem;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceListItem;
+import edu.njupt.feng.web.utils.constants.Constants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +15,6 @@ import java.util.Map;
 public class NodeMap {
     //全局的节点字典变量
     private static Map<String, NodeMapItem> nodeMap = new HashMap<>();
-
 
     /**
      * 添加节点
@@ -31,6 +31,14 @@ public class NodeMap {
      */
     public static void updateNodeAttributes(String nodeAddress,Map<String,String> attributes){
         nodeMap.get(nodeAddress).getNodeServiceInfo().setAttributes(attributes);
+    }
+
+    /**
+     * 移除节点
+     * @param nodeID
+     */
+    public static void removeNode(Integer nodeID){
+        nodeMap.remove(Constants.NODE_PREFIX + nodeID);
     }
 
     /**

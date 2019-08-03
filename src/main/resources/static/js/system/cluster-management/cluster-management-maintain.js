@@ -9,10 +9,20 @@ var cluster_management_maintain_node_desc = "asc";
 var cluster_management_maintain_node_orderBy = "id";
 var cluster_management_maintain_node_configure_node;
 
+var cluster_management_maintain_service_filter;
+var cluster_management_maintain_service_desc = "asc";
+var cluster_management_maintain_service_orderBy = "id";
+var cluster_management_maintain_service_current_node;
+
 /**
  * 加载集群维护页面
  */
 function clusterManagementMaintain() {
+
+    cluster_management_maintain_cluster_filter = null;
+    cluster_management_maintain_cluster_desc = "asc";
+    cluster_management_maintain_cluster_orderBy = "id";
+
     $("#main_content").html('');
     $("#location").html('');
     $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='clusterManagementMaintain()'/>").html(">> 集群维护"));
@@ -28,7 +38,7 @@ function clusterManagementMaintain() {
             .append($("<ul id='cluster_management_maintain_cluster_pagination' class='pagination'/>"))));
 
     var cluster_button_row = $("<div class='row div-row'/>");
-    cluster_button_row.append($("<div class='col-md-2'/>").append($("<button class='btn btn-default btn-sm' id='cluster_management_maintain_refresh' onclick='clusterManagementMaintainClusterRefresh()'/>").html("刷新")));
+    cluster_button_row.append($("<div class='col-md-2'/>").append($("<button class='btn btn-default btn-sm' id='cluster_management_maintain_refresh' onclick='clusterManagementMaintainClusterRefreshButton()'/>").html("刷新")));
     cluster_button_row.append($("<div class='col-md-2'/>").append($("<button class='btn btn-default btn-sm' id='cluster_management_maintain_filter' data-toggle='modal' data-target='#cluster_management_maintain_filter_modal'/>").html("筛选")));
     cluster_button_row.append($("<div class='col-md-2'/>").append($("<button class='btn btn-default btn-sm' id='cluster_management_maintain_add' data-toggle='modal' data-target='#cluster_management_maintain_add_modal'/>").html("添加")));
     cluster_button_row.append($("<div class='col-md-2'/>").append($("<button class='btn btn-default btn-sm' id='cluster_management_maintain_modify' data-toggle='modal' data-target='#cluster_management_maintain_modify_modal'/>").html("修改")));
@@ -49,17 +59,19 @@ function clusterManagementMaintain() {
                 .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_export_title'/>").html("添加集群")))
                 .append($("<div class='modal-body'/>")
                     .append($("<div class='row'/>").append("<label/>").html("集群名称：").append("<input type='text' id='cluster_maintain_cluster_add_name'>"))
-                    .append($("<div class='row'/>").append("<label/>").html("集群结构：").append("<input type='text' id='cluster_maintain_cluster_add_attributes'>")))
+                    .append($("<div class='row'/>").append("<label/>").html("集群属性：").append("<input type='text' id='cluster_maintain_cluster_add_attributes'>")))
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='clusterManagementMaintainClusterAdd()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
-    $("#main_content").append($("<div class='modal fade' id='cluster_management_maintain_modify_modal' tabindex='-1' role='dialog' aria-labelledby='modal_filter_title' aria-hidden='true'/>")
+    $("#main_content").append($("<div class='modal fade' id='cluster_management_maintain_modify_modal' tabindex='-1' role='dialog' aria-labelledby='modal_modify_title' aria-hidden='true'/>")
         .append($("<div class='modal-dialog'/>")
             .append($("<div class='modal-content'/>")
-                .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_filter_title'/>").html("筛选记录")))
-                .append($("<div class='modal-body'/>").append($("<label for='cluster_management_filter_label'/>").html("约束表达式：")).append($("<input id='cluster_management_filter_input' class='form-control'/>")))
+                .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_modify_title'/>").html("集群修改")))
+                .append($("<div class='modal-body'/>")
+                    .append($("<div class='row'/>").append("<label/>").html("集群名称：").append("<input type='text' id='cluster_maintain_cluster_modify_name'>"))
+                    .append($("<div class='row'/>").append("<label/>").html("集群属性：").append("<input type='text' id='cluster_maintain_cluster_modify_attributes'>")))
                 .append($("<div class='modal-footer'/>")
-                    .append($("<button class='btn btn-default' onclick='clusterManagementFilter()' data-dismiss='modal'/>").html("确定"))
+                    .append($("<button class='btn btn-default' onclick='clusterManagementMaintainModifyCluster()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
     $("#main_content").append($("<div class='modal fade' id='cluster_management_maintain_configure_modal' tabindex='-1' role='dialog' aria-labelledby='modal_filter_title' aria-hidden='true'/>")
         .append($("<div class='modal-dialog'/>")
@@ -76,6 +88,7 @@ function clusterManagementMaintain() {
  * 集群列表刷新
  */
 function clusterManagementMaintainClusterRefresh(pageNum) {
+
     $.ajax({
         type : "GET",
         url  : "/api/cluster/cluster_list",
@@ -123,6 +136,38 @@ function clusterManagementMaintainClusterRefresh(pageNum) {
             }
         }
     });
+}
+
+/**
+ * 修改集群属性
+ */
+function clusterManagementMaintainModifyCluster() {
+    var on_tr = $("#cluster_management_maintain_cluster_table").find("tr.tr-on");
+    if(on_tr != null){
+        $.ajax({
+            type : "GET",
+            url : "/api/cluster/modify",
+            data : {"clusterID":on_tr.attr("cluster_id"),"name":$("#cluster_maintain_cluster_modify_name").val(),"attributes" : $("#cluster_maintain_cluster_modify_name").val()},
+            dataType : "json",
+            success : function (data) {
+                alert(data.msg);
+            }
+        });
+        clusterManagementMaintainClusterRefresh(1);
+    }else{
+        alert("请选中对应集群！")
+    }
+}
+
+/**
+ * 刷新按钮
+ */
+function clusterManagementMaintainClusterRefreshButton() {
+    cluster_management_maintain_cluster_filter = null;
+    cluster_management_maintain_cluster_desc = "asc";
+    cluster_management_maintain_cluster_orderBy = "id";
+
+    clusterManagementMaintainClusterRefresh(1);
 }
 
 /**
@@ -181,7 +226,7 @@ function clusterManagementMaintainClusterAdd() {
     $.ajax({
         type : "GET",
         url : "/api/cluster/add",
-        data : {"name":$("#cluster_maintain_cluster_add_name").val(),"attributes" : $("#cluster_maintain_cluster_add_name").val()},
+        data : {"name":$("#cluster_maintain_cluster_add_name").val(),"attributes" : $("#cluster_maintain_cluster_add_attributes").val()},
         dataType : "json",
         success : function (data) {
             alert(data.msg);
@@ -331,7 +376,8 @@ function clusterManagementMaintainNodeTRClick(obj) {
 function clusterManagementMaintainNodeDetail() {
     var on_tr = $("#cluster_management_maintain_configuration_node_table").find("tr.tr-on");
     if(on_tr != null){
-
+        cluster_management_maintain_service_current_node = on_tr.attr("node_id");
+        clusterManagementMaintainNodeDetailLoad();
     }else{
         alert("请选中对应节点！")
     }
@@ -408,13 +454,16 @@ function clusterManagementMaintainNodeDetailLoad() {
             '<div class="col-md-2">' +
                 '<button class="btn btn-default btn-sm" data-toggle="modal" data-target="#cluster_management_maintain_service_export_modal">导出</button>' +
             '</div>' +
+            '<div class="col-md-2 col-md-offset-2">' +
+                '<button class="btn btn-default btn-sm" onclick="clusterManagementMaintainConfigureLoad()">返回</button>' +
+            '</div>' +
         '</div>' +
         '</div>');
     $("#main_content").append($("<div class='modal fade' id='cluster_management_maintain_service_filter_modal' tabindex='-1' role='dialog' aria-labelledby='modal_filter_title' aria-hidden='true'/>")
         .append($("<div class='modal-dialog'/>")
             .append($("<div class='modal-content'/>")
                 .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_filter_title'/>").html("筛选记录")))
-                .append($("<div class='modal-body'/>").append($("<label for='service_management_view_filter_input'/>").html("约束表达式：")).append($("<input id='service_management_view_filter_input' class='form-control'/>")))
+                .append($("<div class='modal-body'/>").append($("<label for='cluster_management_maintain_service_filter_input'/>").html("约束表达式：")).append($("<input id='cluster_management_maintain_service_filter_input' class='form-control'/>")))
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='clusterManagementMaintainServiceFilter()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
@@ -427,6 +476,8 @@ function clusterManagementMaintainNodeDetailLoad() {
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='clusterManagementMaintainServiceExport()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
+
+    clusterManagementMaintainServiceRefresh(1);
 }
 
 /**
@@ -436,13 +487,13 @@ function clusterManagementMaintainNodeDetailLoad() {
 function clusterManagementMaintainServiceRefresh(pageNum) {
     $.ajax({
         type : "GET",
-        url  : "/api/service/service_list_all",
-        data : {"pageNum" : pageNum,"filter" : service_management_view_filter,"desc" : service_management_view_desc,"orderBy" : service_management_view_orderBy},
+        url  : "/api/service/service_list",
+        data : {"nodeID": cluster_management_maintain_service_current_node,"pageNum" : pageNum,"filter" : cluster_management_maintain_service_filter,"desc" : cluster_management_maintain_service_desc,"orderBy" : cluster_management_maintain_service_orderBy},
         dataType : "json",
         success : function (data) {
-            $("#service_management_view_table tr").nextAll().remove();
+            $("#cluster_management_maintain_service_table tr").nextAll().remove();
             for(var i=0;i<data.data.list.length;i++){
-                $("#service_management_view_table").append($("<tr onclick='serviceManagementViewTRClick(this)'/>")
+                $("#cluster_management_maintain_service_table").append($("<tr onclick='nodeeManagementMaintainServiceTRClick(this)'/>")
                     .append($("<td/>").html(data.data.list[i].id))
                     .append($("<td/>").html(data.data.list[i].name))
                     .append($("<td/>").html(data.data.list[i].attributes))
@@ -453,40 +504,54 @@ function clusterManagementMaintainServiceRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].modifyTime)).attr("service_id",data.data.list[i].id));
             }
 
-            $("#service_management_view_pagination").html("");
+            $("#cluster_management_maintain_service_pagination").html("");
             if(data.data.isFirstPage){
-                $("#service_management_view_pagination").append($("<li class='disabled'/>").append($("<span aria-label='Previous'/>").append($("<span/>").html("&laquo;"))));
+                $("#cluster_management_maintain_service_pagination").append($("<li class='disabled'/>").append($("<span aria-label='Previous'/>").append($("<span/>").html("&laquo;"))));
             }else {
-                $("#service_management_view_pagination").append($("<li/>").append($("<span aria-label='Previous' onclick='serviceManagementViewRefresh(" + data.data.prePage + ")'/>").append($("<span/>").html("&laquo;"))));
+                $("#cluster_management_maintain_service_pagination").append($("<li/>").append($("<span aria-label='Previous' onclick='clusterManagementMaintainServiceRefresh(" + data.data.prePage + ")'/>").append($("<span/>").html("&laquo;"))));
             }
 
             for(var index=0;index < data.data.navigatepageNums.length;index++){
                 if(data.data.navigatepageNums[index] != data.data.pageNum){
-                    $("#service_management_view_pagination").append($("<li/>").append($("<span onclick='serviceManagementViewRefresh("  + data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
+                    $("#cluster_management_maintain_service_pagination").append($("<li/>").append($("<span onclick='clusterManagementMaintainServiceRefresh("  + data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
                 }else {
-                    $("#service_management_view_pagination").append($("<li class='active'/>").append($("<span onclick='serviceManagementViewRefresh(" + data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
+                    $("#cluster_management_maintain_service_pagination").append($("<li class='active'/>").append($("<span onclick='clusterManagementMaintainServiceRefresh(" + data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
                 }
             }
 
             if(data.data.isLastPage){
-                $("#service_management_view_pagination").append($("<li class='disabled'/>").append($("<span aria-label='Next'/>").append($("<span/>").html("&raquo;"))));
+                $("#cluster_management_maintain_service_pagination").append($("<li class='disabled'/>").append($("<span aria-label='Next'/>").append($("<span/>").html("&raquo;"))));
             }else {
-                $("#service_management_view_pagination").append($("<li/>").append($("<span aria-label='Next' onclick='serviceManagementViewRefresh(" + data.data.nextPage + ")'/>").append($("<span/>").html("&raquo;"))));
+                $("#cluster_management_maintain_service_pagination").append($("<li/>").append($("<span aria-label='Next' onclick='clusterManagementMaintainServiceRefresh(" + data.data.nextPage + ")'/>").append($("<span/>").html("&raquo;"))));
             }
         }
     });
 }
 
 /**
+ * 每行选中事件
+ * @param obj
+ */
+function nodeeManagementMaintainServiceTRClick(obj) {
+    var trs = $("#cluster_management_maintain_service_table").find("tr");
+    if(trs.hasClass("tr-on")){
+        trs.removeClass("tr-on");
+    }
+    $(obj).addClass("tr-on");
+}
+
+/**
  * 服务过滤
  */
 function clusterManagementMaintainServiceFilter() {
-    
+    cluster_management_maintain_service_filter = $("#cluster_management_maintain_service_filter_input").val();
+    $("#cluster_management_maintain_service_filter_label").html(cluster_management_maintain_service_filter);
+    clusterManagementMaintainServiceRefresh(1);
 }
 
 /**
  * 服务导出
  */
 function clusterManagementMaintainServiceExport() {
-    
+    alert("该功能还未实现，您选中的导出数据的格式为：" + $("input[name='export_way']:checked").val());
 }

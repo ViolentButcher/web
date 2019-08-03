@@ -5,11 +5,11 @@ function searchManagement() {
     $("#main_content").html('');
     $("#main_content").html('<div class="row div-row">' +
         '<label for="search_cluster_name">集群名称:</label>' +
-        '<select id="search_cluster_name">' +
-        '<option>1</option>' +
-        '<option>2</option>' +
-        '<option>3</option>' +
-        '</select>' +
+            '<select id="search_cluster_name">' +
+                '<option>1</option>' +
+                '<option>2</option>' +
+                '<option>3</option>' +
+            '</select>' +
         '</div>' +
         '<h4>请求内容：</h4>' +
         '<div class="row div-row">' +

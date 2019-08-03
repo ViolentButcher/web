@@ -148,4 +148,31 @@ public class ClusterServiceImpl implements ClusterService {
             nodeService.updateAllNodeServiceNumber(clusterInfo.getId());
         }
     }
+
+    @Override
+    public List<ClusterInfo> getClusterListWithoutPageInfo() {
+        return clusterMapper.getClusterList();
+    }
+
+    @Override
+    public String loadCluster(Integer clusterID) {
+        ClusterInfo clusterInfo = clusterMapper.getClusterByID(clusterID);
+        System.out.println("clusterID" + clusterID + "-------------" + clusterInfo.getState());
+        if (clusterInfo.getState() != null){
+            if(clusterInfo.getState() == 1){
+                clusterManagement.stopCluster(clusterID);
+                clusterMapper.updateState(0,clusterID);
+                return "集群卸载成功！";
+            }
+            else {
+                clusterManagement.startCluster(clusterID);
+                clusterMapper.updateState(1,clusterID);
+                return "集群加载成功！";
+            }
+        }else {
+            clusterManagement.startCluster(clusterID);
+            clusterMapper.updateState(1,clusterID);
+            return "集群加载成功！";
+        }
+    }
 }

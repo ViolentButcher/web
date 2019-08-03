@@ -1,6 +1,7 @@
 package edu.njupt.feng.web.webservice;
 
 import edu.njupt.feng.web.entity.common.NodeMapItem;
+import edu.njupt.feng.web.entity.common.ResultInfoWithoutContent;
 import edu.njupt.feng.web.entity.database.NodeInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceListItem;
@@ -37,18 +38,6 @@ public interface NodeWebService {
      */
     public void setNodeServiceList(List<NodeServiceListItem> serviceList);
 
-    /**
-     * 在节点上注册服务信息
-     * @param service
-     */
-    public void registerService(NodeServiceListItem service);
-
-    /**
-     * 移除节点上的某个服务信息
-     * @param serviceID
-     */
-    public void removeService(Integer serviceID);
-
 
     /**
      * 更新节点属性信息（自身）
@@ -84,25 +73,18 @@ public interface NodeWebService {
     public NodeServiceInfo getNodeServiceInfo(String address);
 
     /**
-     * 访问服务地址，获取服务信息
-     * @param address
-     * @return
-     */
-    public ServiceServiceInfo getServiceInfo(String address);
-
-    /**
      * 测试搜索示例
      * @param keyword
      * @return
      */
-    public List<ServiceServiceInfo> testSearch(String keyword,Integer type);
+    public ResultInfoWithoutContent testSearch(String keyword, Integer type);
 
     /**
      * 推荐测试示例
      * @param keyword
      * @return
      */
-    public List<ServiceServiceInfo> testRecommend(String keyword,Integer type);
+    public ResultInfoWithoutContent testRecommend(String keyword,Integer type);
 
     /**
      * 根据全局节点字典返回节点信息
@@ -118,11 +100,4 @@ public interface NodeWebService {
      */
     public ServiceServiceInfo getServiceInfoByServiceMap(String address);
 
-    /**
-     * 查找节点管理的服务中符合要求的节点
-     * @param nodeID
-     * @param keyword
-     * @return
-     */
-    public List<ServiceServiceInfo> searchServiceInfosOwn(Integer nodeID,String keyword);
 }

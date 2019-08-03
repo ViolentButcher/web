@@ -111,8 +111,10 @@ public class NodeServiceImpl implements NodeService {
             nodeInfo.setName(nodeName);
             nodeInfo.setAttributes(attributes);
             nodeInfo.setCluster(cluster);
+            nodeInfo.setPosition(position);
             nodeInfo.setCreateTime(new Date());
             nodeInfo.setModifyTime(new Date());
+            nodeInfo.setServiceNumber(0);
             nodeMapper.addNode(nodeInfo);
             return true;
         }

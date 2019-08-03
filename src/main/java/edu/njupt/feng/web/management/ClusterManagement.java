@@ -2,6 +2,7 @@ package edu.njupt.feng.web.management;
 
 
 import edu.njupt.feng.web.entity.database.ClusterInfo;
+import edu.njupt.feng.web.entity.database.NodeInfo;
 import edu.njupt.feng.web.entity.database.ServiceInfo;
 import edu.njupt.feng.web.mapper.ClusterMapper;
 import edu.njupt.feng.web.mapper.NodeMapper;
@@ -32,8 +33,6 @@ public class ClusterManagement {
     @Autowired
     private NodeManagement nodeManagement;
 
-    @Autowired
-    private Task task;
 
     private Map<Integer, Integer> clusters = new HashMap<>();
 
@@ -44,19 +43,6 @@ public class ClusterManagement {
         for(ClusterInfo clusterInfo : clusterMapper.getClusterList()){
             if(clusterInfo.getState() == 1){
                 startCluster(clusterInfo.getId());
-            }
-        }
-    }
-
-    public void initAsync(){
-        for(ClusterInfo clusterInfo : clusterMapper.getClusterList()){
-            if(clusterInfo.getState() == 1){
-                try {
-                    startClusterAsync(clusterInfo.getId());
-                }catch (Exception e){
-
-                }
-
             }
         }
     }
@@ -75,28 +61,15 @@ public class ClusterManagement {
         }
     }
 
-    public void startClusterAsync(Integer clusterID) throws Exception{
-        long startTime=System.currentTimeMillis();   //获取开始时间
-        if(clusters.get(clusterID) == null){
-            List<Future<String>> tasks = new ArrayList<>();
-            for(Integer nodeID : nodeMapper.getNodeListsByClusterID(clusterID)){
-                Future<String> t = task.startNode(nodeID);
-                tasks.add(t);
-            }
-            boolean finished = false;
-            while(!finished){
-                finished = true;
-                for(Future<String> t : tasks){
-                    if(!t.isDone()){
-                        finished = false;
-                        break;
-                    }
-                }
-            }
-            clusters.put(clusterID,clusterID);
+    /**
+     * 停止集群
+     * @param clusterID
+     */
+    public void stopCluster(Integer clusterID){
+        clusters.remove(clusterID);
+        for (int nodeID : nodeMapper.getNodeListsByClusterID(clusterID)){
+            nodeManagement.stopNode(nodeID);
         }
-        long endTime=System.currentTimeMillis(); //获取结束时间
-        System.out.println("程序运行时间： "+(endTime-startTime)+"ms");
     }
 
     /**
@@ -109,6 +82,24 @@ public class ClusterManagement {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 判断节点是否启动
+     * @param nodeID
+     * @return
+     */
+    public boolean nodeStart(Integer nodeID){
+        NodeInfo nodeInfo = nodeMapper.getNodeInfoByNodeID(nodeID);
+
+        if(nodeInfo != null){
+            if(clusters.get(nodeInfo.getCluster()) == null){
+                return false;
+            }else {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

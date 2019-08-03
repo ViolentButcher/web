@@ -1,6 +1,7 @@
 package edu.njupt.feng.web.management;
 
 import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
+import edu.njupt.feng.web.utils.constants.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,5 +46,13 @@ public class ServiceMap {
      */
     public static void addService(ServiceServiceInfo serviceServiceInfo){
         serviceMap.put(serviceServiceInfo.getServiceAddress(),serviceServiceInfo);
+    }
+
+    /**
+     * 删除服务
+     * @param serviceID
+     */
+    public static void removeService(Integer serviceID){
+        serviceMap.remove(Constants.SERVICE_PREFIX + serviceID);
     }
 }

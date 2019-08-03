@@ -11,6 +11,11 @@ var node_management_view_service_orderBy = "id";
  * 节点浏览
  */
 function nodeManagementViewNode() {
+
+    node_management_view_node_filter = null;
+    node_management_view_node_desc = "asc";
+    node_management_view_node_orderBy = "id";
+
     $("#main_content").html('');
     $("#main_content").html('<h4>现有节点列表：</h4>' +
         '<div class="row div-row">' +
@@ -39,7 +44,7 @@ function nodeManagementViewNode() {
         '</div> ' +
         '<div class="row div-row">' +
             '<div class="col-md-2 col-md-offset-1">' +
-                '<button class="btn btn-default btn-sm" onclick="nodeManagementViewRefresh()">刷新</button>' +
+                '<button class="btn btn-default btn-sm" onclick="nodeManagementViewNodeRefreshButton()">刷新</button>' +
             '</div>' +
             '<div class="col-md-2">' +
                 '<button class="btn btn-default btn-sm" id="node_view_filter" data-toggle="modal" data-target="#node_management_view_node_filter_modal">筛选</button>' +
@@ -72,7 +77,7 @@ function nodeManagementViewNode() {
     $("#location").html('');
 
     //展示位置信息
-    $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNode(1)'/>").html(">> 节点浏览"));
+    $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNode()'/>").html(">> 节点浏览"));
 }
 
 /**
@@ -106,10 +111,10 @@ function nodeManagementViewRefresh(pageNum) {
                 $("#node_management_view_node_table").append($("<tr onclick='nodeManagementViewNodeTRClick(this)'/>")
                     .append($("<td/>").html(data.data.list[i].id))
                     .append($("<td/>").html(data.data.list[i].name))
-                    .append($("<td/>").html(data.data.list[i].attrs))
+                    .append($("<td/>").html(data.data.list[i].attributes))
                     .append($("<td/>").html(data.data.list[i].serviceNumber))
                     .append($("<td/>").html(data.data.list[i].position))
-                    .append($("<td/>").html(data.data.list[i].associatedNode))
+                    .append($("<td/>").html(data.data.list[i].associatedNodes))
                     .append($("<td/>").html(data.data.list[i].level))
                     .append($("<td/>").html(data.data.list[i].createTime))
                     .append($("<td/>").html(data.data.list[i].modifyTime)).attr("node_id",data.data.list[i].id));
@@ -137,6 +142,18 @@ function nodeManagementViewRefresh(pageNum) {
 
         }
     });
+}
+
+/**
+ * 节点刷新按钮
+ */
+function nodeManagementViewNodeRefreshButton() {
+    node_management_view_node_filter = null;
+    node_management_view_node_desc = "asc";
+    node_management_view_node_orderBy = "id";
+
+    $("#node_management_view_node_filter_label").html("无");
+    nodeManagementViewRefresh(1);
 }
 
 /**
@@ -168,6 +185,11 @@ function nodeManagementViewNodeDetail() {
  * 详情页面加载
  */
 function nodeManagementViewNodeDetailLoad() {
+
+    node_management_view_service_filter = null;
+    node_management_view_service_desc = "asc";
+    node_management_view_service_orderBy = "id";
+
     $("#main_content").html('');
     $("#main_content").html('<h3>现有服务列表</h3> ' +
         '<div class="row div-row">' +
@@ -195,7 +217,7 @@ function nodeManagementViewNodeDetailLoad() {
         '</div>' +
         '<div class="row div-row">' +
             '<div class="col-md-2 col-md-offset-2">' +
-                '<button class="btn btn-default btn-sm" onclick="nodeManagementViewServiceRefresh(1)">刷新</button>' +
+                '<button class="btn btn-default btn-sm" onclick="nodeManagementViewServiceRefreshButton()">刷新</button>' +
             '</div>' +
             '<div class="col-md-2">' +
                 '<button class="btn btn-default btn-sm" data-toggle="modal" data-target="#node_management_view_service_filter_modal">筛选</button>' +
@@ -221,6 +243,11 @@ function nodeManagementViewNodeDetailLoad() {
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='nodeManagementViewServiceExport()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
+
+    $("#location").html('');
+
+    //展示位置信息
+    $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNode()'/>").html(">> 节点浏览")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNodeDetailLoad()'/>").html(">> 服务浏览"));
 
     nodeManagementViewServiceRefresh(1);
 }
@@ -268,6 +295,18 @@ function nodeManagementViewServiceRefresh(pageNum) {
             }
         }
     });
+}
+
+/**
+ * 服务刷新按钮
+ */
+function nodeManagementViewServiceRefreshButton() {
+    node_management_view_service_filter = null;
+    node_management_view_service_desc = "asc";
+    node_management_view_service_orderBy = "id";
+
+    $("#node_management_view_service_filter_label").html("无");
+    nodeManagementViewServiceRefresh(1);
 }
 
 /**
