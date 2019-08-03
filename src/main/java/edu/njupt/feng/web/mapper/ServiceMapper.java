@@ -88,7 +88,7 @@ public interface ServiceMapper {
      * @param serviceID
      */
     @Update("UPDATE service SET cluster = #{cluster} WHERE id = #{serviceID}")
-    public void updateCluster(@Param("attributes")Integer cluster,@Param("serviceID")Integer serviceID);
+    public void updateCluster(@Param("cluster")Integer cluster,@Param("serviceID")Integer serviceID);
 
     /**
      * 更新服务内容
