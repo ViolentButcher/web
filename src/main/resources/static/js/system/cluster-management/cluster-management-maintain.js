@@ -122,8 +122,8 @@ function clusterManagementMaintainClusterRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].attribute))
                     .append($("<td/>").html(data.data.list[i].nodeNumber))
                     .append($("<td/>").html(data.data.list[i].configuration))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime))
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss")))
                     .append($("<td/>").html(data.data.list[i].state)).attr("cluster_id",data.data.list[i].id));
             }
 
@@ -131,21 +131,21 @@ function clusterManagementMaintainClusterRefresh(pageNum) {
             if(data.data.isFirstPage){
                 $("#cluster_management_maintain_cluster_pagination").append($("<li class='disabled'/>").append($("<span aria-label='Previous'/>").append($("<span/>").html("&laquo;"))));
             }else {
-                $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span aria-label='Previous' onclick='clusterManagementViewClusterDetailRequest(" + cluster_management_view_current_cluster + "," + data.data.prePage + ")'/>").append($("<span/>").html("&laquo;"))));
+                $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span aria-label='Previous' onclick='clusterManagementMaintainClusterRefresh(" + data.data.prePage + ")'/>").append($("<span/>").html("&laquo;"))));
             }
 
             for(var index=0;index < data.data.navigatepageNums.length;index++){
                 if(data.data.navigatepageNums[index] != data.data.pageNum){
-                    $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span onclick='clusterManagementViewClusterDetailRequest(" + cluster_management_view_current_cluster + "," + data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
+                    $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span onclick='clusterManagementMaintainClusterRefresh(" + data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
                 }else {
-                    $("#cluster_management_maintain_cluster_pagination").append($("<li class='active'/>").append($("<span onclick='clusterManagementViewClusterDetailRequest(" + cluster_management_view_current_cluster + "," + data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
+                    $("#cluster_management_maintain_cluster_pagination").append($("<li class='active'/>").append($("<span onclick='clusterManagementMaintainClusterRefresh("+ data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
                 }
             }
 
             if(data.data.isLastPage){
                 $("#cluster_management_maintain_cluster_pagination").append($("<li class='disabled'/>").append($("<span aria-label='Next'/>").append($("<span/>").html("&raquo;"))));
             }else {
-                $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span aria-label='Next' onclick='clusterManagementViewClusterDetailRequest(" + cluster_management_view_current_cluster + "," + data.data.nextPage + ")'/>").append($("<span/>").html("&raquo;"))));
+                $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span aria-label='Next' onclick='clusterManagementMaintainClusterRefresh("+ data.data.nextPage + ")'/>").append($("<span/>").html("&raquo;"))));
             }
         }
     });
@@ -317,7 +317,22 @@ function clusterManagementMaintainConfigureLoad(){
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='clusterManagementMaintainNodeAutoConfigureAssociatedNode()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
+
     clusterManagementMaintainNodeRefresh(1);
+
+    $.ajax({
+        type: "GET",
+        data: {
+            "clusterID": cluster_management_maintain_configure_cluster,
+        },
+        url: "/api/cluster/cluster_info",
+        dataType: "json",
+        success: function (data) {
+            $("#cluster_management_maintain_node_cluster_name").html(data.data.name);
+            $("#cluster_management_maintain_node_cluster_attr").html(data.data.attribute);
+            $("#cluster_management_maintain_node_cluster_rule").html(data.data.configuration);
+        }
+    });
 }
 
 /**
@@ -355,8 +370,8 @@ function clusterManagementMaintainNodeRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].position))
                     .append($("<td/>").html(data.data.list[i].associatedNodes))
                     .append($("<td/>").html(data.data.list[i].level))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("node_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("node_id",data.data.list[i].id));
             }
             $("#cluster_management_maintain_node_pagination").html("");
             if(data.data.isFirstPage){
@@ -541,8 +556,8 @@ function clusterManagementMaintainServiceRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].cluster))
                     .append($("<td/>").html(data.data.list[i].node))
                     .append($("<td/>").html(data.data.list[i].content))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("service_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("service_id",data.data.list[i].id));
             }
 
             $("#cluster_management_maintain_service_pagination").html("");

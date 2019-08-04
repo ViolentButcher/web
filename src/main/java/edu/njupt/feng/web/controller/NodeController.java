@@ -32,13 +32,14 @@ public class NodeController {
      * 获取节点列表
      * @param pageNum
      * @param filter
-     * @param order
+     * @param orderBy
      * @param desc
      * @return
      */
     @RequestMapping("/api/node/node_list")
     public JsonData getNodeList(Integer clusterID,@RequestParam(defaultValue = "1")Integer pageNum, String filter, @RequestParam(defaultValue = "id")String orderBy, @RequestParam(defaultValue = "asc")String desc){
         JsonData data = new JsonData();
+        System.out.println(orderBy);
         data.setData(nodeService.getPageNodeListWithParams(clusterID, pageNum, filter, orderBy, desc));
         return data;
     }
@@ -235,9 +236,9 @@ public class NodeController {
     }
 
     @RequestMapping("/api/node/node_list_all")
-    public JsonData getAllNodeList(@RequestParam(defaultValue = "1")Integer pageNum, String filter, @RequestParam(defaultValue = "id")String order, @RequestParam(defaultValue = "asc")String desc){
+    public JsonData getAllNodeList(@RequestParam(defaultValue = "1")Integer pageNum, String filter, @RequestParam(defaultValue = "id")String orderBy, @RequestParam(defaultValue = "asc")String desc){
         JsonData data = new JsonData();
-        data.setData(nodeService.getAllNodeList(pageNum, filter, order, desc));
+        data.setData(nodeService.getAllNodeList(pageNum, filter, orderBy, desc));
         return data;
     }
 

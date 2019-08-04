@@ -187,8 +187,8 @@ function nodeManagementMaintainNodeRequest(pageNum) {
                     .append($("<td/>").html(data.data.list[i].cluster))
                     .append($("<td/>").html(data.data.list[i].associatedNodes))
                     .append($("<td/>").html(data.data.list[i].level))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("node_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("node_id",data.data.list[i].id));
             }
             $("#node_management_maintain_node_pagination").html("");
             if(data.data.isFirstPage){
@@ -373,9 +373,11 @@ function nodeManagementMaintainServiceRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].id))
                     .append($("<td/>").html(data.data.list[i].name))
                     .append($("<td/>").html(data.data.list[i].attributes))
+                    .append($("<td/>").html(data.data.list[i].cluster))
+                    .append($("<td/>").html(data.data.list[i].node))
                     .append($("<td/>").html(data.data.list[i].content))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("service_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("service_id",data.data.list[i].id));
             }
 
             $("#node_management_maintain_service_pagination").html("");

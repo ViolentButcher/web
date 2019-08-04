@@ -34,7 +34,7 @@ function serviceManagementStandardization() {
                     '<tr>' +
                         '<th order="id" onclick="serviceManagementStandardizationOrder(this)">ID</th>' +
                         '<th order="name" onclick="serviceManagementStandardizationOrder(this)">名称</th>' +
-                        '<th order="attributes" onclick="serviceManagementStandardizationOrder(this)">内容</th>' +
+                        '<th order="content" onclick="serviceManagementStandardizationOrder(this)">内容</th>' +
                         '<th order="create_time" onclick="serviceManagementStandardizationOrder(this)">创建时间</th>' +
                         '<th order="modify_time" onclick="serviceManagementStandardizationOrder(this)">修改时间</th>' +
                         '<th>是否要标准化</th>' +
@@ -125,7 +125,7 @@ function serviceManagementStandardizationRefresh(pageNum) {
                         .append($("<td/>").html(data.data.list[i].id))
                         .append($("<td/>").html(data.data.list[i].name))
                         .append($("<td/>").html(data.data.list[i].content))
-                        .append($("<td/>").html(data.data.list[i].createTime))
+                        .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
                         .append($("<td/>").html(data.data.list[i].modifyTime))
                         .append($("<td/>").append($("<input type='checkbox' name='standardization_checkbox'onclick='standardizationCheckboxChoose(this)' checked='checked'>").attr("value",data.data.list[i].id))).attr("service_id",data.data.list[i].id));
                 }else {
@@ -133,8 +133,8 @@ function serviceManagementStandardizationRefresh(pageNum) {
                         .append($("<td/>").html(data.data.list[i].id))
                         .append($("<td/>").html(data.data.list[i].name))
                         .append($("<td/>").html(data.data.list[i].content))
-                        .append($("<td/>").html(data.data.list[i].createTime))
-                        .append($("<td/>").html(data.data.list[i].modifyTime))
+                        .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                        .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss")))
                         .append($("<td/>").append(($("<input type='checkbox' name='standardization_checkbox'onclick='standardizationCheckboxChoose(this)'>").attr("value",data.data.list[i].id)))).attr("service_id",data.data.list[i].id));
                 }
 

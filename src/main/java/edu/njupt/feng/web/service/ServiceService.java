@@ -123,9 +123,4 @@ public interface ServiceService {
      */
     public List<ServiceServiceInfo> getServiceInfoByNodeID(Integer nodeID);
 
-    /**
-     * 启动service服务
-     * @param serviceID
-     */
-    public void startService(Integer serviceID);
 }

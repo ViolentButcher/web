@@ -23,6 +23,14 @@ public interface NodeWebService {
     public void updateName(String name);
 
     /**
+     * 更新所属服务名称
+     * @param name
+     * @param serviceID
+     */
+    public void updateServiceName(String name,int serviceID);
+
+
+    /**
      * 更新节点坐标
      * @param position
      */
