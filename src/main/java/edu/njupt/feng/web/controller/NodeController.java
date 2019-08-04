@@ -37,9 +37,9 @@ public class NodeController {
      * @return
      */
     @RequestMapping("/api/node/node_list")
-    public JsonData getNodeList(Integer clusterID,@RequestParam(defaultValue = "1")Integer pageNum, String filter, @RequestParam(defaultValue = "id")String order, @RequestParam(defaultValue = "asc")String desc){
+    public JsonData getNodeList(Integer clusterID,@RequestParam(defaultValue = "1")Integer pageNum, String filter, @RequestParam(defaultValue = "id")String orderBy, @RequestParam(defaultValue = "asc")String desc){
         JsonData data = new JsonData();
-        data.setData(nodeService.getPageNodeListWithParams(clusterID, pageNum, filter, order, desc));
+        data.setData(nodeService.getPageNodeListWithParams(clusterID, pageNum, filter, orderBy, desc));
         return data;
     }
 

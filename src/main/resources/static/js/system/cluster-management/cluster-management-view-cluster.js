@@ -31,7 +31,7 @@ function clusterManagementViewCluster() {
 
     //集群表格
     $("#main_content").append($("<div class='row div-row'/>").append($("<table id='cluster_table' class='table table-bordered table-responsive'/>")
-        .append($("<tr/>").append($("<th/>").html("ID")).append($("<th/>").html("名称")).append($("<th/>").html("属性")).append($("<th/>").html("节点个数")).append($("<th/>").html("节点关系配置")).append($("<th/>").html("创建时间")).append($("<th/>").html("修改时间")).append($("<th/>").html("节点加载状态")))));
+        .append($("<tr/>").append($("<th order='id' onclick='clusterManagementViewClusterOrder(this)'/>").html("ID")).append($("<th  order='name' onclick='clusterManagementViewClusterOrder(this)'/>").html("名称")).append($("<th  order='attribute' onclick='clusterManagementViewClusterOrder(this)'/>").html("属性")).append($("<th  order='node_number' onclick='clusterManagementViewClusterOrder(this)'/>").html("节点个数")).append($("<th  order='configuration' onclick='clusterManagementViewClusterOrder(this)'/>").html("节点关系配置")).append($("<th  order='create_time' onclick='clusterManagementViewClusterOrder(this)'/>").html("创建时间")).append($("<th  order='modify_time' onclick='clusterManagementViewClusterOrder(this)'/>").html("修改时间")).append($("<th  order='state' onclick='clusterManagementViewClusterOrder(this)'/>").html("节点加载状态")))));
 
     $("#main_content").append($("<div class='row div-row'/>").html('<label>当前筛选条件：</label>' +
         '<label id="cluster_management_view_cluster_filter_label">无</label>' ));
@@ -76,6 +76,20 @@ function clusterManagementViewCluster() {
 }
 
 /**
+ * 排序
+ * @param obj
+ */
+function clusterManagementViewClusterOrder(obj) {
+    cluster_management_view_cluster_orderBy = $(obj).attr("order");
+    if(cluster_management_view_cluster_desc == "asc"){
+        cluster_management_view_cluster_desc = "desc";
+    }else {
+        cluster_management_view_cluster_desc = "asc";
+    }
+    clusterManagementViewClusterRefresh(1);
+}
+
+/**
  * 集群列表的刷新
  */
 function clusterManagementViewClusterRefresh(pageIndex) {
@@ -99,7 +113,7 @@ function clusterManagementViewClusterRefresh(pageIndex) {
                     .append($("<td/>").html(data.data.list[i].attribute))
                     .append($("<td/>").html(data.data.list[i].nodeNumber))
                     .append($("<td/>").html(data.data.list[i].configuration))
-                    .append($("<td/>").html(data.data.list[i].createTime))
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy年MM月dd日 hh:mm:ss")))
                     .append($("<td/>").html(data.data.list[i].modifyTime))
                     .append($("<td/>").html(data.data.list[i].state)).attr("cluster_id",data.data.list[i].id));
             }
@@ -216,15 +230,15 @@ function clusterManagementViewClusterDetailLoad() {
             '<div class="row div-row">' +
                 '<table id="cluster_management_view_node_table" class="table table-bordered table-hover table-responsive">' +
                     '<tr>' +
-                        '<th>ID</th>' +
-                        '<th>名称</th>' +
-                        '<th>属性</th>' +
-                        '<th>服务个数</th>' +
-                        '<th>坐标</th>' +
-                        '<th>关联节点</th>' +
-                        '<th>等级</th>' +
-                        '<th>创建时间</th>' +
-                        '<th>修改时间</th>' +
+                        '<th order="id" onclick="clusterManagementMaintainNodeRefreshOrder(this)">ID</th>' +
+                        '<th order="name" onclick="clusterManagementMaintainNodeRefreshOrder(this)">名称</th>' +
+                        '<th order="attributes" onclick="clusterManagementMaintainNodeRefreshOrder(this)">属性</th>' +
+                        '<th order="service_number" onclick="clusterManagementMaintainNodeRefreshOrder(this)">服务个数</th>' +
+                        '<th order="position" onclick="clusterManagementMaintainNodeRefreshOrder(this)">坐标</th>' +
+                        '<th order="associated_nodes" onclick="clusterManagementMaintainNodeRefreshOrder(this)">关联节点</th>' +
+                        '<th order="level" onclick="clusterManagementMaintainNodeRefreshOrder(this)">等级</th>' +
+                        '<th order="create_time" onclick="clusterManagementMaintainNodeRefreshOrder(this)">创建时间</th>' +
+                        '<th order="modify_time" onclick="clusterManagementMaintainNodeRefreshOrder(this)">修改时间</th>' +
                     '</tr>' +
                 '</table>' +
             '</div>' +
@@ -291,6 +305,20 @@ function clusterManagementViewClusterDetailLoad() {
 
     clusterManagementViewClusterDetailRequest(1);
 
+}
+
+/**
+ * 排序
+ * @param obj
+ */
+function clusterManagementMaintainNodeRefreshOrder(obj) {
+    cluster_management_view_node_orderBy = $(obj).attr("order");
+    if(cluster_management_view_node_desc == "asc"){
+        cluster_management_view_node_desc = "desc";
+    }else {
+        cluster_management_view_node_desc = "asc";
+    }
+    clusterManagementViewClusterDetailRequest(1);
 }
 
 /**
@@ -394,12 +422,12 @@ function clusterManagementViewClusterService(){
         '<div class="row div-row">' +
         '<table id="cluster_management_view_service_table" class="table table-bordered table-hover table-responsive">' +
             '<tr>' +
-                '<th>ID</th>' +
-                '<th>名称</th>' +
-                '<th>属性</th>' +
-                '<th>内容</th>' +
-                '<th>创建时间</th>' +
-                '<th>修改时间</th>' +
+                '<th order="id" onclick="clusterManagementViewClusterServiceOrder(this)">ID</th>' +
+                '<th order="name" onclick="clusterManagementViewClusterServiceOrder(this)">名称</th>' +
+                '<th order="attributes" onclick="clusterManagementViewClusterServiceOrder(this)">属性</th>' +
+                '<th order="content" onclick="clusterManagementViewClusterServiceOrder(this)">内容</th>' +
+                '<th order="create_time" onclick="clusterManagementViewClusterServiceOrder(this)">创建时间</th>' +
+                '<th order="modify_time" onclick="clusterManagementViewClusterServiceOrder(this)">修改时间</th>' +
             '</tr>' +
         '</table>' +
         '</div>' +
@@ -451,6 +479,20 @@ function clusterManagementViewClusterService(){
 
     //展示位置信息
     $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='clusterManagementViewCluster()'/>").html(">> 集群浏览")).append($("<button class='btn btn-link btn-xs' onclick='clusterManagementViewClusterDetailLoad()'/>").html(">> 节点浏览")).append($("<button class='btn btn-link btn-xs' onclick='clusterManagementViewClusterService()'/>").html(">> 服务浏览"));
+}
+
+/**
+ * 排序
+ * @param obj
+ */
+function clusterManagementViewClusterServiceOrder(obj) {
+    cluster_management_view_service_orderBy = $(obj).attr("order");
+    if(cluster_management_view_service_desc == "asc"){
+        cluster_management_view_service_desc = "desc";
+    }else {
+        cluster_management_view_service_desc = "asc";
+    }
+    clusterManagementViewClusterServiceRequest(1);
 }
 
 /**

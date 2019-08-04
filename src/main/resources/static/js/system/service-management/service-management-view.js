@@ -15,14 +15,14 @@ function serviceManagementView(){
         '<div class="row div-row">' +
             '<table id="service_management_view_table" class="table table-bordered table-hover table-responsive">' +
             '<tr>' +
-                '<th>ID</th>' +
-                '<th>名称</th>' +
-                '<th>属性</th>' +
-                '<th>所属集群</th>' +
-                '<th>所属节点</th>' +
-                '<th>内容</th>' +
-                '<th>创建时间</th>' +
-                '<th>修改时间</th>' +
+                '<th order="id" onclick="serviceManagementViewOrder(this)">ID</th>' +
+                '<th order="name" onclick="serviceManagementViewOrder(this)">名称</th>' +
+                '<th order="attributes" onclick="serviceManagementViewOrder(this)">属性</th>' +
+                '<th order="cluster" onclick="serviceManagementViewOrder(this)">所属集群</th>' +
+                '<th order="node" onclick="serviceManagementViewOrder(this)">所属节点</th>' +
+                '<th order="content" onclick="serviceManagementViewOrder(this)">内容</th>' +
+                '<th order="create_time" onclick="serviceManagementViewOrder(this)">创建时间</th>' +
+                '<th order="modify_time" onclick="serviceManagementViewOrder(this)">修改时间</th>' +
             '</tr>' +
             '</table>' +
         '</div>' +
@@ -118,6 +118,20 @@ function serviceManagementViewRefresh(pageNum) {
             }
         }
     });
+}
+
+/**
+ * 排序
+ * @param obj
+ */
+function serviceManagementViewOrder(obj) {
+    service_management_standardization_orderBy = $(obj).attr("order");
+    if(service_management_view_desc == "asc"){
+        service_management_view_desc = "desc";
+    }else {
+        service_management_view_desc = "asc";
+    }
+    serviceManagementViewRefresh(1);
 }
 
 /**
