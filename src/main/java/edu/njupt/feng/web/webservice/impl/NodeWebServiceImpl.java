@@ -39,6 +39,16 @@ public class NodeWebServiceImpl implements NodeWebService {
     }
 
     /**
+     * 更新所属服务的名称
+     * @param name
+     * @param serviceID
+     */
+    @Override
+    public void updateServiceName(String name,int serviceID) {
+        serviceInfoList.get(serviceID).setName(name);
+    }
+
+    /**
      * 更新节点位置
      * @param position
      */

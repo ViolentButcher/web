@@ -179,5 +179,47 @@ public class NodeManagement {
         factoryBean.setServiceClass(NodeWebService.class);
         NodeWebService service = factoryBean.create(NodeWebService.class);
         service.updateNodeAttributes(attr);
+
+        NodeMap.getNodeServiceInfo(nodeServiceInfo.getServiceAddress()).getNodeServiceInfo().setAttributes(attr);
+    }
+
+    /**
+     * 为运行的节点添加服务
+     * @param serviceInfo
+     */
+    public void startService(ServiceInfo serviceInfo){
+        NodeServiceInfo nodeServiceInfo = Convert2ServiceInfo.nodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfoByNodeID(serviceInfo.getNode()));
+        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+        factoryBean.setAddress(nodeServiceInfo.getServiceAddress());
+        factoryBean.setServiceClass(NodeWebService.class);
+        NodeWebService service = factoryBean.create(NodeWebService.class);
+
+        NodeServiceListItem item = Convert2ServiceInfo.serviceInfo2NodeServiceListItem(serviceInfo);
+        if(service.getNodeServiceInfoByNodeMap(item.getServiceAddress()) == null){
+            service.addService(serviceInfo);
+        }
+        ServiceMap.addService(Convert2ServiceInfo.serviceInfo2ServiceInfo(serviceInfo));
+    }
+
+    /**
+     * 更新服务名称
+     * @param name
+     * @param serviceID
+     */
+    public void updateServiceName(String name,int serviceID){
+        ServiceServiceInfo serviceInfo = Convert2ServiceInfo.serviceInfo2ServiceInfo(serviceMapper.getServiceInfo(serviceID));
+        NodeServiceInfo nodeServiceInfo = Convert2ServiceInfo.nodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfoByNodeID(serviceInfo.getNode()));
+        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+        factoryBean.setAddress(nodeServiceInfo.getServiceAddress());
+        factoryBean.setServiceClass(NodeWebService.class);
+        NodeWebService service = factoryBean.create(NodeWebService.class);
+        service.updateServiceName(name,serviceID);
+
+        for(NodeServiceListItem item : NodeMap.getNodeServiceInfo(nodeServiceInfo.getServiceAddress()).getServiceList()){
+            if (item.getId() == serviceID){
+                item.setName(name);
+            }
+        }
+        ServiceMap.getServiceInfo(serviceInfo.getServiceAddress()).setName(name);
     }
 }

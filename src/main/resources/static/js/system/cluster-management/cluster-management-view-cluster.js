@@ -113,8 +113,8 @@ function clusterManagementViewClusterRefresh(pageIndex) {
                     .append($("<td/>").html(data.data.list[i].attribute))
                     .append($("<td/>").html(data.data.list[i].nodeNumber))
                     .append($("<td/>").html(data.data.list[i].configuration))
-                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy年MM月dd日 hh:mm:ss")))
-                    .append($("<td/>").html(data.data.list[i].modifyTime))
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss")))
                     .append($("<td/>").html(data.data.list[i].state)).attr("cluster_id",data.data.list[i].id));
             }
             $("#cluster_management_view_cluster_pagination").html("");
@@ -225,20 +225,20 @@ function clusterManagementViewClusterDetailLoad() {
 
     $("#main_content").html('');
     $("#main_content").html('<div class="row div-row">' +
-                 '集群<span id="cluster_management_cluster_span"></span>' + '  节点列表：' +
+                 '<label>集群 <label id="cluster_management_cluster_label"></label>' + '  节点列表：</label>' +
             '</div>' +
             '<div class="row div-row">' +
                 '<table id="cluster_management_view_node_table" class="table table-bordered table-hover table-responsive">' +
                     '<tr>' +
-                        '<th order="id" onclick="clusterManagementMaintainNodeRefreshOrder(this)">ID</th>' +
-                        '<th order="name" onclick="clusterManagementMaintainNodeRefreshOrder(this)">名称</th>' +
-                        '<th order="attributes" onclick="clusterManagementMaintainNodeRefreshOrder(this)">属性</th>' +
-                        '<th order="service_number" onclick="clusterManagementMaintainNodeRefreshOrder(this)">服务个数</th>' +
-                        '<th order="position" onclick="clusterManagementMaintainNodeRefreshOrder(this)">坐标</th>' +
-                        '<th order="associated_nodes" onclick="clusterManagementMaintainNodeRefreshOrder(this)">关联节点</th>' +
-                        '<th order="level" onclick="clusterManagementMaintainNodeRefreshOrder(this)">等级</th>' +
-                        '<th order="create_time" onclick="clusterManagementMaintainNodeRefreshOrder(this)">创建时间</th>' +
-                        '<th order="modify_time" onclick="clusterManagementMaintainNodeRefreshOrder(this)">修改时间</th>' +
+                        '<th order="id" onclick="clusterManagementViewNodeOrder(this)">ID</th>' +
+                        '<th order="name" onclick="clusterManagementViewNodeOrder(this)">名称</th>' +
+                        '<th order="attributes" onclick="clusterManagementViewNodeOrder(this)">属性</th>' +
+                        '<th order="service_number" onclick="clusterManagementViewNodeOrder(this)">服务个数</th>' +
+                        '<th order="position" onclick="clusterManagementViewNodeOrder(this)">坐标</th>' +
+                        '<th order="associated_nodes" onclick="clusterManagementViewNodeOrder(this)">关联节点</th>' +
+                        '<th order="level" onclick="clusterManagementViewNodeOrder(this)">等级</th>' +
+                        '<th order="create_time" onclick="clusterManagementViewNodeOrder(this)">创建时间</th>' +
+                        '<th order="modify_time" onclick="clusterManagementViewNodeOrder(this)">修改时间</th>' +
                     '</tr>' +
                 '</table>' +
             '</div>' +
@@ -299,7 +299,7 @@ function clusterManagementViewClusterDetailLoad() {
             url: "/api/cluster/cluster_info",
             dataType: "json",
             success: function (data) {
-                $("#cluster_management_cluster_span").html(data.data.name);
+                $("#cluster_management_cluster_label").html(data.data.name);
             }
         });
 
@@ -311,7 +311,7 @@ function clusterManagementViewClusterDetailLoad() {
  * 排序
  * @param obj
  */
-function clusterManagementMaintainNodeRefreshOrder(obj) {
+function clusterManagementViewNodeOrder(obj) {
     cluster_management_view_node_orderBy = $(obj).attr("order");
     if(cluster_management_view_node_desc == "asc"){
         cluster_management_view_node_desc = "desc";
@@ -327,7 +327,7 @@ function clusterManagementMaintainNodeRefreshOrder(obj) {
 function clusterManagementViewClusterDetailRequest(pageNum) {
     $.ajax({
         type : "GET",
-        data : {"clusterID" : cluster_management_view_current_cluster, "pageNum":pageNum,"filter" : cluster_management_view_node_filter,"desc" : cluster_management_view_node_desc,"orderBy" : cluster_management_view_node_orderBy},
+        data : {"clusterID":cluster_management_view_current_cluster,"pageNum":pageNum,"filter" : cluster_management_view_node_filter,"desc" : cluster_management_view_node_desc,"orderBy" : cluster_management_view_node_orderBy},
         url  : "/api/node/node_list",
         dataType : "json",
         success : function (data) {
@@ -341,8 +341,8 @@ function clusterManagementViewClusterDetailRequest(pageNum) {
                     .append($("<td/>").html(data.data.list[i].position))
                     .append($("<td/>").html(data.data.list[i].associatedNodes))
                     .append($("<td/>").html(data.data.list[i].level))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("node_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("node_id",data.data.list[i].id));
             }
             $("#cluster_management_view_node_pagination").html("");
             if(data.data.isFirstPage){
@@ -512,8 +512,8 @@ function clusterManagementViewClusterServiceRequest(pageNum) {
                     .append($("<td/>").html(data.data.list[i].name))
                     .append($("<td/>").html(data.data.list[i].attributes))
                     .append($("<td/>").html(data.data.list[i].content))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("service_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("service_id",data.data.list[i].id));
             }
 
             $("#cluster_management_view_service_pagination").html("");

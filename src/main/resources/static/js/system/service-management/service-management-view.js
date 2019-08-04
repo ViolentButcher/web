@@ -92,8 +92,8 @@ function serviceManagementViewRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].cluster))
                     .append($("<td/>").html(data.data.list[i].node))
                     .append($("<td/>").html(data.data.list[i].content))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("service_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("service_id",data.data.list[i].id));
             }
 
             $("#service_management_view_pagination").html("");
@@ -125,7 +125,7 @@ function serviceManagementViewRefresh(pageNum) {
  * @param obj
  */
 function serviceManagementViewOrder(obj) {
-    service_management_standardization_orderBy = $(obj).attr("order");
+    service_management_view_orderBy = $(obj).attr("order");
     if(service_management_view_desc == "asc"){
         service_management_view_desc = "desc";
     }else {
