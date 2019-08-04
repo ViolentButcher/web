@@ -15,14 +15,14 @@ function serviceManagementMaintain() {
         '<div class="row div-row">' +
             '<table id="service_management_maintain_table" class="table-responsive table table-bordered table-hover">' +
                 '<tr>' +
-                    '<th>ID</th>' +
-                    '<th>名称</th>' +
-                    '<th>属性</th>' +
-                    '<th>所属集群</th>' +
-                    '<th>所属节点</th>' +
-                    '<th>内容</th>' +
-                    '<th>创建时间</th>' +
-                    '<th>修改时间</th>' +
+                    '<th order="id" onclick="serviceManagementMaintainOrder(this)">ID</th>' +
+                    '<th order="name" onclick="serviceManagementMaintainOrder(this)">名称</th>' +
+                    '<th order="attributes" onclick="serviceManagementMaintainOrder(this)">属性</th>' +
+                    '<th order="cluster" onclick="serviceManagementMaintainOrder(this)">所属集群</th>' +
+                    '<th order="node" onclick="serviceManagementMaintainOrder(this)">所属节点</th>' +
+                    '<th order="content" onclick="serviceManagementMaintainOrder(this)">内容</th>' +
+                    '<th order="create_time" onclick="serviceManagementMaintainOrder(this)">创建时间</th>' +
+                    '<th order="modify_time" onclick="serviceManagementMaintainOrder(this)">修改时间</th>' +
                 '</tr>' +
             '</table>' +
         '</div>' +
@@ -112,6 +112,20 @@ function serviceManagementMaintain() {
 
     //展示位置信息
     $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='serviceManagementMaintain()'/>").html(">> 服务维护"));
+}
+
+/**
+ * 排序
+ * @param obj
+ */
+function serviceManagementMaintainOrder(obj) {
+    service_management_maintain_orderBy = $(obj).attr("order");
+    if(service_management_maintain_desc == "asc"){
+        service_management_maintain_desc = "desc";
+    }else {
+        service_management_maintain_desc = "asc";
+    }
+    serviceManagementMaintainRefresh(1);
 }
 
 /**

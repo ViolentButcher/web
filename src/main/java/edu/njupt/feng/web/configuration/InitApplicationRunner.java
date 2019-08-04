@@ -18,9 +18,6 @@ public class InitApplicationRunner implements ApplicationRunner {
     @Autowired
     private ClusterManagement clusterManagement;
 
-    @Autowired
-    private ClusterService clusterService;
-
     /**
      * 完成初始化操作
      *      从数据库初始化、启动项目
@@ -28,7 +25,7 @@ public class InitApplicationRunner implements ApplicationRunner {
      * @throws Exception
      */
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-//        clusterManagement.init();
+    public void run(ApplicationArguments args){
+       clusterManagement.init();
     }
 }

@@ -1,6 +1,7 @@
 package edu.njupt.feng.web.management;
 
 import edu.njupt.feng.web.entity.Node;
+import edu.njupt.feng.web.entity.common.Position;
 import edu.njupt.feng.web.entity.common.ResultInfo;
 import edu.njupt.feng.web.entity.common.ResultInfoWithoutContent;
 import edu.njupt.feng.web.entity.database.NodeInfo;
@@ -118,6 +119,11 @@ public class NodeManagement {
         return testSearch(nodeId, keyword, type);
     }
 
+    /**
+     * 整合搜索结果
+     * @param results
+     * @return
+     */
     public ResultInfo addContent(ResultInfoWithoutContent results){
         List<ServiceServiceInfo> serviceInfos = new ArrayList<>();
         if (results.getResult() != null){
@@ -133,5 +139,45 @@ public class NodeManagement {
         return resultInfo;
     }
 
+    /**
+     * 更新节点名称
+     * @param name
+     * @param nodeID
+     */
+    public void updateNodeName(String name,int nodeID){
+        NodeServiceInfo nodeServiceInfo = Convert2ServiceInfo.nodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfoByNodeID(nodeID));
+        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+        factoryBean.setAddress(nodeServiceInfo.getServiceAddress());
+        factoryBean.setServiceClass(NodeWebService.class);
+        NodeWebService service = factoryBean.create(NodeWebService.class);
+        service.updateName(name);
+    }
 
+    /**
+     * 更新节点位置信息
+     * @param position
+     * @param nodeID
+     */
+    public void updateNodePosition(Position position, int nodeID){
+        NodeServiceInfo nodeServiceInfo = Convert2ServiceInfo.nodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfoByNodeID(nodeID));
+        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+        factoryBean.setAddress(nodeServiceInfo.getServiceAddress());
+        factoryBean.setServiceClass(NodeWebService.class);
+        NodeWebService service = factoryBean.create(NodeWebService.class);
+        service.updatePosition(position);
+    }
+
+    /**
+     * 更细节点属性
+     * @param attr
+     * @param nodeID
+     */
+    public void updateNodeAttributes(Map<String,String> attr,int nodeID){
+        NodeServiceInfo nodeServiceInfo = Convert2ServiceInfo.nodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfoByNodeID(nodeID));
+        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+        factoryBean.setAddress(nodeServiceInfo.getServiceAddress());
+        factoryBean.setServiceClass(NodeWebService.class);
+        NodeWebService service = factoryBean.create(NodeWebService.class);
+        service.updateNodeAttributes(attr);
+    }
 }

@@ -21,15 +21,15 @@ function nodeManagementViewNode() {
         '<div class="row div-row">' +
             '<table id="node_management_view_node_table" class="table table-bordered table-hover table-responsive">' +
                 '<tr>' +
-                    '<th>ID</th>' +
-                    '<th>名称</th>' +
-                    '<th>服务个数</th>' +
-                    '<th>坐标</th>' +
-                    '<th>所属集群</th>' +
-                    '<th>关联节点</th>' +
-                    '<th>等级</th>' +
-                    '<th>创建时间</th>' +
-                    '<th>修改时间</th>' +
+                    '<th order="id" onclick="nodeManagementViewNodeOrder(this)">ID</th>' +
+                    '<th order="name" onclick="nodeManagementViewNodeOrder(this)">名称</th>' +
+                    '<th order="service_number" onclick="nodeManagementViewNodeOrder(this)">服务个数</th>' +
+                    '<th order="position" onclick="nodeManagementViewNodeOrder(this)">坐标</th>' +
+                    '<th order="cluster" onclick="nodeManagementViewNodeOrder(this)">所属集群</th>' +
+                    '<th order="associated_nodes" onclick="nodeManagementViewNodeOrder(this)">关联节点</th>' +
+                    '<th order="level" onclick="nodeManagementViewNodeOrder(this)">等级</th>' +
+                    '<th order="create_time" onclick="nodeManagementViewNodeOrder(this)">创建时间</th>' +
+                    '<th order="modify_time" onclick="nodeManagementViewNodeOrder(this)">修改时间</th>' +
                 '</tr>' +
             '</table>' +
         '</div>' +
@@ -78,6 +78,20 @@ function nodeManagementViewNode() {
 
     //展示位置信息
     $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNode()'/>").html(">> 节点浏览"));
+}
+
+/**
+ * 排序
+ * @param obj
+ */
+function nodeManagementViewNodeOrder(obj) {
+    node_management_view_node_orderBy = $(obj).attr("order");
+    if(node_management_view_node_desc == "asc"){
+        node_management_view_node_desc = "desc";
+    }else {
+        node_management_view_node_desc = "asc";
+    }
+    nodeManagementViewRefresh(1);
 }
 
 /**
@@ -195,14 +209,14 @@ function nodeManagementViewNodeDetailLoad() {
         '<div class="row div-row">' +
             '<table id="node_management_view_service_table" class="table table-bordered table-hover table-responsive">' +
                 '<tr>' +
-                    '<th>ID</th>' +
-                    '<th>名称</th>' +
-                    '<th>属性</th>' +
-                    '<th>所属集群</th>' +
-                    '<th>所属节点</th>' +
-                    '<th>内容</th>' +
-                    '<th>创建时间</th>' +
-                    '<th>修改时间</th>' +
+                    '<th order="id" onclick="nodeManagementViewServiceOrder(this)">ID</th>' +
+                    '<th order="name" onclick="nodeManagementViewServiceOrder(this)">名称</th>' +
+                    '<th order="attributes" onclick="nodeManagementViewServiceOrder(this)">属性</th>' +
+                    '<th order="node" onclick="nodeManagementViewServiceOrder(this)">所属集群</th>' +
+                    '<th order="cluster" onclick="nodeManagementViewServiceOrder(this)">所属节点</th>' +
+                    '<th order="content" onclick="nodeManagementViewServiceOrder(this)">内容</th>' +
+                    '<th order="create_time" onclick="nodeManagementViewServiceOrder(this)">创建时间</th>' +
+                    '<th order="modify_time" onclick="nodeManagementViewServiceOrder(this)">修改时间</th>' +
                 '</tr>' +
             '</table>' +
         '</div>' +
@@ -249,6 +263,20 @@ function nodeManagementViewNodeDetailLoad() {
     //展示位置信息
     $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNode()'/>").html(">> 节点浏览")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementViewNodeDetailLoad()'/>").html(">> 服务浏览"));
 
+    nodeManagementViewServiceRefresh(1);
+}
+
+/**
+ * 排序
+ * @param obj
+ */
+function nodeManagementViewServiceOrder(obj) {
+    node_management_view_service_orderBy = $(obj).attr("order");
+    if(node_management_view_service_desc == "asc"){
+        node_management_view_service_desc = "desc";
+    }else {
+        node_management_view_service_desc = "asc";
+    }
     nodeManagementViewServiceRefresh(1);
 }
 
