@@ -21,16 +21,16 @@ function nodeManagementMaintain() {
         '<div class="row div-row">' +
             '<table id="node_management_maintain_node_table" class="table table-bordered table-hover table-responsive">' +
                 '<tr>' +
-                    '<th>ID</th>' +
-                    '<th>名称</th>' +
-                    '<th>属性</th>' +
-                    '<th>服务个数</th>' +
-                    '<th>坐标</th>' +
-                    '<th>所属集群</th>' +
-                    '<th>关联节点</th>' +
-                    '<th>等级</th>' +
-                    '<th>创建时间</th>' +
-                    '<th>修改时间</th>' +
+                    '<th order="id" onclick="nodeManagementMaintainNodeOrder(this)">ID</th>' +
+                    '<th order="name" onclick="nodeManagementMaintainNodeOrder(this)">名称</th>' +
+                    '<th order="attributes" onclick="nodeManagementMaintainNodeOrder(this)">属性</th>' +
+                    '<th order="service_number" onclick="nodeManagementMaintainNodeOrder(this)">服务个数</th>' +
+                    '<th order="position" onclick="nodeManagementMaintainNodeOrder(this)">坐标</th>' +
+                    '<th order="cluster" onclick="nodeManagementMaintainNodeOrder(this)">所属集群</th>' +
+                    '<th order="associated_nodes" onclick="nodeManagementMaintainNodeOrder(this)">关联节点</th>' +
+                    '<th order="level" onclick="nodeManagementMaintainNodeOrder(this)">等级</th>' +
+                    '<th order="create_time" onclick="nodeManagementMaintainNodeOrder(this)">创建时间</th>' +
+                    '<th order="modify_time" onclick="nodeManagementMaintainNodeOrder(this)">修改时间</th>' +
                 '</tr>' +
             '</table>' +
         '</div>' +
@@ -117,6 +117,20 @@ function nodeManagementMaintain() {
 }
 
 /**
+ * 排序
+ * @param obj
+ */
+function nodeManagementMaintainNodeOrder(obj) {
+    node_management_maintain_node_orderBy = $(obj).attr("order");
+    if(node_management_maintain_node_desc == "asc"){
+        node_management_maintain_node_desc = "desc";
+    }else {
+        node_management_maintain_node_desc = "asc";
+    }
+    nodeManagementMaintainNodeRequest(1);
+}
+
+/**
  * 节点添加
  */
 function nodeManagementMaintainNodeAdd() {
@@ -173,8 +187,8 @@ function nodeManagementMaintainNodeRequest(pageNum) {
                     .append($("<td/>").html(data.data.list[i].cluster))
                     .append($("<td/>").html(data.data.list[i].associatedNodes))
                     .append($("<td/>").html(data.data.list[i].level))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("node_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("node_id",data.data.list[i].id));
             }
             $("#node_management_maintain_node_pagination").html("");
             if(data.data.isFirstPage){
@@ -260,6 +274,9 @@ function nodeManagementMaintainNodeDetail() {
     }
 }
 
+/**
+ * 服务详情页面加载
+ */
 function nodeManagementMaintainNodeDetailLoad() {
 
     node_management_maintain_service_filter = null;
@@ -271,14 +288,14 @@ function nodeManagementMaintainNodeDetailLoad() {
         '<div class="row div-row">' +
             '<table id="node_management_maintain_service_table" class="table table-bordered table-hover table-responsive">' +
                 '<tr>' +
-                    '<th>ID</th>' +
-                    '<th>名称</th>' +
-                    '<th>属性</th>' +
-                    '<th>所属集群</th>' +
-                    '<th>所属节点</th>' +
-                    '<th>内容</th>' +
-                    '<th>创建时间</th>' +
-                    '<th>修改时间</th>' +
+                    '<th order="id" onclick="nodeManagementMaintainServiceOrder(this)">ID</th>' +
+                    '<th order="name" onclick="nodeManagementMaintainServiceOrder(this)">名称</th>' +
+                    '<th order="attributes" onclick="nodeManagementMaintainServiceOrder(this)">属性</th>' +
+                    '<th order="node" onclick="nodeManagementMaintainServiceOrder(this)">所属集群</th>' +
+                    '<th order="cluster" onclick="nodeManagementMaintainServiceOrder(this)">所属节点</th>' +
+                    '<th order="content" onclick="nodeManagementMaintainServiceOrder(this)">内容</th>' +
+                    '<th order="create_time" onclick="nodeManagementMaintainServiceOrder(this)">创建时间</th>' +
+                    '<th order="modify_time" onclick="nodeManagementMaintainServiceOrder(this)">修改时间</th>' +
                 '</tr>' +
             '</table>' +
         '</div>' +
@@ -327,6 +344,20 @@ function nodeManagementMaintainNodeDetailLoad() {
 }
 
 /**
+ * 排序
+ * @param obj
+ */
+function nodeManagementMaintainServiceOrder(obj) {
+    node_management_maintain_service_orderBy = $(obj).attr("order");
+    if(node_management_maintain_service_desc == "asc"){
+        node_management_maintain_service_desc = "desc";
+    }else {
+        node_management_maintain_service_desc = "asc";
+    }
+    nodeManagementMaintainServiceRefresh(1);
+}
+
+/**
  * 服务节点的刷新
  */
 function nodeManagementMaintainServiceRefresh(pageNum) {
@@ -342,9 +373,11 @@ function nodeManagementMaintainServiceRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].id))
                     .append($("<td/>").html(data.data.list[i].name))
                     .append($("<td/>").html(data.data.list[i].attributes))
+                    .append($("<td/>").html(data.data.list[i].cluster))
+                    .append($("<td/>").html(data.data.list[i].node))
                     .append($("<td/>").html(data.data.list[i].content))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("service_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("service_id",data.data.list[i].id));
             }
 
             $("#node_management_maintain_service_pagination").html("");

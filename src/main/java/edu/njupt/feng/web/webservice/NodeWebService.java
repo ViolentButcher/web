@@ -1,8 +1,10 @@
 package edu.njupt.feng.web.webservice;
 
 import edu.njupt.feng.web.entity.common.NodeMapItem;
+import edu.njupt.feng.web.entity.common.Position;
 import edu.njupt.feng.web.entity.common.ResultInfoWithoutContent;
 import edu.njupt.feng.web.entity.database.NodeInfo;
+import edu.njupt.feng.web.entity.database.ServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceListItem;
 import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
@@ -13,6 +15,32 @@ import java.util.Map;
 
 @WebService
 public interface NodeWebService {
+
+    /**
+     * 更新节点称
+     * @param name
+     */
+    public void updateName(String name);
+
+    /**
+     * 更新所属服务名称
+     * @param name
+     * @param serviceID
+     */
+    public void updateServiceName(String name,int serviceID);
+
+
+    /**
+     * 更新节点坐标
+     * @param position
+     */
+    public void updatePosition(Position position);
+
+    /**
+     * 添加服务
+     * @param serviceInfo
+     */
+    public void addService(ServiceInfo serviceInfo);
 
     /**
      * 设置节点信息

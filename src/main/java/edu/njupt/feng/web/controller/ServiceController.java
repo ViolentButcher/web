@@ -24,21 +24,21 @@ public class ServiceController {
      * 显示所有节点的信息
      * @param pageNum
      * @param filter
-     * @param order
+     * @param orderBy
      * @param desc
      * @return
      */
     @RequestMapping("/api/service/service_list_all")
-    public JsonData getAllServiceList(@RequestParam(defaultValue = "1")Integer pageNum, String filter, @RequestParam(defaultValue = "id")String order, @RequestParam(defaultValue = "asc")String desc){
+    public JsonData getAllServiceList(@RequestParam(defaultValue = "1")Integer pageNum, String filter, @RequestParam(defaultValue = "id")String orderBy, @RequestParam(defaultValue = "asc")String desc){
         JsonData data = new JsonData();
-        data.setData(serviceService.getAllServicesList(pageNum, filter, order, desc));
+        data.setData(serviceService.getAllServicesList(pageNum, filter, orderBy, desc));
         return data;
     }
 
     @RequestMapping("/api/service/service_list")
-    public JsonData getServiceList(Integer nodeID,@RequestParam(defaultValue = "1")Integer pageNum, String filter, @RequestParam(defaultValue = "id")String order, @RequestParam(defaultValue = "asc")String desc){
+    public JsonData getServiceList(Integer nodeID,@RequestParam(defaultValue = "1")Integer pageNum, String filter, @RequestParam(defaultValue = "id")String orderBy, @RequestParam(defaultValue = "asc")String desc){
         JsonData data = new JsonData();
-        data.setData(serviceService.getServiceListWithParams(nodeID, pageNum, filter, order, desc));
+        data.setData(serviceService.getServiceListWithParams(nodeID, pageNum, filter, orderBy, desc));
         return data;
     }
 

@@ -15,14 +15,14 @@ function serviceManagementView(){
         '<div class="row div-row">' +
             '<table id="service_management_view_table" class="table table-bordered table-hover table-responsive">' +
             '<tr>' +
-                '<th>ID</th>' +
-                '<th>名称</th>' +
-                '<th>属性</th>' +
-                '<th>所属集群</th>' +
-                '<th>所属节点</th>' +
-                '<th>内容</th>' +
-                '<th>创建时间</th>' +
-                '<th>修改时间</th>' +
+                '<th order="id" onclick="serviceManagementViewOrder(this)">ID</th>' +
+                '<th order="name" onclick="serviceManagementViewOrder(this)">名称</th>' +
+                '<th order="attributes" onclick="serviceManagementViewOrder(this)">属性</th>' +
+                '<th order="cluster" onclick="serviceManagementViewOrder(this)">所属集群</th>' +
+                '<th order="node" onclick="serviceManagementViewOrder(this)">所属节点</th>' +
+                '<th order="content" onclick="serviceManagementViewOrder(this)">内容</th>' +
+                '<th order="create_time" onclick="serviceManagementViewOrder(this)">创建时间</th>' +
+                '<th order="modify_time" onclick="serviceManagementViewOrder(this)">修改时间</th>' +
             '</tr>' +
             '</table>' +
         '</div>' +
@@ -92,8 +92,8 @@ function serviceManagementViewRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].cluster))
                     .append($("<td/>").html(data.data.list[i].node))
                     .append($("<td/>").html(data.data.list[i].content))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("service_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("service_id",data.data.list[i].id));
             }
 
             $("#service_management_view_pagination").html("");
@@ -118,6 +118,20 @@ function serviceManagementViewRefresh(pageNum) {
             }
         }
     });
+}
+
+/**
+ * 排序
+ * @param obj
+ */
+function serviceManagementViewOrder(obj) {
+    service_management_view_orderBy = $(obj).attr("order");
+    if(service_management_view_desc == "asc"){
+        service_management_view_desc = "desc";
+    }else {
+        service_management_view_desc = "asc";
+    }
+    serviceManagementViewRefresh(1);
 }
 
 /**

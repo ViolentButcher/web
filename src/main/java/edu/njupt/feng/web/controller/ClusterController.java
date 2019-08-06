@@ -27,9 +27,9 @@ public class ClusterController {
      * @return
      */
     @RequestMapping("/api/cluster/cluster_list")
-    public JsonData getClusterList(@RequestParam(defaultValue = "1")Integer pageNum, String filter,@RequestParam(defaultValue = "id")String order,@RequestParam(defaultValue = "asc")String desc){
+    public JsonData getClusterList(@RequestParam(defaultValue = "1")Integer pageNum, String filter,@RequestParam(defaultValue = "id")String orderBy,@RequestParam(defaultValue = "asc")String desc){
         JsonData data = new JsonData();
-        data.setData(clusterService.getClusterInfoList(pageNum,filter,order,desc));
+        data.setData(clusterService.getClusterInfoList(pageNum,filter,orderBy,desc));
         return data;
     }
 

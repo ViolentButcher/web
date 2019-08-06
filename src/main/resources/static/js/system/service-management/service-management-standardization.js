@@ -32,11 +32,11 @@ function serviceManagementStandardization() {
             '<div class="row div-row">' +
                 '<table id="service_management_standardization_table" class="table-responsive table table-bordered table-hover">' +
                     '<tr>' +
-                        '<th>ID</th>' +
-                        '<th>名称</th>' +
-                        '<th>内容</th>' +
-                        '<th>创建时间</th>' +
-                        '<th>修改时间</th>' +
+                        '<th order="id" onclick="serviceManagementStandardizationOrder(this)">ID</th>' +
+                        '<th order="name" onclick="serviceManagementStandardizationOrder(this)">名称</th>' +
+                        '<th order="content" onclick="serviceManagementStandardizationOrder(this)">内容</th>' +
+                        '<th order="create_time" onclick="serviceManagementStandardizationOrder(this)">创建时间</th>' +
+                        '<th order="modify_time" onclick="serviceManagementStandardizationOrder(this)">修改时间</th>' +
                         '<th>是否要标准化</th>' +
                     '</tr>' +
                 '</table>' +
@@ -78,6 +78,23 @@ function serviceManagementStandardization() {
     serviceManagementStandardizationRefresh(1);
 }
 
+/**
+ * 排序
+ * @param obj
+ */
+function serviceManagementStandardizationOrder(obj) {
+    service_management_standardization_orderBy = $(obj).attr("order");
+    if(service_management_standardization_desc == "asc"){
+        service_management_standardization_desc = "desc";
+    }else {
+        service_management_standardization_desc = "asc";
+    }
+    serviceManagementStandardizationRefresh(1);
+}
+
+/**
+ * 服务刷新按钮
+ */
 function serviceManagementStandardizationRefreshButton() {
 
     selected_service_list = new Array();
@@ -108,7 +125,7 @@ function serviceManagementStandardizationRefresh(pageNum) {
                         .append($("<td/>").html(data.data.list[i].id))
                         .append($("<td/>").html(data.data.list[i].name))
                         .append($("<td/>").html(data.data.list[i].content))
-                        .append($("<td/>").html(data.data.list[i].createTime))
+                        .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
                         .append($("<td/>").html(data.data.list[i].modifyTime))
                         .append($("<td/>").append($("<input type='checkbox' name='standardization_checkbox'onclick='standardizationCheckboxChoose(this)' checked='checked'>").attr("value",data.data.list[i].id))).attr("service_id",data.data.list[i].id));
                 }else {
@@ -116,8 +133,8 @@ function serviceManagementStandardizationRefresh(pageNum) {
                         .append($("<td/>").html(data.data.list[i].id))
                         .append($("<td/>").html(data.data.list[i].name))
                         .append($("<td/>").html(data.data.list[i].content))
-                        .append($("<td/>").html(data.data.list[i].createTime))
-                        .append($("<td/>").html(data.data.list[i].modifyTime))
+                        .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                        .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss")))
                         .append($("<td/>").append(($("<input type='checkbox' name='standardization_checkbox'onclick='standardizationCheckboxChoose(this)'>").attr("value",data.data.list[i].id)))).attr("service_id",data.data.list[i].id));
                 }
 

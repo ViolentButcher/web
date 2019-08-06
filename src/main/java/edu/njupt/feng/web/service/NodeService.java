@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import edu.njupt.feng.web.entity.common.AssociatedNodeInfo;
 import edu.njupt.feng.web.entity.common.Position;
 import edu.njupt.feng.web.entity.database.NodeInfo;
+import edu.njupt.feng.web.entity.database.ServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,6 @@ import java.util.Map;
  */
 @Service
 public interface NodeService {
-
     /**
      * 更新节点关联节点属性
      * @param nodeID

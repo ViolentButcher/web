@@ -27,7 +27,7 @@ function clusterManagementMaintain() {
     $("#location").html('');
     $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='clusterManagementMaintain()'/>").html(">> 集群维护"));
     $("#main_content").append($("<div class='row div-row'/>").append($("<table id='cluster_management_maintain_cluster_table' class='table table-bordered table-responsive'/>")
-        .append($("<tr/>").append($("<th/>").html("ID")).append($("<th/>").html("名称")).append($("<th/>").html("属性")).append($("<th/>").html("节点个数")).append($("<th/>").html("节点关系配置")).append($("<th/>").html("创建时间")).append($("<th/>").html("修改时间")).append($("<th/>").html("节点加载状态")))));
+        .append($("<tr/>").append($("<th order='id' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("ID")).append($("<th order='name' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("名称")).append($("<th order='attribute' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("属性")).append($("<th  order='node_number' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("节点个数")).append($("<th  order='configuration' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("节点关系配置")).append($("<th  order='create_time' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("创建时间")).append($("<th  order='modify_time' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("修改时间")).append($("<th  order='state' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("节点加载状态")))));
 
     $("#main_content").append($("<div class='row div-row'/>")
         .html('<label for="cluster_management_maintain_cluster_filter_label">当前筛选条件：</label>' +
@@ -85,10 +85,23 @@ function clusterManagementMaintain() {
 }
 
 /**
+ * 排序
+ * @param obj
+ */
+function clusterManagementMaintainClusterOrder(obj) {
+    cluster_management_maintain_cluster_orderBy = $(obj).attr("order");
+    if(cluster_management_maintain_cluster_desc == "asc"){
+        cluster_management_maintain_cluster_desc = "desc";
+    }else {
+        cluster_management_maintain_cluster_desc = "asc";
+    }
+    clusterManagementMaintainClusterRefresh(1);
+}
+
+/**
  * 集群列表刷新
  */
 function clusterManagementMaintainClusterRefresh(pageNum) {
-
     $.ajax({
         type : "GET",
         url  : "/api/cluster/cluster_list",
@@ -109,8 +122,8 @@ function clusterManagementMaintainClusterRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].attribute))
                     .append($("<td/>").html(data.data.list[i].nodeNumber))
                     .append($("<td/>").html(data.data.list[i].configuration))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime))
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss")))
                     .append($("<td/>").html(data.data.list[i].state)).attr("cluster_id",data.data.list[i].id));
             }
 
@@ -118,21 +131,21 @@ function clusterManagementMaintainClusterRefresh(pageNum) {
             if(data.data.isFirstPage){
                 $("#cluster_management_maintain_cluster_pagination").append($("<li class='disabled'/>").append($("<span aria-label='Previous'/>").append($("<span/>").html("&laquo;"))));
             }else {
-                $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span aria-label='Previous' onclick='clusterManagementViewClusterDetailRequest(" + cluster_management_view_current_cluster + "," + data.data.prePage + ")'/>").append($("<span/>").html("&laquo;"))));
+                $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span aria-label='Previous' onclick='clusterManagementMaintainClusterRefresh(" + data.data.prePage + ")'/>").append($("<span/>").html("&laquo;"))));
             }
 
             for(var index=0;index < data.data.navigatepageNums.length;index++){
                 if(data.data.navigatepageNums[index] != data.data.pageNum){
-                    $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span onclick='clusterManagementViewClusterDetailRequest(" + cluster_management_view_current_cluster + "," + data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
+                    $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span onclick='clusterManagementMaintainClusterRefresh(" + data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
                 }else {
-                    $("#cluster_management_maintain_cluster_pagination").append($("<li class='active'/>").append($("<span onclick='clusterManagementViewClusterDetailRequest(" + cluster_management_view_current_cluster + "," + data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
+                    $("#cluster_management_maintain_cluster_pagination").append($("<li class='active'/>").append($("<span onclick='clusterManagementMaintainClusterRefresh("+ data.data.navigatepageNums[index] + ")'/>").append($("<span/>").html(data.data.navigatepageNums[index]))));
                 }
             }
 
             if(data.data.isLastPage){
                 $("#cluster_management_maintain_cluster_pagination").append($("<li class='disabled'/>").append($("<span aria-label='Next'/>").append($("<span/>").html("&raquo;"))));
             }else {
-                $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span aria-label='Next' onclick='clusterManagementViewClusterDetailRequest(" + cluster_management_view_current_cluster + "," + data.data.nextPage + ")'/>").append($("<span/>").html("&raquo;"))));
+                $("#cluster_management_maintain_cluster_pagination").append($("<li/>").append($("<span aria-label='Next' onclick='clusterManagementMaintainClusterRefresh("+ data.data.nextPage + ")'/>").append($("<span/>").html("&raquo;"))));
             }
         }
     });
@@ -260,7 +273,7 @@ function clusterManagementMaintainConfigureLoad(){
         .append($("<div class='div-row row'/>").append($("<label/>").html("当前集群配置规则：")).append($("<label id='cluster_management_maintain_node_cluster_rule'/>").html("无")));
 
     $("#main_content").append($("<div class='row div-row'/>").append($("<table id='cluster_management_maintain_configuration_node_table' class='table table-bordered table-responsive'/>")
-        .append($("<tr/>").append($("<th/>").html("ID")).append($("<th/>").html("名称")).append($("<th/>").html("属性")).append($("<th/>").html("服务个数")).append($("<th/>").html("坐标")).append($("<th/>").html("关联节点")).append($("<th/>").html("等级")).append($("<th/>").html("创建时间")).append($("<th/>").html("修改时间")))));
+        .append($("<tr/>").append($("<th order='id' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("ID")).append($("<th order='name' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("名称")).append($("<th order='attributes' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("属性")).append($("<th order='service_number' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("服务个数")).append($("<th order='position' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("坐标")).append($("<th order='associated_nodes' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("关联节点")).append($("<th order='level' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("等级")).append($("<th order='create_time' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("创建时间")).append($("<th order='modify_time' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("修改时间")))));
 
     $("#main_content").append($("<div class='row div-row'/>").append($("<label/>").html("当前筛选条件：")).append("<label id='cluster_management_maintain_node_filter_show'>"));
 
@@ -304,6 +317,35 @@ function clusterManagementMaintainConfigureLoad(){
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='clusterManagementMaintainNodeAutoConfigureAssociatedNode()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
+
+    clusterManagementMaintainNodeRefresh(1);
+
+    $.ajax({
+        type: "GET",
+        data: {
+            "clusterID": cluster_management_maintain_configure_cluster,
+        },
+        url: "/api/cluster/cluster_info",
+        dataType: "json",
+        success: function (data) {
+            $("#cluster_management_maintain_node_cluster_name").html(data.data.name);
+            $("#cluster_management_maintain_node_cluster_attr").html(data.data.attribute);
+            $("#cluster_management_maintain_node_cluster_rule").html(data.data.configuration);
+        }
+    });
+}
+
+/**
+ * 排序
+ * @param obj
+ */
+function clusterManagementMaintainNodeRefreshOrder(obj) {
+    cluster_management_maintain_node_orderBy = $(obj).attr("order");
+    if(cluster_management_maintain_node_desc == "asc"){
+        cluster_management_maintain_node_desc = "desc";
+    }else {
+        cluster_management_maintain_node_desc = "asc";
+    }
     clusterManagementMaintainNodeRefresh(1);
 }
 
@@ -328,8 +370,8 @@ function clusterManagementMaintainNodeRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].position))
                     .append($("<td/>").html(data.data.list[i].associatedNodes))
                     .append($("<td/>").html(data.data.list[i].level))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("node_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("node_id",data.data.list[i].id));
             }
             $("#cluster_management_maintain_node_pagination").html("");
             if(data.data.isFirstPage){
@@ -424,14 +466,14 @@ function clusterManagementMaintainNodeDetailLoad() {
         '<div class="row div-row">' +
             '<table id="cluster_management_maintain_service_table" class="table table-bordered table-hover table-responsive">' +
                 '<tr>' +
-                    '<th>ID</th>' +
-                    '<th>名称</th>' +
-                    '<th>属性</th>' +
-                    '<th>所属集群</th>' +
-                    '<th>所属节点</th>' +
-                    '<th>内容</th>' +
-                    '<th>创建时间</th>' +
-                    '<th>修改时间</th>' +
+                    '<th order="id" onclick="clusterManagementMaintainServiceOrder(this)">ID</th>' +
+                    '<th order="name" onclick="clusterManagementMaintainServiceOrder(this)">名称</th>' +
+                    '<th order="attributes" onclick="clusterManagementMaintainServiceOrder(this)">属性</th>' +
+                    '<th order="cluster" onclick="clusterManagementMaintainServiceOrder(this)">所属集群</th>' +
+                    '<th order="node" onclick="clusterManagementMaintainServiceOrder(this)">所属节点</th>' +
+                    '<th order="content" onclick="clusterManagementMaintainServiceOrder(this)">内容</th>' +
+                    '<th order="create_time" onclick="clusterManagementMaintainServiceOrder(this)">创建时间</th>' +
+                    '<th order="modify_time" onclick="clusterManagementMaintainServiceOrder(this)">修改时间</th>' +
                 '</tr>' +
             '</table>' +
         '</div>' +
@@ -481,6 +523,20 @@ function clusterManagementMaintainNodeDetailLoad() {
 }
 
 /**
+ * 排序
+ * @param obj
+ */
+function clusterManagementMaintainServiceOrder(obj) {
+    cluster_management_maintain_service_orderBy = $(obj).attr("order");
+    if(cluster_management_maintain_service_desc == "asc"){
+        cluster_management_maintain_service_desc = "desc";
+    }else {
+        cluster_management_maintain_service_desc = "asc";
+    }
+    clusterManagementMaintainServiceRefresh(1);
+}
+
+/**
  *
  * @param pageNum
  */
@@ -500,8 +556,8 @@ function clusterManagementMaintainServiceRefresh(pageNum) {
                     .append($("<td/>").html(data.data.list[i].cluster))
                     .append($("<td/>").html(data.data.list[i].node))
                     .append($("<td/>").html(data.data.list[i].content))
-                    .append($("<td/>").html(data.data.list[i].createTime))
-                    .append($("<td/>").html(data.data.list[i].modifyTime)).attr("service_id",data.data.list[i].id));
+                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
+                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("service_id",data.data.list[i].id));
             }
 
             $("#cluster_management_maintain_service_pagination").html("");

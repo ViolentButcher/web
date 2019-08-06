@@ -7,6 +7,8 @@ import edu.njupt.feng.web.entity.common.AssociatedNodeInfo;
 import edu.njupt.feng.web.entity.common.Position;
 import edu.njupt.feng.web.entity.database.NodeInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
+import edu.njupt.feng.web.management.ClusterManagement;
+import edu.njupt.feng.web.management.NodeManagement;
 import edu.njupt.feng.web.mapper.NodeMapper;
 import edu.njupt.feng.web.mapper.ServiceMapper;
 import edu.njupt.feng.web.service.NodeService;
@@ -26,6 +28,13 @@ public class NodeServiceImpl implements NodeService {
 
     @Autowired
     private ServiceMapper serviceMapper;
+
+    @Autowired
+    private ClusterManagement clusterManagement;
+
+
+    @Autowired
+    private NodeManagement nodeManagement;
 
     @Override
     public void updateAssoicatedNodes(Integer nodeID, List<AssociatedNodeInfo> associatedNodeInfos) {
@@ -48,6 +57,9 @@ public class NodeServiceImpl implements NodeService {
         }catch (Exception e){
 
         }
+        if(clusterManagement.nodeStart(nodeID)){
+            nodeManagement.updateNodeAttributes(attributes,nodeID);
+        }
     }
 
     @Override
@@ -57,6 +69,9 @@ public class NodeServiceImpl implements NodeService {
             nodeMapper.updatePosition(mapper.writeValueAsString(position),nodeID);
         }catch (Exception e){
 
+        }
+        if(clusterManagement.nodeStart(nodeID)){
+            nodeManagement.updateNodePosition(position,nodeID);
         }
     }
 
