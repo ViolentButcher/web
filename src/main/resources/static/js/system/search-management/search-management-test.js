@@ -83,12 +83,12 @@ function testSearch() {
                     for (var i=0;i<data.data.result.length;i++){
                         $("#search_result").append($("<tr/>")
                             .append($("<td/>").html("id:" + data.data.result[i].id
-                                                + "\nattributes:" + data.data.result[i].attributes
-                                                + "\nnode:" + data.data.result[i].node
-                                                + "\ncluster:" + data.data.result[i].cluster
-                                                + "\ncontent:" + data.data.result[i].content
-                                                + "\ncreateTime:" + data.data.result[i].createTime
-                                                + "\nmodifyTime:" + data.data.result[i].modifyTime)));
+                                                + "<br>attributes:" + data.data.result[i].attributes
+                                                + "<br>node:" + data.data.result[i].node
+                                                + "<br>cluster:" + data.data.result[i].cluster
+                                                + "<br>content:" + data.data.result[i].content
+                                                + "<br>createTime:" + new Date(data.data.result[i].createTime).Format("yyyy-MM-dd hh:mm:ss")
+                                                + "<br>modifyTime:" + new Date(data.data.result[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))));
                     }
                     $("#search_cost").html(data.data.costTime);
                 }

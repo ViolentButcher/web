@@ -3,13 +3,16 @@ package edu.njupt.feng.web.webservice.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.njupt.feng.web.entity.common.AssociatedNodeServiceInfo;
 import edu.njupt.feng.web.entity.common.NodeMapItem;
+import edu.njupt.feng.web.entity.common.Position;
 import edu.njupt.feng.web.entity.common.ResultInfoWithoutContent;
+import edu.njupt.feng.web.entity.database.ServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceListItem;
 import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
 import edu.njupt.feng.web.management.NodeMap;
 import edu.njupt.feng.web.management.ServiceMap;
 import edu.njupt.feng.web.utils.constants.Constants;
+import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
 import edu.njupt.feng.web.utils.mysql.MySQLUtil;
 import edu.njupt.feng.web.webservice.NodeWebService;
 import edu.njupt.feng.web.webservice.ServiceWebService;
@@ -25,6 +28,43 @@ public class NodeWebServiceImpl implements NodeWebService {
     private NodeServiceInfo nodeServiceInfo;
 
     private Map<Integer,NodeServiceListItem> serviceInfoList = new HashMap<>();
+
+    /**
+     * 更新节点名称
+     * @param name
+     */
+    @Override
+    public void updateName(String name) {
+        nodeServiceInfo.setName(name);
+    }
+
+    /**
+     * 更新所属服务的名称
+     * @param name
+     * @param serviceID
+     */
+    @Override
+    public void updateServiceName(String name,int serviceID) {
+        serviceInfoList.get(serviceID).setName(name);
+    }
+
+    /**
+     * 更新节点位置
+     * @param position
+     */
+    @Override
+    public void updatePosition(Position position) {
+        nodeServiceInfo.setPosition(position);
+    }
+
+    /**
+     * 添加服务
+     * @param serviceInfo
+     */
+    @Override
+    public void addService(ServiceInfo serviceInfo) {
+        serviceInfoList.put(serviceInfo.getId(), Convert2ServiceInfo.serviceInfo2NodeServiceListItem(serviceInfo));
+    }
 
     /**
      * 设置节点信息
