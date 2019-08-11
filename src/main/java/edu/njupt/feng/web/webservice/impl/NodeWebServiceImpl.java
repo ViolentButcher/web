@@ -19,12 +19,13 @@ import edu.njupt.feng.web.webservice.NodeWebService;
 import edu.njupt.feng.web.webservice.ServiceWebService;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import feng.util;
-
+import feng.pre;
 
 
 public class NodeWebServiceImpl implements NodeWebService {
@@ -228,6 +229,8 @@ public class NodeWebServiceImpl implements NodeWebService {
                 service_item.getAttributes().put("temp_Nextlist","");
                 updateServiceAttributes(service_item.getAttributes(),service_item.getId());
             }
+            System.out.println("初始化attributes中的————temp_Nextlist:[{},{},~~~]");
+
             //用于存储所有服务的邻接表 service：service邻接表
             //service邻接表格式：ArrayList<Map<String,String>>
             //Map<String,String>———— "id":id,"Sim":sim
@@ -241,6 +244,7 @@ public class NodeWebServiceImpl implements NodeWebService {
             //计算Sim
             for(NodeServiceListItem service_item : serviceInfoList.values())
             {
+                System.out.println("计算"+service_item.getId()+"的Sim，寻找邻接顶点");
                 int id=service_item.getId();
                 float[] vec=util.String_2_floatList(service_item.getAttributes().get("vec"));
                 for(NodeServiceListItem service_item_2 : serviceInfoList.values())
@@ -271,8 +275,11 @@ public class NodeWebServiceImpl implements NodeWebService {
             Gson gson=new Gson();
             //对L中的所有邻接表添加到相应service的attributes中。
             for(NodeServiceListItem service_item : serviceInfoList.values()){
+                System.out.println("更新"+service_item.getId()+"的attributes");
                 service_item.getAttributes().put("temp_Nextlist",gson.toJson(L.get(service_item)));
-                updateServiceAttributes(service_item.getAttributes(),service_item.getId());
+                //updateServiceAttributes(service_item.getAttributes(),service_item.getId());
+                Connection con=pre.Con();
+                pre.upData(con,service_item.getId(),gson.toJson(service_item.getAttributes()));
             }
         }
         return resultInfoWithoutContent;
