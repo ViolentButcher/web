@@ -181,7 +181,7 @@ function nodeManagementMaintainNodeRequest(pageNum) {
                 $("#node_management_maintain_node_table").append($("<tr onclick='nodeManagementMaintainNodeTRClick(this)'/>")
                     .append($("<td/>").html(data.data.list[i].id))
                     .append($("<td/>").html(data.data.list[i].name))
-                    .append($("<td/>").html(data.data.list[i].attrs))
+                    .append($("<td/>").html(data.data.list[i].attributes))
                     .append($("<td/>").html(data.data.list[i].serviceNumber))
                     .append($("<td/>").html(data.data.list[i].position))
                     .append($("<td/>").html(data.data.list[i].cluster))
