@@ -32,6 +32,13 @@ public interface NodeService {
     public void updateAttributes(Map<String,String> attributes, Integer nodeID);
 
     /**
+     * 更新节点名称
+     * @param name
+     * @param nodeID
+     */
+    public void updateName(String name,Integer nodeID);
+
+    /**
      * 更新节点位置
      * @param position
      * @param nodeID

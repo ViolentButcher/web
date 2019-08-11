@@ -2,9 +2,14 @@ package edu.njupt.feng.web.controller;
 
 import edu.njupt.feng.web.entity.common.JsonData;
 import edu.njupt.feng.web.management.NodeManagement;
+import edu.njupt.feng.web.webservice.NodeWebService;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -27,5 +32,23 @@ public class TestController {
         return data;
     }
 
+    @RequestMapping("/test/api/update")
+    public JsonData testUpdate(){
+        JsonData data = new JsonData();
+
+        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+        factoryBean.setAddress("http://localhost:8081/node105");
+        factoryBean.setServiceClass(NodeWebService.class);
+        NodeWebService service = factoryBean.create(NodeWebService.class);
+
+        Map<String,String> attr = service.getNodeInfo().getAttributes();
+        if(attr == null){
+            attr = new HashMap<>();
+        }
+        attr.put("test1","test1");
+        service.updateNodeAttributes(attr);
+
+        return data;
+    }
 
 }
