@@ -116,7 +116,18 @@ public class NodeManagement {
      * @return
      */
     public ResultInfo testRecommend(Integer nodeId,String keyword,Integer type){
-        return testSearch(nodeId, keyword, type);
+        if(nodeServices.get(nodeId) != null){
+            JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+
+            factoryBean.setServiceClass(NodeWebService.class);
+            factoryBean.setAddress(nodeServices.get(nodeId).getServiceAddress());
+            NodeWebService service = factoryBean.create(NodeWebService.class);
+            CXFClientUtil.configTimeout(service);
+            ResultInfoWithoutContent results = service.testRecommend(keyword,type);
+
+            return addContent(results);
+        }
+        return null;
     }
 
     /**

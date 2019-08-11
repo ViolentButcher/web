@@ -31,19 +31,6 @@ public interface ClusterService {
     public PageInfo getClusterNodeList(int clusterID,int pageNum);
 
     /**
-     * 加载集群
-     * @param clusterID
-     */
-    public boolean loadCluster(int clusterID);
-
-    /**
-     * 卸载集群
-     * @param clusterID
-     * @return
-     */
-    public boolean uninstallCluster(int clusterID);
-
-    /**
      * 添加集群
      * @param clusterName
      * @param clusterAttr
