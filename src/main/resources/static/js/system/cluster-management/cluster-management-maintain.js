@@ -313,7 +313,10 @@ function clusterManagementMaintainConfigureLoad(){
         .append($("<div class='modal-dialog'/>")
             .append($("<div class='modal-content'/>")
                 .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='cluster_management_maintain_configure_auto_modal_title'/>").html("自动配置关联节点")))
-                .append($("<div class='modal-body'/>").append($("<label for='cluster_management_filter_label'/>").html("约束表达式：")).append($("<input id='cluster_management_filter_input' class='form-control'/>")))
+                .append($("<div class='modal-body'/>")
+                    .append($("<div class='row'/>").append("<label/>").html("配置规则：").append("<select id='cluster_management_maintain_configure_auto_rule'><option value=1>配置规则1</option><option value=2>配置规则2</option><option value=3>配置规则3</option></select>"))
+                    .append($("<div class='row'/>").append("<label/>").html("<input type='checkbox' id='cluster_management_maintain_configure_auto_save'>保留集群中已有关联和等级"))
+                    .append($("<div class='row'/>").append("<label/>").html("参数(以\":\",\",\"分割)：").append("<input type='textarea' id='cluster_management_maintain_configure_auto_parameter'>")))
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='clusterManagementMaintainNodeAutoConfigureAssociatedNode()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
@@ -457,7 +460,15 @@ function clusterManagementMaintainNodeManualConfigureAssociatedNode() {
  * 自动配置节点关联关系
  */
 function clusterManagementMaintainNodeAutoConfigureAssociatedNode() {
+    $.ajax({
+        type : "GET",
+        data : {"clusterID" : cluster_management_maintain_configure_cluster,"rule":$("#cluster_management_maintain_configure_auto_rule option:selected").val(),"save":$("#cluster_management_maintain_configure_auto_save").is(":checked"),"parameter":$("#cluster_management_maintain_configure_auto_parameter").val()},
+        url  : "/api/node/configure/auto",
+        dataType : "json",
+        success : function (data) {
 
+        }
+    });
 }
 
 function clusterManagementMaintainNodeDetailLoad() {

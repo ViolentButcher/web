@@ -139,7 +139,8 @@ public class NodeWebServiceImpl implements NodeWebService {
         serviceInfoList.get(serviceID).setAttributes(attributes);
         ObjectMapper mapper = new ObjectMapper();
         try{
-            MySQLUtil.updateServiceAttributes(mapper.writeValueAsString(attributes),serviceID);
+            String json = mapper.writeValueAsString(attributes);
+            MySQLUtil.updateServiceAttributes(json.replaceAll("\\\\","\\\\\\\\"),serviceID);
         }catch (Exception e){
 
         }
