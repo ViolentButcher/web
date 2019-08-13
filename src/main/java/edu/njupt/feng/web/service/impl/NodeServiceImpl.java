@@ -262,4 +262,21 @@ public class NodeServiceImpl implements NodeService {
             updateServiceNumber(serviceMapper.countNodeServiceNumber(nodeID),nodeID);
         }
     }
+
+
+    /**
+     * 自动配置节点
+     * @param clusterID
+     * @param rule
+     * @param save
+     * @param parameter
+     */
+    @Override
+    public void autoConfigNodes(int clusterID, int rule, boolean save, Map<String, String> parameter) {
+        System.out.println("clusterID : " + clusterID
+                            + "\nrule : " + rule
+                            + "\nsave : " + save
+                            + "\nparameter : "  + parameter);
+
+    }
 }
