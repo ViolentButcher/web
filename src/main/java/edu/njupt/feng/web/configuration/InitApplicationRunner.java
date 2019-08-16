@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class InitApplicationRunner implements ApplicationRunner {
 
-    //cluster管理类
+    /**
+     * cluster管理类
+     */
     @Autowired
     private ClusterManagement clusterManagement;
 

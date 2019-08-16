@@ -1,19 +1,18 @@
 package feng;
 
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-//import com.hankcs.demo.DemoWord2Vec;
+import com.hankcs.demo.DemoWord2Vec;
 import com.hankcs.hanlp.mining.word2vec.DocVectorModel;
 import com.hankcs.hanlp.mining.word2vec.Vector;
 import com.hankcs.hanlp.mining.word2vec.WordVectorModel;
 
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class pre {
 
@@ -28,25 +27,40 @@ public class pre {
         ArrayList<Map<String, String>> L = new ArrayList<Map<String, String>>();
         try {
             Statement stm = con.createStatement();
-            String sql = "select * from service";
+            String sql = "select * from service ";
             ResultSet re = stm.executeQuery(sql);
             int i = 0;
             //doc2vec时用的
             //DocVectorModel docvectormodel = get_DocVectorModel();
 
             while (re.next()) {
-                int node = re.getInt("node");
+                String name = re.getString("name");
                 String attribute = re.getString("attributes");
                 int id = re.getInt("id");
                 //System.out.println(id);
+//                int toadd=Integer.valueOf(name.substring(7,name.length()));
+//                int newid=id+toadd;
+                Map<String,String> object = (Map<String,String>)JSON.parse(attribute);
+                String strvec=object.get("vec");
+                if(!strvec.startsWith("{")) {
+                    System.out.println("vec不对，不是Vector");
+                    System.out.println(id);
+                }
+                if(!object.containsKey("temp_Nextlist"))
+                {
+                    System.out.println("temp_Nextlist不对");
+                    System.out.println(id);
+                }
 
-                Map<String, String> map = new HashMap<String, String>();
-                map.put("id", String.valueOf(id));
-                map.put("att", attribute);
-                map.put("node", String.valueOf(node));
-                L.add(map);
+
+//                Map<String, String> map = new HashMap<String, String>();
+//                map.put("id", String.valueOf(id));
+//                map.put("att", attribute);
+//                map.put("node", String.valueOf(node));
+//                L.add(map);
+
 //                String new_att = doc2evcaddtoatt(docvectormodel, attribute,content);
-//                upData(con,id,new_att);
+ //                 upData(con,name,newid);
 //                contentList[i] = content;
 //                System.out.println("new att: " + id + "    " + new_att);
             }
@@ -80,12 +94,13 @@ public class pre {
         }
     }
 
-    public static void upData(Connection con, Integer id, String str) {//修改数据
+    public static void upData(Connection con, String name,int newid) {//修改数据
         try {
-            String sql = "update service set attributes = ? where id = ?";
+            String sql = "update service set id = ? where name = ? and cluster = ?";
             PreparedStatement pst = con.prepareStatement(sql);
-            pst.setString(1, str);
-            pst.setInt(2, id);
+            pst.setInt(1, newid);
+            pst.setString(2, name);
+            pst.setInt(3,3);
             pst.executeUpdate();
             pst.close();
         } catch (SQLException se) {
@@ -97,59 +112,24 @@ public class pre {
         }
     }
 
-    //    public static void deleteData(Connection con) {//删除数据
-//        try {
-//            String sql = "delete from emp where deptno = ?";
-//            PreparedStatement pst = con.prepareStatement(sql);
-//            pst.setInt(1, 3);
-//            pst.executeUpdate();
-//            pst.close();
-//        }catch(SQLException se) {
-//            se.printStackTrace();
-//        }catch(Exception e) {
-//            e.printStackTrace();
-//        }finally {
-//            System.out.println("MySQL数据库成功删除数据！" + "\n");
-//        }
-//    }
-
-
-    /**
-     * 加载预料，获得文档向量模型
-     *
-     * @return
-     * @throws IOException
-     */
-//    public static DocVectorModel get_DocVectorModel() throws IOException {
-//        DemoWord2Vec demoWord2Vec = new DemoWord2Vec();
-//        //词向量
-//        WordVectorModel wordVectorModel = demoWord2Vec.trainOrLoadModel();
-//        //文档向量
-//        return new DocVectorModel(wordVectorModel);
-//    }
-
-    /**
-     * 未加处理的文档 ==> 向量
-     *
-     * @param doc
-     * @param docVectorModel
-     * @return float[]
-     */
-    public static float[] doc2vec(DocVectorModel docVectorModel, String doc) {
-        return docVectorModel.query(doc).getElementArray();
+        public static void deleteData(Connection con,int id) {//删除数据
+        try {
+            String sql = "delete from service where id = ?";
+            PreparedStatement pst = con.prepareStatement(sql);
+            pst.setInt(1, id);
+            pst.executeUpdate();
+            pst.close();
+        }catch(SQLException se) {
+            se.printStackTrace();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }finally {
+            System.out.println("MySQL数据库成功删除数据！" + "\n");
+        }
     }
 
-    /**
-     * 计算两个文本的相似度
-     *
-     * @param docVectorModel
-     * @param doc1
-     * @param doc2
-     * @return
-     */
-    public static float similarity(DocVectorModel docVectorModel, String doc1, String doc2) {
-        return docVectorModel.similarity(doc1, doc2);
-    }
+
+
 
     /**
      * float[] 转 String
@@ -250,6 +230,25 @@ public class pre {
             System.out.println("执行结束！");
         }
         return con;
+    }
+
+    static class MyComparator implements Comparator {
+        public int compare(Object o1,Object o2) {
+            Map<String,String> e1=(Map<String,String>)o1;
+            Map<String,String> e2=(Map<String,String>)o2;
+            if(Float.valueOf(e1.get("Sim"))<Float.valueOf(e2.get("Sim")))
+                return 0;
+            else
+                return 1;
+        }
+    }
+    public static void main(String[] args) {
+        Connection con=Con();
+        fetchData(con);
+//        for (int i = 404993; i >=399995 ; i--) {
+//            //String name="service"+i;
+//            deleteData(con,i);
+//        }
     }
 }
 //1. 查询

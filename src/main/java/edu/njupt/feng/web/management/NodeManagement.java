@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,7 +102,12 @@ public class NodeManagement {
             factoryBean.setAddress(nodeServices.get(nodeId).getServiceAddress());
             NodeWebService service = factoryBean.create(NodeWebService.class);
             CXFClientUtil.configTimeout(service);
-            ResultInfoWithoutContent results = service.testSearch(keyword,type);
+            ResultInfoWithoutContent results = null;
+            try {
+                results = service.testSearch(keyword,type);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             return addContent(results);
         }
@@ -116,7 +122,18 @@ public class NodeManagement {
      * @return
      */
     public ResultInfo testRecommend(Integer nodeId,String keyword,Integer type){
-        return testSearch(nodeId, keyword, type);
+        if(nodeServices.get(nodeId) != null){
+            JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+
+            factoryBean.setServiceClass(NodeWebService.class);
+            factoryBean.setAddress(nodeServices.get(nodeId).getServiceAddress());
+            NodeWebService service = factoryBean.create(NodeWebService.class);
+            CXFClientUtil.configTimeout(service);
+            ResultInfoWithoutContent results = service.testRecommend(keyword,type);
+
+            return addContent(results);
+        }
+        return null;
     }
 
     /**

@@ -167,7 +167,7 @@ public interface NodeMapper {
      * 删除集群所属节点
      * @param clusterID
      */
-    @Delete("DELETE FROM cluster WHERE cluster = #{clusterID}")
+    @Delete("DELETE FROM node WHERE cluster = #{clusterID}")
     public void deleteNodesByCluster(Integer clusterID);
 
     /**

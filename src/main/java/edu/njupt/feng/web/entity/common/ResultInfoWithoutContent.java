@@ -5,6 +5,7 @@ import edu.njupt.feng.web.entity.service.NodeServiceListItem;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class ResultInfoWithoutContent implements Serializable {
@@ -43,6 +44,20 @@ public class ResultInfoWithoutContent implements Serializable {
         }
         if(b.getResult() != null){
             result.addAll(b.getResult());
+            if (result != null) {
+                result.sort(new Comparator<NodeServiceListItem>() {
+                    @Override
+                    public int compare(NodeServiceListItem o1, NodeServiceListItem o2) {
+                        if (Float.valueOf(o1.getAttributes().get("search_sim")) < Float.valueOf(o2.getAttributes().get("search_sim")))
+                            return 1;
+                        else if (Float.valueOf(o1.getAttributes().get("search_sim")) > Float.valueOf(o2.getAttributes().get("search_sim")))
+                            return -1;
+                        else
+                            return 0;
+                    }
+                });
+                result=result.subList(0, Math.min(10,result.size()));
+            }
         }
         if(b.getCostTime() != null){
             costTime += b.getCostTime();

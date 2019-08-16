@@ -1,7 +1,8 @@
 package edu.njupt.feng.web.webservice.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+
 import edu.njupt.feng.web.entity.common.AssociatedNodeServiceInfo;
 import edu.njupt.feng.web.entity.common.NodeMapItem;
 import edu.njupt.feng.web.entity.common.Position;
@@ -16,26 +17,27 @@ import edu.njupt.feng.web.utils.constants.Constants;
 import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
 import edu.njupt.feng.web.utils.mysql.MySQLUtil;
 import edu.njupt.feng.web.webservice.NodeWebService;
-import edu.njupt.feng.web.webservice.ServiceWebService;
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
-
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import feng.util;
 import feng.pre;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import com.hankcs.hanlp.mining.word2vec.Vector;
+import com.hankcs.hanlp.mining.word2vec.DocVectorModel;
+
+import java.io.IOException;
+import java.util.*;
+
+import feng.util;
+import feng.Temp;
 
 
 public class NodeWebServiceImpl implements NodeWebService {
 
     private NodeServiceInfo nodeServiceInfo;
 
-    private Map<Integer,NodeServiceListItem> serviceInfoList = new HashMap<>();
+    private Map<Integer, NodeServiceListItem> serviceInfoList = new HashMap<>();
 
     /**
      * 更新节点名称
+     *
      * @param name
      */
     @Override
@@ -45,16 +47,28 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 更新所属服务的名称
+     *
      * @param name
      * @param serviceID
      */
     @Override
-    public void updateServiceName(String name,int serviceID) {
+    public void updateServiceName(String name, int serviceID) {
         serviceInfoList.get(serviceID).setName(name);
     }
 
     /**
+     * 更新自身修改时间
+     *
+     * @param modifyTime
+     */
+    @Override
+    public void updateModifyTime(Date modifyTime) {
+        nodeServiceInfo.setModifyTime(modifyTime);
+    }
+
+    /**
      * 更新节点位置
+     *
      * @param position
      */
     @Override
@@ -64,6 +78,7 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 添加服务
+     *
      * @param serviceInfo
      */
     @Override
@@ -73,6 +88,7 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 设置节点信息
+     *
      * @param nodeInfo
      */
     @Override
@@ -82,6 +98,7 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 获取节点信息
+     *
      * @return
      */
     @Override
@@ -91,6 +108,7 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 获取节点上面的服务列表
+     *
      * @return
      */
     @Override
@@ -100,18 +118,20 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 设置节点上的服务列表
+     *
      * @param serviceList
      */
     @Override
     public void setNodeServiceList(List<NodeServiceListItem> serviceList) {
-        for(NodeServiceListItem serviceInfo : serviceList){
-            serviceInfoList.put(serviceInfo.getId(),serviceInfo);
+        for (NodeServiceListItem serviceInfo : serviceList) {
+            serviceInfoList.put(serviceInfo.getId(), serviceInfo);
         }
     }
 
 
     /**
      * 更新节点属性信息（自身）
+     *
      * @param attributes
      */
     @Override
@@ -119,28 +139,39 @@ public class NodeWebServiceImpl implements NodeWebService {
         nodeServiceInfo.setAttributes(attributes);
 
         //全局NodeMap的属性更新
-        NodeMap.updateNodeAttributes(nodeServiceInfo.getServiceAddress(),attributes);
+        NodeMap.updateNodeAttributes(nodeServiceInfo.getServiceAddress(), attributes);
 
         ObjectMapper mapper = new ObjectMapper();
-        try{
-            MySQLUtil.updateNodeAttributes(mapper.writeValueAsString(attributes),nodeServiceInfo.getId());
-        }catch (Exception e){
+        try {
+            MySQLUtil.updateNodeAttributes(mapper.writeValueAsString(attributes), nodeServiceInfo.getId());
+        } catch (Exception e) {
 
         }
     }
 
     /**
      * 更新服务属性
+     *
      * @param attributes
      * @param serviceID
      */
     @Override
     public void updateServiceAttributes(Map<String, String> attributes, Integer serviceID) {
         serviceInfoList.get(serviceID).setAttributes(attributes);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String json = mapper.writeValueAsString(attributes);
+            MySQLUtil.updateServiceAttributes(json.replaceAll("\\\\", "\\\\\\\\"), serviceID);
+        } catch (Exception e) {
+
+        }
+        ServiceMap.updateServiceAttributes(Constants.SERVICE_PREFIX + serviceID, attributes);
     }
+
 
     /**
      * 更新其它节点的属性
+     *
      * @param attributes
      * @param nodeID
      */
@@ -155,7 +186,25 @@ public class NodeWebServiceImpl implements NodeWebService {
     }
 
     /**
+     * 更新其它节点所属的服务的属性
+     *
+     * @param attributes
+     * @param serviceID
+     * @param nodeID
+     */
+    @Override
+    public void updateOtherServiceAttributes(Map<String, String> attributes, Integer serviceID, Integer nodeID) {
+        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+
+        factoryBean.setAddress(Constants.NODE_PREFIX + nodeID);
+        factoryBean.setServiceClass(NodeWebService.class);
+        NodeWebService service = factoryBean.create(NodeWebService.class);
+        service.updateServiceAttributes(attributes, serviceID);
+    }
+
+    /**
      * 访问其它节点，获取其服务列表信息
+     *
      * @param address
      * @return
      */
@@ -170,6 +219,7 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 获取节点信息
+     *
      * @param address
      * @return
      */
@@ -184,20 +234,35 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 搜索测试
+     *
      * @param keyword
      * @return
      */
     @Override
-    public ResultInfoWithoutContent testSearch(String keyword,Integer type) {
+    public ResultInfoWithoutContent testSearch(String keyword, Integer type) {
         ResultInfoWithoutContent results = new ResultInfoWithoutContent();
-        if(type ==1){
+        //加载word2vec.txt,并获得文档向量模型。
+        DocVectorModel docVectorModel = null;
+        try {
+            docVectorModel = util.get_DocVectorModel();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //根据文档向量模型，把查询String keyword 转换为Vector
+        Vector search_vec = util.doc2Vector(docVectorModel, keyword);
+        if (type == 1) {//集中式
             long startTime = System.currentTimeMillis();
-            results = recommendMethodTest01ByWebservice(keyword,0.5f);
+            results = recommendMethodTest01ByMap(search_vec);
             long endTime = System.currentTimeMillis();
             System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
-        }else if (type == 2){
+        } else if (type == 2) {//树状  （先寻找根节点/队长 ，然后层次遍历）
             long startTime = System.currentTimeMillis();
-            results =  recommendMethodTest02ByMap(keyword);
+            results = recommendMethodTest02ByMap(search_vec);
+            long endTime = System.currentTimeMillis();
+            System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
+        } else {//树状、分布式  （广度优先算法）
+            long startTime = System.currentTimeMillis();
+            results = recommendMethodTest03ByMap(search_vec);
             long endTime = System.currentTimeMillis();
             System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
         }
@@ -206,124 +271,496 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 推荐测试
+     *
      * @param keyword
      * @return
      */
     @Override
-    public ResultInfoWithoutContent testRecommend(String keyword,Integer type) {
-        return testSearch(keyword,type);
+    public ResultInfoWithoutContent testRecommend(String keyword, Integer type) {
+        return testSearch(keyword, type);
     }
 
-    /**
-     * 搜索方法测试，通过webservice
-     * @param keyword
-     * @return
-     */
-    public ResultInfoWithoutContent recommendMethodTest01ByWebservice(String keyword,float limit){
 
-        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
-        if(serviceInfoList!= null && serviceInfoList.values() != null){
+    /**
+     * 初始化之根据服务的vector，以洪范的方式为每个服务创建语义邻接表
+     *
+     * @param serviceList
+     * @param limit
+     * @param the
+     * @param node_id
+     */
+    public void createNextlist(Map<Integer, NodeServiceListItem> serviceList, float limit, boolean the, int node_id) {
+        if (serviceList != null && serviceList.values() != null) {
 
             //初始化attributes中的————temp_Nextlist:[{},{},~~~]
-            for(NodeServiceListItem service_item : serviceInfoList.values()){
-                service_item.getAttributes().put("temp_Nextlist","");
-                updateServiceAttributes(service_item.getAttributes(),service_item.getId());
-            }
-            System.out.println("初始化attributes中的————temp_Nextlist:[{},{},~~~]");
+            for (NodeServiceListItem service_item : serviceList.values()) {
+//                System.out.println(service_item.getId());
+//                System.out.println(service_item.getAttributes().get("temp_Nextlist"));
+                service_item.getAttributes().put("temp_Nextlist", "");
 
+                if (the)
+                    updateServiceAttributes(service_item.getAttributes(), service_item.getId());
+                else
+                    updateOtherServiceAttributes(service_item.getAttributes(), service_item.getId(), node_id);
+            }
+
+            //System.out.println("初始化attributes中的————temp_Nextlist:[{},{},~~~]");
             //用于存储所有服务的邻接表 service：service邻接表
             //service邻接表格式：ArrayList<Map<String,String>>
             //Map<String,String>———— "id":id,"Sim":sim
-            Map<NodeServiceListItem,ArrayList<Map<String,String>>> L =new HashMap<>();
-            for(NodeServiceListItem service_item : serviceInfoList.values()){
-                ArrayList<Map<String,String>> item_Nextlist=new ArrayList<>();
+            Map<NodeServiceListItem, ArrayList<Map<String, String>>> L = new HashMap<>();
+            for (NodeServiceListItem service_item : serviceList.values()) {
+                ArrayList<Map<String, String>> item_Nextlist = new ArrayList<>();
                 item_Nextlist.clear();
-                L.put(service_item,item_Nextlist);
+                L.put(service_item, item_Nextlist);
             }
 
             //计算Sim
-            for(NodeServiceListItem service_item : serviceInfoList.values())
-            {
-                System.out.println("计算"+service_item.getId()+"的Sim，寻找邻接顶点");
-                int id=service_item.getId();
-                float[] vec=util.String_2_floatList(service_item.getAttributes().get("vec"));
-                for(NodeServiceListItem service_item_2 : serviceInfoList.values())
-                {
-                    int id_2=service_item_2.getId();
-                    float[] vec_2=util.String_2_floatList(service_item_2.getAttributes().get("vec"));
-                    if(id != id_2)
-                    {
-                        float Sim=util.dot(vec,vec_2);
-                        if(Sim>limit)
-                        {
+            for (NodeServiceListItem service_item : serviceList.values()) {
+                //System.out.println("计算" + service_item.getId() + "的Sim，寻找邻接顶点");
+                int id = service_item.getId();
+                float[] vec = util.String_2_floatList(service_item.getAttributes().get("vec"));
+                for (NodeServiceListItem service_item_2 : serviceList.values()) {
+                    int id_2 = service_item_2.getId();
+                    float[] vec_2 = util.String_2_floatList(service_item_2.getAttributes().get("vec"));
+                    if (id != id_2) {
+                        float Sim = util.dot(vec, vec_2);
+                        if (Sim > limit) {
                             //向service_item中添加邻接顶点（服务）
-                            Map<String,String> next_service2=new HashMap<>();
-                            next_service2.put("id",Integer.toString(id_2));
-                            next_service2.put("Sim",Float.toString(Sim));
+                            Map<String, String> next_service2 = new HashMap<>();
+                            next_service2.put("id", Integer.toString(id_2));
+                            next_service2.put("Sim", Float.toString(Sim));
                             L.get(service_item).add(next_service2);
 
                             //向service_item_2中添加邻接顶点（服务）
-                            Map<String,String> next_service1=new HashMap<>();
-                            next_service1.put("id",Integer.toString(id));
-                            next_service1.put("Sim",Float.toString(Sim));
+                            Map<String, String> next_service1 = new HashMap<>();
+                            next_service1.put("id", Integer.toString(id));
+                            next_service1.put("Sim", Float.toString(Sim));
                             L.get(service_item_2).add(next_service1);
                         }
                     }
                 }
             }
 
-            Gson gson=new Gson();
-            //对L中的所有邻接表添加到相应service的attributes中。
-            for(NodeServiceListItem service_item : serviceInfoList.values()){
-                System.out.println("更新"+service_item.getId()+"的attributes");
-                service_item.getAttributes().put("temp_Nextlist",gson.toJson(L.get(service_item)));
-                //updateServiceAttributes(service_item.getAttributes(),service_item.getId());
-                Connection con=pre.Con();
-                pre.upData(con,service_item.getId(),gson.toJson(service_item.getAttributes()));
+            //对L中的所有邻接表排序删选前十个,添加到相应service的attributes中。
+            for (NodeServiceListItem service_item : serviceList.values()) {
+                //System.out.println("更新" + service_item.getId() + "的attributes");
+                ArrayList<Map<String, String>> temp = L.get(service_item);
+                temp.sort(new Comparator<Map<String, String>>() {
+                    @Override
+                    public int compare(Map<String, String> o1, Map<String, String> o2) {
+                        if (Float.valueOf(o1.get("Sim")) < Float.valueOf(o2.get("Sim")))
+                            return 1;
+                        else if (Float.valueOf(o1.get("Sim")) > Float.valueOf(o2.get("Sim")))
+                            return -1;
+                        else
+                            return 0;
+                    }
+                });
+                if (temp.size() < 10) {
+                    System.out.println(temp);
+                    System.out.println(service_item.getId());
+                }
+                List<Map<String, String>> new_list = temp.subList(0, Math.min(10, temp.size()));
+
+                //1. 用temp类来保存邻接节点。
+                List<Temp> tempList = new ArrayList<Temp>();
+                for (int i = 0; i < new_list.size(); i++) {
+                    Temp tempservicenode = new Temp();
+                    tempservicenode.setId(i);
+                    tempservicenode.setIndex(Integer.parseInt(new_list.get(i).get("id")));
+                    tempservicenode.setSim(Double.valueOf(new_list.get(i).get("Sim")));
+                    tempList.add(tempservicenode);
+                }
+                //输出是正确的，但是输入sql时，反斜杠会被吃掉。
+                service_item.getAttributes().put("temp_Nextlist", JSON.toJSONString(tempList));
+                //System.out.println(JSON.toJSONString(service_item.getAttributes()));
+
+                //2.new_temp.toString()不会报错
+                //service_item.getAttributes().put("temp_Nextlist", new_list.toString());
+                if (the)
+                    updateServiceAttributes(service_item.getAttributes(), service_item.getId());
+                else
+                    updateOtherServiceAttributes(service_item.getAttributes(), service_item.getId(), node_id);
             }
         }
-        return resultInfoWithoutContent;
     }
 
-    public ResultInfoWithoutContent recommendMethodTest02ByMap(String keyword){
-        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
 
-        //首先，检查自己的服务列表有没有符合要求服务
-        if(serviceInfoList!= null && serviceInfoList.values() != null){
-            //resultInfoWithoutContent.add(sortNodeServiceListItem(new ArrayList<>(serviceInfoList.values()),keyword));
-            for(NodeServiceListItem service_item : serviceInfoList.values()){
-                //service_item   id : {journal=中国矿业大学(北京), author=潘莉, publish_time=2016年, title=南水北调北京受水区供水调适与管理, keyword=北京市}
-                System.out.print(service_item.getId());
-                System.out.println(service_item.getAttributes());
+    public void change(Map<Integer, NodeServiceListItem> serviceList, boolean the, int node_id) {
+        for (NodeServiceListItem ith : serviceList.values()) {
+
+            String strvec = ith.getAttributes().get("vec");
+            if (!strvec.startsWith("{")) {
+                System.out.println("vec不对，不是Vector");
+                System.out.println(ith.getId());
             }
-
-//            for (int i = 1; i < serviceInfoList.size()+1; i++) {
-//                System.out.println(serviceInfoList.get(i).getId());
+            if (!ith.getAttributes().containsKey("temp_Nextlist")) {
+                System.out.println("temp_Nextlist不对");
+                System.out.println(ith.getId());
+            }
+//            List<Float> other_vec = JSON.parseArray(ith.getAttributes().get("vec"),Float.class);
+//            float[] temp =new float[other_vec.size()];
+//            for (int i = 0; i < other_vec.size(); i++) {
+//                temp[i]=other_vec.get(i);
 //            }
+
+
+//            float[] temp =util.String_2_floatList(ith.getAttributes().get("vec"));
+//            Vector vector=new Vector(temp);
+//            ith.getAttributes().put("vec", JSON.toJSONString(vector));
+//            if (the)
+//                updateServiceAttributes(ith.getAttributes(), ith.getId());
+//            else
+//                updateOtherServiceAttributes(ith.getAttributes(), ith.getId(), node_id);
+        }
+    }
+
+    public List<NodeServiceListItem> searchinnode(Map<Integer, NodeServiceListItem> serviceList, Vector search_vec,int numofedge) {
+        //当前节点下服务的结果
+        List<NodeServiceListItem> result = new ArrayList<>();
+        //遍历的方式
+//        Queue<NodeServiceListItem> result = new PriorityQueue<NodeServiceListItem>(10, new Comparator<NodeServiceListItem>() {
+//            @Override
+//            public int compare(NodeServiceListItem o1, NodeServiceListItem o2) {
+//                if (Float.valueOf(o1.getAttributes().get("search_sim")) < Float.valueOf(o2.getAttributes().get("search_sim")))
+//                    return 1;
+//                else if (Float.valueOf(o1.getAttributes().get("search_sim")) > Float.valueOf(o2.getAttributes().get("search_sim")))
+//                    return -1;
+//                else
+//                    return 0;
+//            }
+//        });
+//        for (NodeServiceListItem ith : serviceList.values()) {
+//            //JSON.parseArray(ith.getAttributes().get("temp_Nextlist"), Temp.class);
+//
+//            float sim = search_vec.dot(JSON.parseObject(ith.getAttributes().get("vec"),Vector.class));
+//            ith.getAttributes().put("search_sim", Float.toString(sim));
+//            result.add(ith);
+//        }
+//        return result;
+
+        NodeServiceListItem thefirstaddtoqueue = null;
+        //初始化visit为0，代表未访问
+        for (NodeServiceListItem service_item : serviceList.values()) {
+            service_item.getAttributes().put("visit", "0");
+            thefirstaddtoqueue = service_item;
+        }
+
+        Queue<NodeServiceListItem> Q = new LinkedList<>();
+        Q.add(thefirstaddtoqueue);
+        thefirstaddtoqueue.getAttributes().put("visit", "1");
+        int n = 0;
+        while (!Q.isEmpty()) {
+            NodeServiceListItem servicetemp = Q.remove();
+            List<NodeServiceListItem> sim_temp_list = new ArrayList<>();
+            if (servicetemp != null && servicetemp.getAttributes() != null && servicetemp.getAttributes().containsKey("temp_Nextlist") && servicetemp.getAttributes().get("temp_Nextlist") != null) {
+
+                List<Temp> service_list = JSON.parseArray(servicetemp.getAttributes().get("temp_Nextlist"), Temp.class);
+                for (int i = 0; i < service_list.size(); i++) {
+
+                    NodeServiceListItem ith = serviceList.get(service_list.get(i).getIndex());
+                    if (ith != null && ith.getAttributes() != null && ith.getAttributes().containsKey("visit") && !ith.getAttributes().get("visit").equals("1")) {
+                        n++;
+                        //System.out.println(ith.getId());
+                        Vector other_vec = JSON.parseObject(ith.getAttributes().get("vec"), Vector.class);
+                        float sim = search_vec.dot(other_vec);
+                        ith.getAttributes().put("search_sim", Float.toString(sim));
+                        sim_temp_list.add(ith);
+                        ith.getAttributes().put("visit", "1");
+                    }
+
+                }
+            }
+            sim_temp_list.sort(new Comparator<NodeServiceListItem>() {
+                @Override
+                public int compare(NodeServiceListItem o1, NodeServiceListItem o2) {
+                    if (Float.valueOf(o1.getAttributes().get("search_sim")) < Float.valueOf(o2.getAttributes().get("search_sim")))
+                        return 1;
+                    else if (Float.valueOf(o1.getAttributes().get("search_sim")) > Float.valueOf(o2.getAttributes().get("search_sim")))
+                        return -1;
+                    else
+                        return 0;
+                }
+            });
+
+            for (int i = 0; i < Math.min(numofedge, sim_temp_list.size()); i++) {
+                Q.add(sim_temp_list.get(i));
+                result.add(sim_temp_list.get(i));
+            }
+        }
+
+        System.out.println("访问服务数量：   "+n);
+        return result;
+    }
+
+
+    public List<NodeServiceListItem> searchinnodebyname(Map<String, NodeServiceListItem> serviceList, Vector search_vec,int numofedge) {
+        //当前节点下服务的结果
+        List<NodeServiceListItem> result = new ArrayList<>();
+        //遍历的方式
+//        Queue<NodeServiceListItem> result = new PriorityQueue<NodeServiceListItem>(10, new Comparator<NodeServiceListItem>() {
+//            @Override
+//            public int compare(NodeServiceListItem o1, NodeServiceListItem o2) {
+//                if (Float.valueOf(o1.getAttributes().get("search_sim")) < Float.valueOf(o2.getAttributes().get("search_sim")))
+//                    return 1;
+//                else if (Float.valueOf(o1.getAttributes().get("search_sim")) > Float.valueOf(o2.getAttributes().get("search_sim")))
+//                    return -1;
+//                else
+//                    return 0;
+//            }
+//        });
+//        for (NodeServiceListItem ith : serviceList.values()) {
+//            //JSON.parseArray(ith.getAttributes().get("temp_Nextlist"), Temp.class);
+//
+//            float sim = search_vec.dot(JSON.parseObject(ith.getAttributes().get("vec"),Vector.class));
+//            ith.getAttributes().put("search_sim", Float.toString(sim));
+//            result.add(ith);
+//        }
+//        return result;
+
+        NodeServiceListItem thefirstaddtoqueue = null;
+        //初始化visit为0，代表未访问
+        for (NodeServiceListItem service_item : serviceList.values()) {
+            if (service_item != null && service_item.getAttributes() != null) {
+                service_item.getAttributes().put("visit", "0");
+                thefirstaddtoqueue = service_item;
+            }
+        }
+        Queue<NodeServiceListItem> Q = new LinkedList<>();
+        Q.add(thefirstaddtoqueue);
+        thefirstaddtoqueue.getAttributes().put("visit", "1");
+        int n = 0;
+        while (!Q.isEmpty()) {
+            NodeServiceListItem servicetemp = Q.remove();
+            List<NodeServiceListItem> sim_temp_list = new ArrayList<>();
+            if (servicetemp != null && servicetemp.getAttributes() != null && servicetemp.getAttributes().containsKey("temp_Nextlist") && servicetemp.getAttributes().get("temp_Nextlist") != null) {
+
+                List<Temp> service_list = JSON.parseArray(servicetemp.getAttributes().get("temp_Nextlist"), Temp.class);
+                for (int i = 0; i < service_list.size(); i++) {
+
+                    NodeServiceListItem ith = serviceList.get("service" + service_list.get(i).getIndex());
+                    if (ith != null && ith.getAttributes() != null && ith.getAttributes().containsKey("visit") && !ith.getAttributes().get("visit").equals("1")) {
+                        //System.out.println(ith.getId());
+                        Vector other_vec = JSON.parseObject(ith.getAttributes().get("vec"), Vector.class);
+                        float sim = search_vec.dot(other_vec);
+                        ith.getAttributes().put("search_sim", Float.toString(sim));
+                        sim_temp_list.add(ith);
+                        ith.getAttributes().put("visit", "1");
+                        n++;
+                    }
+
+                }
+            }
+            sim_temp_list.sort(new Comparator<NodeServiceListItem>() {
+                @Override
+                public int compare(NodeServiceListItem o1, NodeServiceListItem o2) {
+                    if (Float.valueOf(o1.getAttributes().get("search_sim")) < Float.valueOf(o2.getAttributes().get("search_sim")))
+                        return 1;
+                    else if (Float.valueOf(o1.getAttributes().get("search_sim")) > Float.valueOf(o2.getAttributes().get("search_sim")))
+                        return -1;
+                    else
+                        return 0;
+                }
+            });
+
+            for (int i = 0; i < Math.min(numofedge, sim_temp_list.size()); i++) {
+                Q.add(sim_temp_list.get(i));
+                result.add(sim_temp_list.get(i));
+            }
+        }
+
+        System.out.println("访问服务数量：   "+n);
+        return result;
+    }
+
+    /**
+     * 预处理，遍历的方式床架语义邻接表
+     *
+     * @param keyword
+     * @return
+     */
+    public ResultInfoWithoutContent PreDo_vectoNextlist(String keyword, float limit) {
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
+        //首先，检查自己的服务列表有没有符合要求服务
+        if (serviceInfoList != null && serviceInfoList.values() != null) {
+            change(serviceInfoList, true, 0);
+            //createNextlist(serviceInfoList, limit, true, 0);
         }
         //遍历关联节点
-        if(nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
-            for(AssociatedNodeServiceInfo nodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()){
-                NodeMapItem item = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
-                //resultInfoWithoutContent.add(sortNodeServiceListItem(item.getServiceList(),keyword));
+        if (nodeServiceInfo.getAssociatedNodeServiceInfos() != null) {
+            for (AssociatedNodeServiceInfo nodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()) {
 
-                if (item.getServiceList()!=null){
-                    System.out.println("\n当前节点为："+nodeServiceInfo.getId());
-                    for(NodeServiceListItem service_item : item.getServiceList()){
-                        service_item.getId();
-                        //System.out.print(item.getId());
+                NodeMapItem item = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
+                if (item.getServiceList() != null) {
+                    Map<Integer, NodeServiceListItem> serviceList = new HashMap<>();
+                    for (NodeServiceListItem service_item : item.getServiceList()) {
+                        if (service_item != null && service_item.getAttributes() != null)
+                            serviceList.put(service_item.getId(), service_item);
                     }
-//                    resultInfoWithoutContent.add(sortNodeServiceListItem(associatedNodeServicesList,keyword));
+                    change(serviceList, false, nodeServiceInfo.getId());
+                    //createNextlist(serviceList, limit, false, nodeServiceInfo.getId());
                 }
             }
         }
+
         return resultInfoWithoutContent;
     }
 
+    /**
+     * 集中式
+     *
+     * @param search_vec
+     * @return
+     */
+    public ResultInfoWithoutContent recommendMethodTest01ByMap(Vector search_vec) {
+        //返回的结果
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
+        int n=1;
+        //首先，检查自己的服务列表有没有符合要求服务
+        if (serviceInfoList != null && serviceInfoList.values() != null) {
+            //change(serviceInfoList,true,0);
+            //searchinnode(serviceInfoList, search_vec);
+            resultInfoWithoutContent.add(sortNodeServiceListItem(serviceInfoList, search_vec));
+        }
+        //遍历关联节点
+        if (nodeServiceInfo.getAssociatedNodeServiceInfos() != null) {
+            for (AssociatedNodeServiceInfo nodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()) {
+
+                NodeMapItem item = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
+                if (item.getServiceList() != null) {
+                    Map<Integer, NodeServiceListItem> serviceList = new HashMap<>();
+                    for (NodeServiceListItem service_item : item.getServiceList()) {
+                        serviceList.put(service_item.getId(), service_item);
+                    }
+                    //change(serviceList,false,nodeServiceInfo.getId());
+                    //searchinnode(serviceList, search_vec);
+                    n++;
+                    resultInfoWithoutContent.add(sortNodeServiceListItem(serviceList, search_vec));
+                }
+            }
+        }
+        System.out.println("集中式:   "+n);
+        return resultInfoWithoutContent;
+    }
+
+    public ResultInfoWithoutContent recommendMethodTest02ByMap(Vector search_vec) {
+        int n=0;
+        //返回的结果
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
+        //寻找根节点
+        //parent 用来保存父亲节点的NodeServiceInfo。初始化为自己
+        NodeServiceInfo parent = nodeServiceInfo;
+        boolean hasparent = true;
+        //周围节点中包含父亲结点类型，就继续执行
+        while (hasparent) {
+            for (AssociatedNodeServiceInfo temp : parent.getAssociatedNodeServiceInfos()) {
+                if (temp.getAssociatedType().equals("parent")) {
+                    parent = getNodeServiceInfoByNodeMap(temp.getServiceAddress()).getNodeServiceInfo();
+                    hasparent = true;
+                    break;
+                } else
+                    hasparent = false;
+            }
+        }
+        Queue<NodeServiceInfo> Q = new LinkedList<>();
+        Q.add(parent);
+        while (!Q.isEmpty()) {
+            NodeServiceInfo The = Q.remove();
+            //出队时访问当前节点
+            n++;
+            NodeMapItem node = getNodeServiceInfoByNodeMap(The.getServiceAddress());
+            if (node.getServiceList() != null) {
+                Map<String, NodeServiceListItem> serviceList = new HashMap<>();
+                for (NodeServiceListItem service_item : node.getServiceList()) {
+                    if (service_item != null && service_item.getName() != null) {
+                        serviceList.put(service_item.getName(), service_item);
+                    }
+                }
+//               allnodes.put(item.getNodeServiceInfo().getName(), serviceList);
+//               searchinnodebyname(serviceList,search_vec);
+//               change(serviceList, false, nodeServiceInfo.getId());
+//               searchinnode(serviceList, search_vec);
+                resultInfoWithoutContent.add(sortNodeServiceListItembyname(serviceList, search_vec));
+            }
+
+            //把当前节点的孩子们入队
+            if (The != null && The.getAssociatedNodeServiceInfos() != null) {
+                for (AssociatedNodeServiceInfo item : The.getAssociatedNodeServiceInfos()) {
+                    if (item != null && item.getAssociatedType() != null && item.getAssociatedType().equals("child")) {
+                        Q.add(getNodeServiceInfoByNodeMap(item.getServiceAddress()).getNodeServiceInfo());
+                    }
+                }
+            }
+        }
+        System.out.println("树状；    "+n);
+        return resultInfoWithoutContent;
+    }
+
+    /**
+     * 广度优先遍历
+     *
+     * @param search_vec
+     * @return
+     */
+    public ResultInfoWithoutContent recommendMethodTest03ByMap(Vector search_vec) {
+        //返回的结果
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
+        Map<String, Map<String, NodeServiceListItem>> allnodes = new HashMap<>();
+        int n=1;
+        Queue<NodeServiceInfo> Q = new LinkedList<>();
+        //首先，检查自己的服务列表有没有符合要求服务
+        if (serviceInfoList != null && serviceInfoList.values() != null) {
+            Map<String, NodeServiceListItem> serviceList = new HashMap<>();
+            for (NodeServiceListItem item : serviceInfoList.values()) {
+                if (item != null && item.getName() != null) {
+                    serviceList.put(item.getName(), item);
+                }
+            }
+            allnodes.put(nodeServiceInfo.getName(), serviceList);
+            //searchinnodebyname(serviceList,search_vec);
+            //change(serviceInfoList,true,0);
+            //searchinnode(serviceInfoList, search_vec);
+            resultInfoWithoutContent.add(sortNodeServiceListItembyname(serviceList, search_vec));
+        }
+        //树状或者图装：采用广度优先的算法遍历邻接顶点
+        Q.add(nodeServiceInfo);
+        System.out.println(nodeServiceInfo);
+        while (!Q.isEmpty()) {
+            NodeServiceInfo head = Q.remove();
+            if (head.getAssociatedNodeServiceInfos() != null) {
+                for (AssociatedNodeServiceInfo nodeServiceInfo : head.getAssociatedNodeServiceInfos()) {
+                    NodeMapItem item = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
+
+                    //System.out.println(item.getNodeServiceInfo());
+                    if (nodeServiceInfo.getId() != head.getId() && !allnodes.containsKey(item.getNodeServiceInfo().getName())) {
+                        Q.add(item.getNodeServiceInfo());
+                        if (item.getServiceList() != null) {
+                            Map<String, NodeServiceListItem> serviceList = new HashMap<>();
+                            for (NodeServiceListItem service_item : item.getServiceList()) {
+                                if (service_item != null && service_item.getName() != null) {
+                                    serviceList.put(service_item.getName(), service_item);
+                                }
+                            }
+                            n++;
+                            allnodes.put(item.getNodeServiceInfo().getName(), serviceList);
+//                            searchinnodebyname(serviceList,search_vec);
+//                            change(serviceList, false, nodeServiceInfo.getId());
+//                            searchinnode(serviceList, search_vec);
+                            resultInfoWithoutContent.add(sortNodeServiceListItembyname(serviceList, search_vec));
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("树状或者分布式：   "+n);
+        return resultInfoWithoutContent;
+    }
 
 
     /**
      * 从node字典中获取node信息
+     *
      * @param address
      * @return
      */
@@ -334,6 +771,7 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 从字典获取节点信息
+     *
      * @param address
      * @return
      */
@@ -345,32 +783,37 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 测试方法：
+     *
      * @param serviceList
-     * @param keyword
      * @return
      */
-    private ResultInfoWithoutContent sortNodeServiceListItem(List<NodeServiceListItem> serviceList,String keyword){
+    private ResultInfoWithoutContent sortNodeServiceListItem(Map<Integer, NodeServiceListItem> serviceList, Vector vector) {
 
         ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
-        List<NodeServiceListItem> results = new ArrayList<>();
 
         long startTime = System.nanoTime();
-        if(serviceList != null){
-            //首先，检查自己的服务列表有没有符合要求服务
-            for(NodeServiceListItem item : serviceList){
-                //检查服务的属性信息是否包含关键字
-                if(item.getAttributes() != null && item.getAttributes().values() != null){
-                    for(String attrValue : item.getAttributes().values()){
-                        if (attrValue.contains(keyword)){
-                            results.add(item);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+
+        //这是我的搜索函数
+        List<NodeServiceListItem> resultList = searchinnode(serviceList, vector,3);
+
         long endTime = System.nanoTime();
-        resultInfoWithoutContent.setResult(results);
+        resultInfoWithoutContent.setResult(resultList);
+        resultInfoWithoutContent.setCostTime(endTime - startTime);
+
+        return resultInfoWithoutContent;
+    }
+
+    private ResultInfoWithoutContent sortNodeServiceListItembyname(Map<String, NodeServiceListItem> serviceList, Vector vector) {
+
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
+
+        long startTime = System.nanoTime();
+
+        //这是我的搜索函数
+        List<NodeServiceListItem> resultList = searchinnodebyname(serviceList, vector,3);
+
+        long endTime = System.nanoTime();
+        resultInfoWithoutContent.setResult(resultList);
         resultInfoWithoutContent.setCostTime(endTime - startTime);
 
         return resultInfoWithoutContent;
