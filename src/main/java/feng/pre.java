@@ -242,14 +242,14 @@ public class pre {
                 return 1;
         }
     }
-    public static void main(String[] args) {
-        Connection con=Con();
-        fetchData(con);
-//        for (int i = 404993; i >=399995 ; i--) {
-//            //String name="service"+i;
-//            deleteData(con,i);
-//        }
-    }
+//    public static void main(String[] args) {
+//        Connection con=Con();
+//        fetchData(con);
+////        for (int i = 404993; i >=399995 ; i--) {
+////            //String name="service"+i;
+////            deleteData(con,i);
+////        }
+//    }
 }
 //1. 查询
 //String[] contentList = fetchData(con, "content");

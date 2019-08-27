@@ -790,12 +790,9 @@ public class NodeWebServiceImpl implements NodeWebService {
     private ResultInfoWithoutContent sortNodeServiceListItem(Map<Integer, NodeServiceListItem> serviceList, Vector vector) {
 
         ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
-
         long startTime = System.nanoTime();
-
         //这是我的搜索函数
         List<NodeServiceListItem> resultList = searchinnode(serviceList, vector,3);
-
         long endTime = System.nanoTime();
         resultInfoWithoutContent.setResult(resultList);
         resultInfoWithoutContent.setCostTime(endTime - startTime);
@@ -804,14 +801,10 @@ public class NodeWebServiceImpl implements NodeWebService {
     }
 
     private ResultInfoWithoutContent sortNodeServiceListItembyname(Map<String, NodeServiceListItem> serviceList, Vector vector) {
-
         ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
-
         long startTime = System.nanoTime();
-
         //这是我的搜索函数
         List<NodeServiceListItem> resultList = searchinnodebyname(serviceList, vector,3);
-
         long endTime = System.nanoTime();
         resultInfoWithoutContent.setResult(resultList);
         resultInfoWithoutContent.setCostTime(endTime - startTime);
