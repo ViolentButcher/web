@@ -46,7 +46,7 @@ public class TestController {
             attr = new HashMap<>();
         }
         attr.put("test1","test1");
-        service.updateNodeAttributes(attr);
+        service.updateOtherServiceAttributes(attr,104501,105);
 
         return data;
     }

@@ -28,6 +28,6 @@ public class InitApplicationRunner implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args){
-       clusterManagement.init();
+ //      clusterManagement.init();
     }
 }
