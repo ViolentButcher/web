@@ -15,7 +15,7 @@ public class ClusterProvider {
      * @return
      */
     public String getClusterList(String filter,String order,String desc){
-        return new SQL(){{
+        String sql =  new SQL(){{
             SELECT("*");
             FROM("cluster");
             if(filter != null && filter.length() > 0) {
@@ -24,6 +24,8 @@ public class ClusterProvider {
             ORDER_BY(order);
 
         }}.toString() + " " + desc;
+        System.out.println(sql);
+        return sql;
     }
 
 

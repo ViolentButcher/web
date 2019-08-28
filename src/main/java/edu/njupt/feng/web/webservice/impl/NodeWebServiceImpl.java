@@ -19,10 +19,9 @@ import edu.njupt.feng.web.utils.mysql.MySQLUtil;
 import edu.njupt.feng.web.webservice.NodeWebService;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 
-
+import feng.*;
 import java.io.*;
 import java.util.*;
-
 
 public class NodeWebServiceImpl implements NodeWebService {
 
@@ -252,12 +251,25 @@ public class NodeWebServiceImpl implements NodeWebService {
             List<String> serviceOwningNodeList = loadList("service_owning_node_list.txt");
             Double[][] estimateScoreMatrix = loadMatrix("estimate_score_matrix.txt", nodeList.size(), serviceList.size());
             long startTime = System.currentTimeMillis();
-            results = executeRecommend(keyword, nodeList, serviceList, serviceOwningNodeList, estimateScoreMatrix);
+            results = executeRecommendInCentralization(keyword, nodeList, serviceList, serviceOwningNodeList, estimateScoreMatrix);
             long endTime = System.currentTimeMillis();
             System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
         }else if (type == 2){
+            File dataPath = new File("data" + File.separator + nodeServiceInfo.getCluster() + File.separator);
+            if (!dataPath.exists())
+                prepareScoreInHierarchical();
             long startTime = System.currentTimeMillis();
-            results =  recommendMethodTest02ByMap(keyword);
+            results =  executeRecommendInHierarchical(keyword);
+            long endTime = System.currentTimeMillis();
+            System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
+        } else if (type == 3) {
+            System.out.println("line 264");
+            File dataPath = new File("data" + File.separator + nodeServiceInfo.getCluster() + File.separator);
+            System.out.println("line 266");
+            if (!dataPath.exists())
+                prepareScoreInDistribution();
+            long startTime = System.currentTimeMillis();
+            results =  executeRecommendInDistribution(keyword);
             long endTime = System.currentTimeMillis();
             System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
         }
@@ -408,8 +420,113 @@ public class NodeWebServiceImpl implements NodeWebService {
         System.out.println("It's my turn to implement this algorithm");
     }
 
+    public void prepareScoreInHierarchical() {
+        System.out.println("prepareScoreInHierarchical starts");
+        // 获取全部节点的名称
+        List<String> nodeList = new ArrayList<>();
+        NodeServiceInfo rootNodeServiceInfo;
+        NodeMapItem rootItem = null;
+        if (nodeServiceInfo.getLevel() != 0) {
+            rootItem = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
+            do {
+                for (AssociatedNodeServiceInfo associatedNodeServiceInfo : rootItem.getNodeServiceInfo().getAssociatedNodeServiceInfos()) {
+                    System.out.println(associatedNodeServiceInfo.getId());
+                    System.out.println(associatedNodeServiceInfo.getAssociatedType());
+                    if (associatedNodeServiceInfo.getAssociatedType().equals("parent"))
+                        rootItem = getNodeServiceInfoByNodeMap(associatedNodeServiceInfo.getServiceAddress());
+                }
+            } while (rootItem.getNodeServiceInfo().getLevel() != 0);
+            rootNodeServiceInfo = rootItem.getNodeServiceInfo();
+        }
+        else {
+            rootNodeServiceInfo = nodeServiceInfo;
+        }
+        System.out.println("finish 1");
+        Queue<NodeServiceInfo> nodeServiceInfoQueue = new ArrayDeque<>();
+        ((ArrayDeque<NodeServiceInfo>) nodeServiceInfoQueue).addLast(rootNodeServiceInfo);
+        while (!nodeServiceInfoQueue.isEmpty()) {
+            NodeServiceInfo currentNodeServiceInfo = ((ArrayDeque<NodeServiceInfo>) nodeServiceInfoQueue).removeFirst();
+            nodeList.add(currentNodeServiceInfo.getName());
+            for (AssociatedNodeServiceInfo associatedNodeServiceInfo : currentNodeServiceInfo.getAssociatedNodeServiceInfos()) {
+                if (associatedNodeServiceInfo.getAssociatedType().equals("child")) {
+                    NodeMapItem item = getNodeServiceInfoByNodeMap(associatedNodeServiceInfo.getServiceAddress());
+                    ((ArrayDeque<NodeServiceInfo>) nodeServiceInfoQueue).addLast(item.getNodeServiceInfo());
+                }
+            }
+        }
+        System.out.println("finish2");
+        // 分别对每个节点生成相应的得分矩阵
+        Queue<NodeMapItem> nodeMapItemQueue = new ArrayDeque<>();
+        for (AssociatedNodeServiceInfo associatedNodeServiceInfo : rootNodeServiceInfo.getAssociatedNodeServiceInfos()) {
+            if (associatedNodeServiceInfo.getAssociatedType().equals("child")) {
+                ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).addLast(getNodeServiceInfoByNodeMap(associatedNodeServiceInfo.getServiceAddress()));
+            }
+        }
+        while (!nodeMapItemQueue.isEmpty()) {
+            NodeMapItem currentNodeMapItem = ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).removeFirst();
+            System.out.println(currentNodeMapItem.getNodeServiceInfo().getName());
+            generateEstimateScoreInNode(currentNodeMapItem.getServiceList(), nodeList,
+                    "data" + File.separator + currentNodeMapItem.getNodeServiceInfo().getCluster()
+                            + File.separator + currentNodeMapItem.getNodeServiceInfo().getName());
+            for (AssociatedNodeServiceInfo associatedNodeServiceInfo : currentNodeMapItem.getNodeServiceInfo().getAssociatedNodeServiceInfos()) {
+                if (associatedNodeServiceInfo.getAssociatedType().equals("child")) {
+                    NodeMapItem item = getNodeServiceInfoByNodeMap(associatedNodeServiceInfo.getServiceAddress());
+                    ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).addLast(item);
+                }
+            }
+        }
+        if (nodeServiceInfo.getLevel() == 0) {
+            generateEstimateScoreInNode(new ArrayList<>(serviceInfoList.values()), nodeList,
+                    "data" + File.separator + nodeServiceInfo.getCluster() + File.separator
+                            + nodeServiceInfo.getName());
+        }
+        else {
+            generateEstimateScoreInNode(rootItem.getServiceList(), nodeList,
+                    "data" + File.separator + rootItem.getNodeServiceInfo().getCluster()
+                            + File.separator + rootItem.getNodeServiceInfo().getName());
+        }
+        System.out.println("It's my turn to implement this algorithm");
+    }
 
-    public ResultInfoWithoutContent executeRecommend(String keyword,
+    public void prepareScoreInDistribution() {
+        // 获取全部节点的名称
+        System.out.println("prepareScoreInDistribution starts");
+        List<String> nodeList = new ArrayList<>();
+        Queue<NodeMapItem> nodeMapItemQueue = new ArrayDeque<>();
+        ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).addLast(getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress()));
+        while (!nodeMapItemQueue.isEmpty()) {
+            NodeMapItem nodeMapItem = ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).removeFirst();
+            System.out.println(nodeMapItem.getNodeServiceInfo().getName());
+            nodeList.add(nodeMapItem.getNodeServiceInfo().getName());
+            for (AssociatedNodeServiceInfo associatedNodeServiceInfo:nodeMapItem.getNodeServiceInfo().getAssociatedNodeServiceInfos()) {
+                nodeMapItem = getNodeServiceInfoByNodeMap(associatedNodeServiceInfo.getServiceAddress());
+                if (!nodeList.contains(nodeMapItem.getNodeServiceInfo().getName()))
+                    ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).addLast(nodeMapItem);
+            }
+        }
+        for (String nodeName:nodeList) {
+            System.out.println(nodeName);
+        }
+
+        // 分别对每个节点生成相应的得分矩阵
+        List<String> nodeHasBeenProcessed = new ArrayList<>();
+        ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).addLast(getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress()));
+        nodeHasBeenProcessed.add(nodeServiceInfo.getName());
+        while (!nodeMapItemQueue.isEmpty()) {
+            NodeMapItem nodeMapItem = ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).removeFirst();
+            generateEstimateScoreInNode(nodeMapItem.getServiceList(), nodeList,
+                    "data" + File.separator + nodeServiceInfo.getCluster() + File.separator + nodeMapItem.getNodeServiceInfo().getName());
+            for (AssociatedNodeServiceInfo associatedNodeServiceInfo:nodeMapItem.getNodeServiceInfo().getAssociatedNodeServiceInfos()) {
+                nodeMapItem = getNodeServiceInfoByNodeMap(associatedNodeServiceInfo.getServiceAddress());
+                if (!nodeHasBeenProcessed.contains(nodeMapItem.getNodeServiceInfo().getName())) {
+                    ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).addLast(nodeMapItem);
+                    nodeHasBeenProcessed.add(nodeMapItem.getNodeServiceInfo().getName());
+                }
+            }
+        }
+    }
+
+    public ResultInfoWithoutContent executeRecommendInCentralization(String keyword,
                                                      List<String> nodeList,
                                                      List<String> serviceList,
                                                      List<String> serviceOwningNodeList,
@@ -435,7 +552,7 @@ public class NodeWebServiceImpl implements NodeWebService {
                 NodeMapItem item = getNodeServiceInfoByNodeMap(mainNode.getServiceAddress());
                 for (AssociatedNodeServiceInfo associatedNodeServiceInfo:
                         item.getNodeServiceInfo().getAssociatedNodeServiceInfos()) {
-                    item = getNodeServiceInfoByNodeMap(mainNode.getServiceAddress());
+                    item = getNodeServiceInfoByNodeMap(associatedNodeServiceInfo.getServiceAddress());
                     if (item.getNodeServiceInfo().getName().equals(entry.getKey())) {
                         for (NodeServiceListItem nodeServiceListItem : item.getServiceList()) {
                             if (nodeServiceListItem.getAttributes().get("ISBN").equals(entry.getValue()))
@@ -445,10 +562,114 @@ public class NodeWebServiceImpl implements NodeWebService {
                 }
             }
         }
+        System.out.println(results.size());
         ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
         resultInfoWithoutContent.setResult(results);
         System.out.println("It's my turn to implement this algorithm");
         return resultInfoWithoutContent;
+    }
+
+    public ResultInfoWithoutContent executeRecommendInHierarchical(String keyword) {
+        // 找到根节点的NodeMapItem类
+        NodeMapItem rootNodeMapItem = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
+        while (rootNodeMapItem.getNodeServiceInfo().getLevel() != 0) {
+            for (AssociatedNodeServiceInfo associatedNodeServiceInfo: rootNodeMapItem.getNodeServiceInfo().getAssociatedNodeServiceInfos()) {
+                if (associatedNodeServiceInfo.getAssociatedType().equals("parent"))
+                    rootNodeMapItem = getNodeServiceInfoByNodeMap(associatedNodeServiceInfo.getServiceAddress());
+            }
+        }
+
+        // 遍历所有的节点，计算每个节点得分较高的服务
+        Map candidates = new HashMap();
+        Queue<NodeMapItem> nodeMapItemQueue = new ArrayDeque<>();
+        ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).addLast(rootNodeMapItem);
+        while (!nodeMapItemQueue.isEmpty()) {
+            NodeMapItem nodeMapItem = ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).removeFirst();
+            candidates.putAll(getHighScoreServiceInNode(nodeMapItem, 3));
+            for (AssociatedNodeServiceInfo associatedNodeServiceInfo: nodeMapItem.getNodeServiceInfo().getAssociatedNodeServiceInfos()) {
+                if (associatedNodeServiceInfo.getAssociatedType().equals("child"))
+                    ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).addLast(getNodeServiceInfoByNodeMap(associatedNodeServiceInfo.getServiceAddress()));
+            }
+        }
+
+        // 将推荐结果进行汇总
+        List<Map.Entry<NodeServiceListItem, Double>> candidatesList
+                = new ArrayList<Map.Entry<NodeServiceListItem, Double>>(candidates.entrySet());
+        Collections.sort(candidatesList, new Comparator<Map.Entry<NodeServiceListItem, Double>>() {
+            public int compare(Map.Entry<NodeServiceListItem, Double> o1,
+                               Map.Entry<NodeServiceListItem, Double> o2) {
+                return -o1.getValue().compareTo(o2.getValue());
+            }
+        });
+        List<NodeServiceListItem> results = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            results.add(candidatesList.get(i).getKey());
+        }
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
+        resultInfoWithoutContent.setResult(results);
+        return resultInfoWithoutContent;
+    }
+
+
+    public ResultInfoWithoutContent executeRecommendInDistribution(String keyword) {
+        System.out.println("into executeRecommendInDistribution");
+        // 遍历所有的节点，计算每个节点得分较高的服务
+        Map candidates = new HashMap();
+        Queue<NodeMapItem> nodeMapItemQueue = new ArrayDeque<>();
+        List<String> nodeHasBeenProcessed = new ArrayList<>();
+        NodeMapItem nodeMapItem = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
+        ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).addLast(nodeMapItem);
+        nodeHasBeenProcessed.add(nodeMapItem.getNodeServiceInfo().getName());
+        while (!nodeMapItemQueue.isEmpty()) {
+            nodeMapItem = ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).removeFirst();
+            System.out.println(nodeMapItem.getNodeServiceInfo().getName());
+            candidates.putAll(getHighScoreServiceInNode(nodeMapItem, 3));
+            for (AssociatedNodeServiceInfo associatedNodeServiceInfo: nodeMapItem.getNodeServiceInfo().getAssociatedNodeServiceInfos()) {
+                nodeMapItem = getNodeServiceInfoByNodeMap(associatedNodeServiceInfo.getServiceAddress());
+                if (!nodeHasBeenProcessed.contains(nodeMapItem.getNodeServiceInfo().getName())) {
+                    ((ArrayDeque<NodeMapItem>) nodeMapItemQueue).addLast(nodeMapItem);
+                    nodeHasBeenProcessed.add(nodeMapItem.getNodeServiceInfo().getName());
+                }
+
+            }
+        }
+
+        // 将推荐结果进行汇总
+        List<Map.Entry<NodeServiceListItem, Double>> candidatesList
+                = new ArrayList<Map.Entry<NodeServiceListItem, Double>>(candidates.entrySet());
+        Collections.sort(candidatesList, new Comparator<Map.Entry<NodeServiceListItem, Double>>() {
+            public int compare(Map.Entry<NodeServiceListItem, Double> o1,
+                               Map.Entry<NodeServiceListItem, Double> o2) {
+                return -o1.getValue().compareTo(o2.getValue());
+            }
+        });
+        List<NodeServiceListItem> results = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            results.add(candidatesList.get(i).getKey());
+        }
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
+        resultInfoWithoutContent.setResult(results);
+        return resultInfoWithoutContent;
+    }
+
+
+    Map getHighScoreServiceInNode(NodeMapItem nodeItem, int returnNumber) {
+        Map<NodeServiceListItem, Double> highScoreServiceMap = new HashMap();
+        String nodeName = nodeItem.getNodeServiceInfo().getName();
+        Integer clusterName = nodeItem.getNodeServiceInfo().getCluster();
+        List<String> nodeList = loadList("data" + File.separator + clusterName + File.separator + nodeName
+                + File.separator + "node_list.txt");
+        List<String> serviceList = loadList("data" + File.separator + clusterName + File.separator + nodeName
+                + File.separator + "service_list.txt");
+        Double[][] estimateScoreMatrix = loadMatrix("data" + File.separator + clusterName + File.separator
+                + nodeName + File.separator + "estimate_score_matrix.txt", nodeList.size(), serviceList.size());
+        int currentNodeIndex = nodeList.indexOf(nodeServiceInfo.getName());
+        List<Integer> highScoreServiceIndexList = minIndex(estimateScoreMatrix[currentNodeIndex], returnNumber);
+        for (Integer highScoreServiceIndex : highScoreServiceIndexList) {
+            highScoreServiceMap.put(nodeItem.getServiceList().get(highScoreServiceIndex),
+                    estimateScoreMatrix[currentNodeIndex][highScoreServiceIndex]);
+        }
+        return highScoreServiceMap;
     }
 
 
@@ -516,8 +737,11 @@ public class NodeWebServiceImpl implements NodeWebService {
     }
 
     public static void saveList(List<String> list, String fileName) {
+        System.out.println(fileName);
         try {
             File writeName = new File(fileName);
+            if (!writeName.getParentFile().exists())
+                writeName.getParentFile().mkdirs();
             writeName.createNewFile(); // 创建新文件,有同名的文件的话直接覆盖
             try (FileWriter writer = new FileWriter(writeName);
                  BufferedWriter out = new BufferedWriter(writer)
@@ -534,8 +758,11 @@ public class NodeWebServiceImpl implements NodeWebService {
     }
 
     public static void saveMatrix(Double[][] matrix, String fileName) {
+        System.out.println(fileName);
         try {
             File writeName = new File(fileName);
+            if (!writeName.getParentFile().exists())
+                writeName.getParentFile().mkdirs();
             writeName.createNewFile(); // 创建新文件,有同名的文件的话直接覆盖
             try (FileWriter writer = new FileWriter(writeName);
                  BufferedWriter out = new BufferedWriter(writer)
@@ -619,9 +846,56 @@ public class NodeWebServiceImpl implements NodeWebService {
         return result;
     }
 
+    public void generateEstimateScoreInNode(List<NodeServiceListItem> nodeServiceListItemList,
+                                            List<String> nodeList,
+                                            String path) {
+        System.out.println("==nodelist==");
+        for (int i = 0; i < nodeList.size(); i++) {
+            System.out.println(nodeList.get(i));
+        };
+        System.out.println("==nodelist_end==");
+        List<String> serviceList = new ArrayList<>();
+        Double[][] scoreMatrix = new Double[nodeList.size()][nodeServiceListItemList.size()];
+        for (int i = 0; i < scoreMatrix.length; i++) {
+            for (int j = 0; j < scoreMatrix[0].length; j++) {
+                scoreMatrix[i][j] = 0.0;
+            }
+
+        }
+        int serviceIndex = 0;
+        for (NodeServiceListItem nodeServiceListItem : nodeServiceListItemList) {
+            serviceList.add(String.valueOf(nodeServiceListItem.getId()));
+            String scoreMapString = nodeServiceListItem.getAttributes().get("Score");
+            Map<String, Object> scoreMap = parseMap(scoreMapString);
+            for (Map.Entry<String, Object> entry : scoreMap.entrySet()) {
+                String userName = entry.getKey();
+//                System.out.println("userName=" + userName);
+                int indexOfUser = nodeList.indexOf(userName);
+                scoreMatrix[indexOfUser][serviceIndex] = Double.valueOf((String)entry.getValue());
+            }
+            serviceIndex ++;
+            System.out.println("service index=" + serviceIndex);
+        }
+
+        // 实施矩阵分解
+        Double[][] estimateScoreMatrix = (Double[][]) MatrixFactorization.gradAscent(scoreMatrix, 3).get("product");
+
+        // 将结果写入文件
+        saveList(nodeList, path + File.separator + "node_list.txt");
+        saveList(serviceList, path + File.separator + "service_list.txt");
+        saveMatrix(scoreMatrix, path + File.separator + "score_matrix.txt");
+        saveMatrix(estimateScoreMatrix, path + File.separator + "estimate_score_matrix.txt");
+    }
+
     static class LeastComparator implements Comparator<Double> {
         public int compare(Double o1, Double o2) {
-            return (int)(o2-o1);
+            if(o1 < o2)
+                return 1;
+            else
+                if (o1 > o2)
+                    return -1;
+                else
+                    return 0;
         }
     }
 
