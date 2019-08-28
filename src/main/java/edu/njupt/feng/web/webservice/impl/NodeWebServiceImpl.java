@@ -298,7 +298,7 @@ public class NodeWebServiceImpl implements NodeWebService {
             System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
         }else if (type == 2){
             long startTime = System.currentTimeMillis();
-            results =  recommendMethodTest02ByMap(keyword);
+            //results =  recommendMethodTest02ByMap(keyword);
             long endTime = System.currentTimeMillis();
             System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
         }
