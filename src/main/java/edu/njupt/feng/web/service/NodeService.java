@@ -146,4 +146,13 @@ public interface NodeService {
      * 更新节点所有节点的服务数量
      */
     public void updateAllNodeServiceNumber(Integer clusterID);
+
+    /**
+     * 自动配置节点
+     * @param clusterID
+     * @param rule
+     * @param save
+     * @param parameter
+     */
+    public void autoConfigNodes(int clusterID,int rule,boolean save,Map<String,String> parameter);
 }

@@ -15,6 +15,7 @@ import edu.njupt.feng.web.management.NodeMap;
 import edu.njupt.feng.web.management.ServiceMap;
 import edu.njupt.feng.web.utils.constants.Constants;
 import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
+import edu.njupt.feng.web.utils.model.MatrixFactorization;
 import edu.njupt.feng.web.utils.mysql.MySQLUtil;
 import edu.njupt.feng.web.webservice.NodeWebService;
 import feng.pre;
@@ -25,6 +26,8 @@ import com.hankcs.hanlp.mining.word2vec.DocVectorModel;
 import java.io.IOException;
 import java.util.*;
 
+import java.io.*;
+import java.util.*;
 import feng.util;
 import feng.Temp;
 
@@ -241,6 +244,7 @@ public class NodeWebServiceImpl implements NodeWebService {
     @Override
     public ResultInfoWithoutContent testSearch(String keyword, Integer type) {
         ResultInfoWithoutContent results = new ResultInfoWithoutContent();
+//        if(type == 1){
         //加载word2vec.txt,并获得文档向量模型。
         DocVectorModel docVectorModel = null;
         try {
@@ -276,8 +280,29 @@ public class NodeWebServiceImpl implements NodeWebService {
      * @return
      */
     @Override
-    public ResultInfoWithoutContent testRecommend(String keyword, Integer type) {
-        return testSearch(keyword, type);
+    public ResultInfoWithoutContent testRecommend(String keyword,Integer type) {
+        ResultInfoWithoutContent results = new ResultInfoWithoutContent();
+        if(type == 1){
+            if(!new File("node_list.txt").exists()
+                    || !new File("service_list.txt").exists()
+                    || !new File("service_owning_node_list.txt").exists()
+                    || !new File("estimate_score_matrix.txt").exists())
+                prepareScoreInCentralization();
+            List<String> nodeList = loadList("node_list.txt");
+            List<String> serviceList = loadList("service_list.txt");
+            List<String> serviceOwningNodeList = loadList("service_owning_node_list.txt");
+            Double[][] estimateScoreMatrix = loadMatrix("estimate_score_matrix.txt", nodeList.size(), serviceList.size());
+            long startTime = System.currentTimeMillis();
+            results = executeRecommend(keyword, nodeList, serviceList, serviceOwningNodeList, estimateScoreMatrix);
+            long endTime = System.currentTimeMillis();
+            System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
+        }else if (type == 2){
+            long startTime = System.currentTimeMillis();
+            results =  recommendMethodTest02ByMap(keyword);
+            long endTime = System.currentTimeMillis();
+            System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
+        }
+        return results;
     }
 
 
@@ -757,10 +782,117 @@ public class NodeWebServiceImpl implements NodeWebService {
         return resultInfoWithoutContent;
     }
 
+    public void prepareScoreInCentralization() {
+
+//        System.out.println(scoreSetString);
+
+        // 读取节点和服务列表
+        List<String> nodeList = new ArrayList<>();
+        List<String> serviceList = new ArrayList<>();
+        List<String> serviceOwningNodeList = new ArrayList<>();
+        nodeList.add(nodeServiceInfo.getName());
+        for (NodeServiceListItem nodeServiceListItem : new ArrayList<>(serviceInfoList.values())) {
+            serviceList.add(nodeServiceListItem.getAttributes().get("ISBN"));
+            serviceOwningNodeList.add(nodeServiceInfo.getName());
+        }
+        for(AssociatedNodeServiceInfo nodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()) {
+            NodeMapItem item = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
+            nodeList.add(item.getNodeServiceInfo().getName());
+            for (NodeServiceListItem nodeServiceListItem : item.getServiceList()) {
+//                System.out.println(nodeServiceListItem.getId());
+//                System.out.println(nodeServiceListItem.getName());
+//                System.out.println(nodeServiceListItem.getAttributes());
+                serviceList.add(nodeServiceListItem.getAttributes().get("ISBN"));
+                serviceOwningNodeList.add(item.getNodeServiceInfo().getName());
+            }
+        }
+
+        // 构造评分矩阵
+        Double[][] scoreMatrix = new Double[nodeList.size()][serviceList.size()];
+        String scoreSetString = nodeServiceInfo.getAttributes().get("rating");
+        Map<String, Object> scoreSet = parseMap(scoreSetString);
+        for (Map.Entry<String, Object> entry : scoreSet.entrySet()) {
+//            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+            int rowIndex = nodeList.indexOf(nodeServiceInfo.getName());
+            int columnIndex = serviceList.indexOf(entry.getKey());
+            scoreMatrix[rowIndex][columnIndex] = Double.valueOf((String)entry.getValue());
+        }
+        for(AssociatedNodeServiceInfo nodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()) {
+            NodeMapItem item = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
+            int rowIndex = nodeList.indexOf(item.getNodeServiceInfo().getName());
+            System.out.println(rowIndex);
+            scoreSetString = item.getNodeServiceInfo().getAttributes().get("rating");
+            scoreSet = parseMap(scoreSetString);
+            for (Map.Entry<String, Object> entry : scoreSet.entrySet()) {
+//                System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+                int columnIndex = serviceList.indexOf(entry.getKey());
+                scoreMatrix[rowIndex][columnIndex] = Double.valueOf((String)entry.getValue());
+            }
+        }
+
+        Map matrixFactorizationResult = MatrixFactorization.gradAscent(scoreMatrix, 10);
+        Double[][] product = (Double[][]) matrixFactorizationResult.get("product");
+
+        saveList(nodeList, "node_list.txt");
+        saveList(serviceList, "service_list.txt");
+        saveList(serviceOwningNodeList, "service_owning_node_list.txt");
+        saveMatrix(scoreMatrix, "score_matrix.txt");
+        saveMatrix(product, "estimate_score_matrix.txt");
+
+
+        System.out.println("It's my turn to implement this algorithm");
+    }
+
+
+    public ResultInfoWithoutContent executeRecommend(String keyword,
+                                                     List<String> nodeList,
+                                                     List<String> serviceList,
+                                                     List<String> serviceOwningNodeList,
+                                                     Double[][] estimateScoreMatrix) {
+        List<NodeServiceListItem> results = new ArrayList<>();
+
+        int row = nodeList.indexOf(nodeServiceInfo.getName());
+        List<Integer> objectIndex = minIndex(estimateScoreMatrix[row], 3);
+        Map<String, String> object = new TreeMap<>();
+        for (Integer element: objectIndex) {
+            object.put(serviceOwningNodeList.get(element), serviceList.get(element));
+        }
+        for (Map.Entry<String, String> entry : object.entrySet()) {
+            System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+            if (nodeServiceInfo.getName().equals(entry.getKey())) {
+                for (NodeServiceListItem nodeServiceListItem : serviceInfoList.values()) {
+                    if (nodeServiceListItem.getAttributes().get("ISBN").equals(entry.getValue()))
+                        results.add(nodeServiceListItem);
+                }
+            }
+            else {
+                AssociatedNodeServiceInfo mainNode = nodeServiceInfo.getAssociatedNodeServiceInfos().get(0);
+                NodeMapItem item = getNodeServiceInfoByNodeMap(mainNode.getServiceAddress());
+                for (AssociatedNodeServiceInfo associatedNodeServiceInfo:
+                        item.getNodeServiceInfo().getAssociatedNodeServiceInfos()) {
+                    item = getNodeServiceInfoByNodeMap(mainNode.getServiceAddress());
+                    if (item.getNodeServiceInfo().getName().equals(entry.getKey())) {
+                        for (NodeServiceListItem nodeServiceListItem : item.getServiceList()) {
+                            if (nodeServiceListItem.getAttributes().get("ISBN").equals(entry.getValue()))
+                                results.add(nodeServiceListItem);
+                        }
+                    }
+                }
+            }
+        }
+        ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
+        resultInfoWithoutContent.setResult(results);
+        System.out.println("It's my turn to implement this algorithm");
+        return resultInfoWithoutContent;
+    }
+
+
+
 
     /**
      * 从node字典中获取node信息
      *
+      * 从node字典中获取node信息
      * @param address
      * @return
      */
@@ -810,4 +942,122 @@ public class NodeWebServiceImpl implements NodeWebService {
 
         return resultInfoWithoutContent;
     }
+
+    public static Map<String, Object> parseMap (String mapString) {
+        Gson gson = new Gson();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map = gson.fromJson(mapString, map.getClass());
+        return map;
+    }
+
+    public static void saveList(List<String> list, String fileName) {
+        try {
+            File writeName = new File(fileName);
+            writeName.createNewFile(); // 创建新文件,有同名的文件的话直接覆盖
+            try (FileWriter writer = new FileWriter(writeName);
+                 BufferedWriter out = new BufferedWriter(writer)
+            ) {
+                for (String item : list) {
+                    out.write(item);
+                    out.newLine();
+                }
+                out.flush(); // 把缓存区内容压入文件
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveMatrix(Double[][] matrix, String fileName) {
+        try {
+            File writeName = new File(fileName);
+            writeName.createNewFile(); // 创建新文件,有同名的文件的话直接覆盖
+            try (FileWriter writer = new FileWriter(writeName);
+                 BufferedWriter out = new BufferedWriter(writer)
+            ) {
+                for (int i = 0; i < matrix.length; i++) {
+                    for (int j = 0; j < matrix[0].length; j++) {
+                        out.write(String.valueOf(matrix[i][j]));
+                        if (j == matrix[0].length - 1)
+                            out.newLine();
+                        else
+                            out.write(",");
+                    }
+                }
+                out.flush(); // 把缓存区内容压入文件
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> loadList(String fileName) {
+        List<String> result = new ArrayList<>();
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(new File(fileName))));
+            String line = "";
+            while(true) {
+                line = br.readLine();
+                if(line == null)
+                    break;
+                result.add(line);
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static Double[][] loadMatrix(String fileName, int rowNumber, int columnNumber) {
+        Double[][] result = new Double[rowNumber][columnNumber];
+        int rowIndex = 0;
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(new File(fileName))));
+            String line = "";
+            while(true) {
+                line = br.readLine();
+                if(line == null)
+                    break;
+                String[] elementArray = line.split(",");
+                for (int i = 0; i < elementArray.length; i++) {
+                    result[rowIndex][i] = Double.valueOf(elementArray[i]);
+                }
+                rowIndex ++;
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static List<Integer> minIndex(Double[] array, int n) {
+        List<Integer> result = new ArrayList<Integer>();
+        HashMap map = new HashMap();
+        for (int i = 0; i < array.length; i++) {
+            map.put(array[i], i); // 将值和下标存入Map
+        }
+        // 排列
+        List list = new ArrayList();
+        LeastComparator myComparator = new LeastComparator();
+        Arrays.sort(array, myComparator); // 升序排列
+        for (int i = 0; i < array.length; i++) {
+            list.add(array[i]);
+        }
+        // 查找原始下标
+        for (int i = 0; i < n; i++) {
+            result.add((Integer)map.get(array[i]));
+        }
+        return result;
+    }
+
+    static class LeastComparator implements Comparator<Double> {
+        public int compare(Double o1, Double o2) {
+            return (int)(o2-o1);
+        }
+    }
+
 }
