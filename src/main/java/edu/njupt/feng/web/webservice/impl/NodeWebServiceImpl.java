@@ -16,15 +16,14 @@ import edu.njupt.feng.web.utils.constants.Constants;
 import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
 import edu.njupt.feng.web.utils.mysql.MySQLUtil;
 import edu.njupt.feng.web.webservice.NodeWebService;
-import edu.njupt.feng.web.webservice.ServiceWebService;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import feng.util;
-
 
 
 public class NodeWebServiceImpl implements NodeWebService {
@@ -50,6 +49,15 @@ public class NodeWebServiceImpl implements NodeWebService {
     @Override
     public void updateServiceName(String name,int serviceID) {
         serviceInfoList.get(serviceID).setName(name);
+    }
+
+    /**
+     * 更新自身修改时间
+     * @param modifyTime
+     */
+    @Override
+    public void updateModifyTime(Date modifyTime) {
+        nodeServiceInfo.setModifyTime(modifyTime);
     }
 
     /**
@@ -136,6 +144,13 @@ public class NodeWebServiceImpl implements NodeWebService {
     @Override
     public void updateServiceAttributes(Map<String, String> attributes, Integer serviceID) {
         serviceInfoList.get(serviceID).setAttributes(attributes);
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            MySQLUtil.updateServiceAttributes(mapper.writeValueAsString(attributes),serviceID);
+        }catch (Exception e){
+
+        }
+        ServiceMap.updateServiceAttributes(Constants.SERVICE_PREFIX + serviceID,attributes);
     }
 
     /**
@@ -151,6 +166,22 @@ public class NodeWebServiceImpl implements NodeWebService {
         factoryBean.setServiceClass(NodeWebService.class);
         NodeWebService service = factoryBean.create(NodeWebService.class);
         service.updateNodeAttributes(attributes);
+    }
+
+    /**
+     * 更新其它节点所属的服务的属性
+     * @param attributes
+     * @param serviceID
+     * @param nodeID
+     */
+    @Override
+    public void updateOtherServiceAttributes(Map<String, String> attributes, Integer serviceID, Integer nodeID) {
+        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+
+        factoryBean.setAddress(Constants.NODE_PREFIX + nodeID);
+        factoryBean.setServiceClass(NodeWebService.class);
+        NodeWebService service = factoryBean.create(NodeWebService.class);
+        service.updateServiceAttributes(attributes,serviceID);
     }
 
     /**
