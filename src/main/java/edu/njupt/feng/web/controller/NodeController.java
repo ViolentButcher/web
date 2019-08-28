@@ -113,8 +113,28 @@ public class NodeController {
      * @return
      */
     @RequestMapping("/api/node/configure/auto")
-    public JsonData configureNodeWithAuto(){
+    public JsonData configureNodeWithAuto(Integer clusterID,Boolean save,Integer rule,String parameter){
         JsonData data = new JsonData();
+
+        if(clusterID == null){
+            data.setMsg("请选择集群");
+        }else if(rule == null){
+            data.setMsg("请选择配置方法");
+        }else {
+            if(clusterManagement.isStart(clusterID)){
+                data.setMsg("集群已经启动，无法配置集群！！！");
+            }else {
+                Map<String,String> parameterMap = new HashMap<>();
+                if (parameter != null && parameter.length()>0){
+                    for (String s : parameter.replaceAll(" ","").split(",")){
+                        if(s.contains(":")){
+                            parameterMap.put(s.split(":")[0],s.split(":")[1]);
+                        }
+                    }
+                }
+                nodeService.autoConfigNodes(clusterID,rule,save,parameterMap);
+            }
+        }
 
         return data;
     }
