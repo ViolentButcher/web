@@ -304,7 +304,7 @@ public class NodeWebServiceImpl implements NodeWebService {
         }
         return results;
     }
-
+//为什么啊？？？？？
 
     /**
      * 初始化之根据服务的vector，以洪范的方式为每个服务创建语义邻接表
