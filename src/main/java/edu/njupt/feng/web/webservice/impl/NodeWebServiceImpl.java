@@ -15,6 +15,7 @@ import edu.njupt.feng.web.management.NodeMap;
 import edu.njupt.feng.web.management.ServiceMap;
 import edu.njupt.feng.web.utils.constants.Constants;
 import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
+import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
 import edu.njupt.feng.web.utils.model.MatrixFactorization;
 import edu.njupt.feng.web.utils.mysql.MySQLUtil;
 import edu.njupt.feng.web.webservice.NodeWebService;
@@ -25,6 +26,13 @@ import com.hankcs.hanlp.mining.word2vec.DocVectorModel;
 
 import java.io.IOException;
 import java.util.*;
+
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import feng.util;
 
 import java.io.*;
 import java.util.*;
@@ -38,9 +46,18 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     private Map<Integer, NodeServiceListItem> serviceInfoList = new HashMap<>();
 
+
+
+
+
+
+
+
+
+
+
     /**
      * 更新节点名称
-     *
      * @param name
      */
     @Override
@@ -50,18 +67,16 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 更新所属服务的名称
-     *
      * @param name
      * @param serviceID
      */
     @Override
-    public void updateServiceName(String name, int serviceID) {
+    public void updateServiceName(String name,int serviceID) {
         serviceInfoList.get(serviceID).setName(name);
     }
 
     /**
      * 更新自身修改时间
-     *
      * @param modifyTime
      */
     @Override
@@ -71,7 +86,6 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 更新节点位置
-     *
      * @param position
      */
     @Override
@@ -81,7 +95,6 @@ public class NodeWebServiceImpl implements NodeWebService {
 
     /**
      * 添加服务
-     *
      * @param serviceInfo
      */
     @Override
