@@ -1,6 +1,7 @@
 package edu.njupt.feng.web.webservice.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import edu.njupt.feng.web.entity.common.AssociatedNodeServiceInfo;
 import edu.njupt.feng.web.entity.common.NodeMapItem;
 import edu.njupt.feng.web.entity.common.Position;
@@ -17,7 +18,13 @@ import edu.njupt.feng.web.utils.mysql.MySQLUtil;
 import edu.njupt.feng.web.webservice.NodeWebService;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import feng.util;
+
 
 public class NodeWebServiceImpl implements NodeWebService {
 
@@ -215,7 +222,7 @@ public class NodeWebServiceImpl implements NodeWebService {
         ResultInfoWithoutContent results = new ResultInfoWithoutContent();
         if(type ==1){
             long startTime = System.currentTimeMillis();
-            results = recommendMethodTest01ByWebservice(keyword);
+            results = recommendMethodTest01ByWebservice(keyword,0.5f);
             long endTime = System.currentTimeMillis();
             System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
         }else if (type == 2){
@@ -242,34 +249,63 @@ public class NodeWebServiceImpl implements NodeWebService {
      * @param keyword
      * @return
      */
-    public ResultInfoWithoutContent recommendMethodTest01ByWebservice(String keyword){
+    public ResultInfoWithoutContent recommendMethodTest01ByWebservice(String keyword,float limit){
 
         ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
-
-        //首先，检查自己的服务列表有没有符合要求服务
         if(serviceInfoList!= null && serviceInfoList.values() != null){
-            System.out.println(nodeServiceInfo.getAttributes());
-            resultInfoWithoutContent.add(sortNodeServiceListItem(new ArrayList<>(serviceInfoList.values()),keyword));
-        }
 
-        if ( nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
-            //遍历关联节点
-            for(AssociatedNodeServiceInfo associatedNode : nodeServiceInfo.getAssociatedNodeServiceInfos()){
+            //初始化attributes中的————temp_Nextlist:[{},{},~~~]
+            for(NodeServiceListItem service_item : serviceInfoList.values()){
+                service_item.getAttributes().put("temp_Nextlist","");
+                updateServiceAttributes(service_item.getAttributes(),service_item.getId());
+            }
+            //用于存储所有服务的邻接表 service：service邻接表
+            //service邻接表格式：ArrayList<Map<String,String>>
+            //Map<String,String>———— "id":id,"Sim":sim
+            Map<NodeServiceListItem,ArrayList<Map<String,String>>> L =new HashMap<>();
+            for(NodeServiceListItem service_item : serviceInfoList.values()){
+                ArrayList<Map<String,String>> item_Nextlist=new ArrayList<>();
+                item_Nextlist.clear();
+                L.put(service_item,item_Nextlist);
+            }
 
-                //获取关联节点的节点信息
-                NodeServiceInfo associatedNodeInfo = getNodeServiceInfo(associatedNode.getServiceAddress());
+            //计算Sim
+            for(NodeServiceListItem service_item : serviceInfoList.values())
+            {
+                int id=service_item.getId();
+                float[] vec=util.String_2_floatList(service_item.getAttributes().get("vec"));
+                for(NodeServiceListItem service_item_2 : serviceInfoList.values())
+                {
+                    int id_2=service_item_2.getId();
+                    float[] vec_2=util.String_2_floatList(service_item_2.getAttributes().get("vec"));
+                    if(id != id_2)
+                    {
+                        float Sim=util.dot(vec,vec_2);
+                        if(Sim>limit)
+                        {
+                            //向service_item中添加邻接顶点（服务）
+                            Map<String,String> next_service2=new HashMap<>();
+                            next_service2.put("id",Integer.toString(id_2));
+                            next_service2.put("Sim",Float.toString(Sim));
+                            L.get(service_item).add(next_service2);
 
-                System.out.println(associatedNodeInfo.getAttributes());
-                //获取关联节点的服务列表
-                List<NodeServiceListItem> associatedNodeServicesList = getServiceList(associatedNode.getServiceAddress());
-
-                if (associatedNodeServicesList!=null){
-                    resultInfoWithoutContent.add(sortNodeServiceListItem(associatedNodeServicesList,keyword));
+                            //向service_item_2中添加邻接顶点（服务）
+                            Map<String,String> next_service1=new HashMap<>();
+                            next_service1.put("id",Integer.toString(id));
+                            next_service1.put("Sim",Float.toString(Sim));
+                            L.get(service_item_2).add(next_service1);
+                        }
+                    }
                 }
+            }
 
+            Gson gson=new Gson();
+            //对L中的所有邻接表添加到相应service的attributes中。
+            for(NodeServiceListItem service_item : serviceInfoList.values()){
+                service_item.getAttributes().put("temp_Nextlist",gson.toJson(L.get(service_item)));
+                updateServiceAttributes(service_item.getAttributes(),service_item.getId());
             }
         }
-
         return resultInfoWithoutContent;
     }
 
@@ -278,13 +314,31 @@ public class NodeWebServiceImpl implements NodeWebService {
 
         //首先，检查自己的服务列表有没有符合要求服务
         if(serviceInfoList!= null && serviceInfoList.values() != null){
-            resultInfoWithoutContent.add(sortNodeServiceListItem(new ArrayList<>(serviceInfoList.values()),keyword));
+            //resultInfoWithoutContent.add(sortNodeServiceListItem(new ArrayList<>(serviceInfoList.values()),keyword));
+            for(NodeServiceListItem service_item : serviceInfoList.values()){
+                //service_item   id : {journal=中国矿业大学(北京), author=潘莉, publish_time=2016年, title=南水北调北京受水区供水调适与管理, keyword=北京市}
+                System.out.print(service_item.getId());
+                System.out.println(service_item.getAttributes());
+            }
+
+//            for (int i = 1; i < serviceInfoList.size()+1; i++) {
+//                System.out.println(serviceInfoList.get(i).getId());
+//            }
         }
         //遍历关联节点
         if(nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
             for(AssociatedNodeServiceInfo nodeServiceInfo : nodeServiceInfo.getAssociatedNodeServiceInfos()){
                 NodeMapItem item = getNodeServiceInfoByNodeMap(nodeServiceInfo.getServiceAddress());
-                resultInfoWithoutContent.add(sortNodeServiceListItem(item.getServiceList(),keyword));
+                //resultInfoWithoutContent.add(sortNodeServiceListItem(item.getServiceList(),keyword));
+
+                if (item.getServiceList()!=null){
+                    System.out.println("\n当前节点为："+nodeServiceInfo.getId());
+                    for(NodeServiceListItem service_item : item.getServiceList()){
+                        service_item.getId();
+                        //System.out.print(item.getId());
+                    }
+//                    resultInfoWithoutContent.add(sortNodeServiceListItem(associatedNodeServicesList,keyword));
+                }
             }
         }
         return resultInfoWithoutContent;
