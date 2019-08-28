@@ -32,16 +32,19 @@ public class NodeServiceImpl implements NodeService {
     @Autowired
     private ClusterManagement clusterManagement;
 
-
     @Autowired
     private NodeManagement nodeManagement;
 
+    /**
+     * 更新关联节点
+     * @param nodeID
+     * @param associatedNodeInfos
+     */
     @Override
     public void updateAssoicatedNodes(Integer nodeID, List<AssociatedNodeInfo> associatedNodeInfos) {
         ObjectMapper mapper = new ObjectMapper();
         try{
             String associatedNodes = mapper.writeValueAsString(associatedNodeInfos);
-            System.out.println(associatedNodes + "-----------------");
             nodeMapper.updateAssoicatedNode(associatedNodes,nodeID);
         }catch (Exception e){
 
@@ -49,6 +52,21 @@ public class NodeServiceImpl implements NodeService {
 
     }
 
+    /**
+     * 更新节点名称
+     * @param name
+     * @param nodeID
+     */
+    @Override
+    public void updateName(String name, Integer nodeID) {
+        nodeMapper.updateName(name, nodeID);
+    }
+
+    /**
+     * 更新节点属性
+     * @param attributes
+     * @param nodeID
+     */
     @Override
     public void updateAttributes(Map<String, String> attributes, Integer nodeID) {
         ObjectMapper mapper = new ObjectMapper();
@@ -62,6 +80,11 @@ public class NodeServiceImpl implements NodeService {
         }
     }
 
+    /**
+     * 更新位置信息
+     * @param position
+     * @param nodeID
+     */
     @Override
     public void updatePosition(Position position, Integer nodeID) {
         ObjectMapper mapper = new ObjectMapper();
@@ -70,47 +93,87 @@ public class NodeServiceImpl implements NodeService {
         }catch (Exception e){
 
         }
-        if(clusterManagement.nodeStart(nodeID)){
-            nodeManagement.updateNodePosition(position,nodeID);
-        }
     }
 
+    /**
+     * 更新节点信息
+     * @param cluster
+     * @param nodeID
+     */
     @Override
     public void updateCluster(Integer cluster, Integer nodeID) {
         nodeMapper.updateCluster(cluster, nodeID);
     }
 
+    /**
+     * 更新服务数量
+     * @param serviceNumber
+     * @param nodeID
+     */
     @Override
     public void updateServiceNumber(Integer serviceNumber, Integer nodeID) {
         nodeMapper.updateServiceNumber(serviceNumber, nodeID);
     }
 
+    /**
+     * 更新层次
+     * @param level
+     * @param nodeID
+     */
     @Override
     public void updateLevel(Integer level, Integer nodeID) {
         nodeMapper.updateLevel(level, nodeID);
     }
 
+    /**
+     * 更新创建时间
+     * @param createTime
+     * @param nodeID
+     */
     @Override
     public void updateCreateTime(Date createTime, Integer nodeID) {
         nodeMapper.updateCreateTime(createTime, nodeID);
     }
 
+    /**
+     * 更新修改时间
+     * @param modifyTime
+     * @param nodeID
+     */
     @Override
     public void updateModifyTime(Date modifyTime, Integer nodeID) {
         nodeMapper.updateModifyTime(modifyTime, nodeID);
     }
 
+    /**
+     * 获取节点信息
+     * @param clusterID
+     * @return
+     */
     @Override
     public List<NodeInfo> getNodeInfos(Integer clusterID) {
         return nodeMapper.getNodeInfosListByClusterID(clusterID);
     }
 
+    /**
+     * 配置节点
+     * TODO
+     * @param clusterID
+     */
     @Override
     public void configureNodes(Integer clusterID) {
 
     }
 
-
+    /**
+     * 获取集群节点列表
+     * @param clusterID
+     * @param pageNum
+     * @param filter
+     * @param order
+     * @param desc
+     * @return
+     */
     @Override
     public PageInfo getPageNodeListWithParams(Integer clusterID, Integer pageNum, String filter, String order, String desc) {
         PageHelper.startPage(pageNum,10);
@@ -119,6 +182,14 @@ public class NodeServiceImpl implements NodeService {
         return pageInfo;
     }
 
+    /**
+     * 添加节点
+     * @param nodeName
+     * @param cluster
+     * @param attributes
+     * @param position
+     * @return
+     */
     @Override
     public boolean addNode(String nodeName, Integer cluster,String attributes,String position) {
         if(nodeMapper.countNodesByName(nodeName) == 0){
@@ -136,11 +207,23 @@ public class NodeServiceImpl implements NodeService {
         return false;
     }
 
+    /**
+     * 删除节点
+     * @param nodeID
+     */
     @Override
     public void deleteNode(Integer nodeID) {
         nodeMapper.deleteNode(nodeID);
     }
 
+    /**
+     * 获取所有节点列表
+     * @param pageNum
+     * @param filter
+     * @param order
+     * @param desc
+     * @return
+     */
     @Override
     public PageInfo getAllNodeList(Integer pageNum, String filter, String order, String desc) {
         PageHelper.startPage(pageNum,10);
@@ -149,20 +232,51 @@ public class NodeServiceImpl implements NodeService {
         return pageInfo;
     }
 
+    /**
+     * 获取节点服务信息
+     * @param nodeID
+     * @return
+     */
     @Override
     public NodeServiceInfo getNodeServiceInfo(Integer nodeID) {
         return Convert2ServiceInfo.nodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfoByNodeID(nodeID));
     }
 
+    /**
+     * 获取节点服务信息
+     * @param clusterID
+     * @return
+     */
     @Override
     public List<NodeServiceInfo> getNodeServiceInfoListByClusterID(Integer clusterID) {
         return Convert2ServiceInfo.listNodeServiceInfo2ServiceInfo(nodeMapper.getNodeInfosListByClusterID(clusterID));
     }
 
+    /**
+     * 更新集群所有节点服务数量
+     * @param clusterID
+     */
     @Override
     public void updateAllNodeServiceNumber(Integer clusterID) {
         for(Integer nodeID : nodeMapper.getNodeListsByClusterID(clusterID)){
             updateServiceNumber(serviceMapper.countNodeServiceNumber(nodeID),nodeID);
         }
+    }
+
+
+    /**
+     * 自动配置节点
+     * @param clusterID
+     * @param rule
+     * @param save
+     * @param parameter
+     */
+    @Override
+    public void autoConfigNodes(int clusterID, int rule, boolean save, Map<String, String> parameter) {
+        System.out.println("clusterID : " + clusterID
+                            + "\nrule : " + rule
+                            + "\nsave : " + save
+                            + "\nparameter : "  + parameter);
+
     }
 }

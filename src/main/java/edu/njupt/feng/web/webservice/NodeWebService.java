@@ -10,6 +10,7 @@ import edu.njupt.feng.web.entity.service.NodeServiceListItem;
 import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
 
 import javax.jws.WebService;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,11 @@ public interface NodeWebService {
      */
     public void updateServiceName(String name,int serviceID);
 
+    /**
+     * 更新自身修改时间
+     * @param modifyTime
+     */
+    public void updateModifyTime(Date modifyTime);
 
     /**
      * 更新节点坐标
@@ -86,6 +92,14 @@ public interface NodeWebService {
      * @param serviceID
      */
     public void updateServiceAttributes(Map<String,String> attributes,Integer serviceID);
+
+    /**
+     * 更新其它节点的服务信息
+     * @param attributes
+     * @param serviceID
+     * @param nodeID
+     */
+    public void updateOtherServiceAttributes(Map<String,String> attributes,Integer serviceID,Integer nodeID);
 
     /**
      * 访问其它节点，获取其服务列表信息

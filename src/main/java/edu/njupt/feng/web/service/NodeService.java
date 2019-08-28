@@ -32,6 +32,13 @@ public interface NodeService {
     public void updateAttributes(Map<String,String> attributes, Integer nodeID);
 
     /**
+     * 更新节点名称
+     * @param name
+     * @param nodeID
+     */
+    public void updateName(String name,Integer nodeID);
+
+    /**
      * 更新节点位置
      * @param position
      * @param nodeID
@@ -139,4 +146,13 @@ public interface NodeService {
      * 更新节点所有节点的服务数量
      */
     public void updateAllNodeServiceNumber(Integer clusterID);
+
+    /**
+     * 自动配置节点
+     * @param clusterID
+     * @param rule
+     * @param save
+     * @param parameter
+     */
+    public void autoConfigNodes(int clusterID,int rule,boolean save,Map<String,String> parameter);
 }
