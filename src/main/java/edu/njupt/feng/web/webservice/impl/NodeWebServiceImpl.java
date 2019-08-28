@@ -788,7 +788,6 @@ public class NodeWebServiceImpl implements NodeWebService {
      * @return
      */
     private ResultInfoWithoutContent sortNodeServiceListItem(Map<Integer, NodeServiceListItem> serviceList, Vector vector) {
-
         ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
         long startTime = System.nanoTime();
         //这是我的搜索函数
