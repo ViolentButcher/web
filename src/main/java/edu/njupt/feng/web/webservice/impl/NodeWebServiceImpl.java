@@ -2,7 +2,7 @@ package edu.njupt.feng.web.webservice.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.google.gson.Gson;
 import edu.njupt.feng.web.entity.common.AssociatedNodeServiceInfo;
 import edu.njupt.feng.web.entity.common.NodeMapItem;
 import edu.njupt.feng.web.entity.common.Position;
