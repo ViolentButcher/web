@@ -2,6 +2,7 @@ package edu.njupt.feng.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.njupt.feng.web.entity.common.JsonData;
+import edu.njupt.feng.web.management.ClusterManagement;
 import edu.njupt.feng.web.service.ClusterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,14 +18,25 @@ import java.util.Map;
 @RestController
 public class ClusterController {
 
-    //集群相关服务类
+    /**
+     * 集群相关服务类
+     */
     @Autowired
     private ClusterService clusterService;
 
     /**
+     * 集群管理类
+     */
+    @Autowired
+    private ClusterManagement clusterManagement;
+
+    /**
      * 获取集群列表
-     * @param pageNum
-     * @return
+     * @param pageNum   页码
+     * @param filter    筛选条件
+     * @param orderBy   排序条件
+     * @param desc  升降序
+     * @return  集群列表的分页信息
      */
     @RequestMapping("/api/cluster/cluster_list")
     public JsonData getClusterList(@RequestParam(defaultValue = "1")Integer pageNum, String filter,@RequestParam(defaultValue = "id")String orderBy,@RequestParam(defaultValue = "asc")String desc){
@@ -35,6 +47,7 @@ public class ClusterController {
 
     /**
      * 导出集群列表信息
+     *    TODO
      * @return
      */
     @RequestMapping("/api/cluster/export")
@@ -46,7 +59,12 @@ public class ClusterController {
 
     /**
      * 添加集群
-     * @return
+     *      首先判断添加属性的格式是否正确；
+     *      然后向cluster添加集群信息
+     *      返回提示信息
+     * @param name  集群名称
+     * @param attributes    集群属性
+     * @return  提示信息
      */
     @RequestMapping("/api/cluster/add")
     public JsonData addCluster(String name,String attributes){
@@ -74,29 +92,38 @@ public class ClusterController {
 
     /**
      * 修改集群信息
-     * @return
+     *      如果集群启动不允许修改集群信息
+     * @param clusterID     集群id，必填
+     * @param name      集群名称
+     * @param attributes    集群属性
+     * @return  提示信息
      */
     @RequestMapping("/api/cluster/modify")
     public JsonData modifyCluster(Integer clusterID,String name,String attributes){
         JsonData data = new JsonData();
         String message = "";
-        if(name != null && name.length() != 0){
-            clusterService.updateName(name,clusterID);
-            message = "修改集群" + clusterID + "名称为" + name + "\n";
-        }
-        if (attributes != null && attributes.length() != 0){
-            Map<String,String> attr = new HashMap<>();
-            String[] attributeWords = attributes.replaceAll(" ","").split(",");
-            try{
-                for(String attributeWord : attributeWords){
-                    attr.put(attributeWord.split(":")[0],attributeWord.split(":")[1]);
-                }
-            }catch (Exception e){
-                message.concat("对不起，输入属性格式有误");
-            }
 
-            clusterService.updateAttributes(attr,clusterID);
-            message.concat("修改集群" + clusterID + "属性为" + attributes + "\n");
+        if(clusterManagement.isStart(clusterID)){
+            message = "对不起，集群已经启动，无法修改集群信息！";
+        }else {
+            if(name != null && name.length() != 0){
+                clusterService.updateName(name,clusterID);
+                message = "修改集群" + clusterID + "名称为" + name + "\n";
+            }
+            if (attributes != null && attributes.length() != 0){
+                Map<String,String> attr = new HashMap<>();
+                String[] attributeWords = attributes.replaceAll(" ","").split(",");
+                try{
+                    for(String attributeWord : attributeWords){
+                        attr.put(attributeWord.split(":")[0],attributeWord.split(":")[1]);
+                    }
+                }catch (Exception e){
+                    message.concat("对不起，输入属性格式有误");
+                }
+
+                clusterService.updateAttributes(attr,clusterID);
+                message.concat("修改集群" + clusterID + "属性为" + attributes + "\n");
+            }
         }
         data.setMsg(message);
         return data;
@@ -104,7 +131,9 @@ public class ClusterController {
 
     /**
      * 删除集群
-     * @return
+     *      集群启动的判断在clusterService.deleteCluster()中
+     * @param clusterID     集群id
+     * @return      提示信息
      */
     @RequestMapping("/api/cluster/delete")
     public JsonData deleteCluster(Integer clusterID){
@@ -113,6 +142,10 @@ public class ClusterController {
         return data;
     }
 
+    /**
+     * 获取集群列表
+     * @return  集群列表信息
+     */
     @RequestMapping("/api/cluster/distribution/cluster_list")
     public JsonData getClusterListForDistribution(){
         JsonData data = new JsonData();
@@ -120,6 +153,11 @@ public class ClusterController {
         return data;
     }
 
+    /**
+     * 获取集群信息
+     * @param clusterID     集群id
+     * @return
+     */
     @RequestMapping("/api/cluster/cluster_info")
     public JsonData getClusterInfoByClusterID(Integer clusterID){
         JsonData data = new JsonData();
@@ -127,6 +165,11 @@ public class ClusterController {
         return data;
     }
 
+    /**
+     * 启动或者卸载集群
+     * @param clusterID
+     * @return
+     */
     @RequestMapping("/api/cluster/load")
     public JsonData loadData(Integer clusterID){
         JsonData data = new JsonData();
