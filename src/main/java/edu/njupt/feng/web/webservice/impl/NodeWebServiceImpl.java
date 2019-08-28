@@ -28,11 +28,8 @@ import java.io.IOException;
 import java.util.*;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import feng.util;
+import java.io.*;
+import java.util.*;
 
 import java.io.*;
 import java.util.*;
@@ -179,7 +176,6 @@ public class NodeWebServiceImpl implements NodeWebService {
             String json = mapper.writeValueAsString(attributes);
             MySQLUtil.updateServiceAttributes(json.replaceAll("\\\\", "\\\\\\\\"), serviceID);
         } catch (Exception e) {
-
         }
         ServiceMap.updateServiceAttributes(Constants.SERVICE_PREFIX + serviceID, attributes);
     }
@@ -902,10 +898,9 @@ public class NodeWebServiceImpl implements NodeWebService {
 
 
 
+
     /**
      * 从node字典中获取node信息
-     *
-      * 从node字典中获取node信息
      * @param address
      * @return
      */
@@ -954,6 +949,73 @@ public class NodeWebServiceImpl implements NodeWebService {
         resultInfoWithoutContent.setCostTime(endTime - startTime);
 
         return resultInfoWithoutContent;
+    }
+
+    public static Map<String, Object> parseMap (String mapString) {
+        Gson gson = new Gson();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map = gson.fromJson(mapString, map.getClass());
+        return map;
+    }
+
+    public static void saveList(List<String> list, String fileName) {
+        try {
+            File writeName = new File(fileName);
+            writeName.createNewFile(); // 创建新文件,有同名的文件的话直接覆盖
+            try (FileWriter writer = new FileWriter(writeName);
+                 BufferedWriter out = new BufferedWriter(writer)
+            ) {
+                for (String item : list) {
+                    out.write(item);
+                    out.newLine();
+                }
+                out.flush(); // 把缓存区内容压入文件
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveMatrix(Double[][] matrix, String fileName) {
+        try {
+            File writeName = new File(fileName);
+            writeName.createNewFile(); // 创建新文件,有同名的文件的话直接覆盖
+            try (FileWriter writer = new FileWriter(writeName);
+                 BufferedWriter out = new BufferedWriter(writer)
+            ) {
+                for (int i = 0; i < matrix.length; i++) {
+                    for (int j = 0; j < matrix[0].length; j++) {
+                        out.write(String.valueOf(matrix[i][j]));
+                        if (j == matrix[0].length - 1)
+                            out.newLine();
+                        else
+                            out.write(",");
+                    }
+                }
+                out.flush(); // 把缓存区内容压入文件
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> loadList(String fileName) {
+        List<String> result = new ArrayList<>();
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(new File(fileName))));
+            String line = "";
+            while(true) {
+                line = br.readLine();
+                if(line == null)
+                    break;
+                result.add(line);
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     public static Map<String, Object> parseMap (String mapString) {
