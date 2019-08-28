@@ -17,11 +17,12 @@ import edu.njupt.feng.web.utils.convert.Convert2ServiceInfo;
 import edu.njupt.feng.web.utils.model.MatrixFactorization;
 import edu.njupt.feng.web.utils.mysql.MySQLUtil;
 import edu.njupt.feng.web.webservice.NodeWebService;
-import edu.njupt.feng.web.webservice.ServiceWebService;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+
 
 import java.io.*;
 import java.util.*;
+
 
 public class NodeWebServiceImpl implements NodeWebService {
 
@@ -46,6 +47,15 @@ public class NodeWebServiceImpl implements NodeWebService {
     @Override
     public void updateServiceName(String name,int serviceID) {
         serviceInfoList.get(serviceID).setName(name);
+    }
+
+    /**
+     * 更新自身修改时间
+     * @param modifyTime
+     */
+    @Override
+    public void updateModifyTime(Date modifyTime) {
+        nodeServiceInfo.setModifyTime(modifyTime);
     }
 
     /**
@@ -132,6 +142,14 @@ public class NodeWebServiceImpl implements NodeWebService {
     @Override
     public void updateServiceAttributes(Map<String, String> attributes, Integer serviceID) {
         serviceInfoList.get(serviceID).setAttributes(attributes);
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            String json = mapper.writeValueAsString(attributes);
+            MySQLUtil.updateServiceAttributes(json.replaceAll("\\\\","\\\\\\\\"),serviceID);
+        }catch (Exception e){
+
+        }
+        ServiceMap.updateServiceAttributes(Constants.SERVICE_PREFIX + serviceID,attributes);
     }
 
     /**
@@ -147,6 +165,22 @@ public class NodeWebServiceImpl implements NodeWebService {
         factoryBean.setServiceClass(NodeWebService.class);
         NodeWebService service = factoryBean.create(NodeWebService.class);
         service.updateNodeAttributes(attributes);
+    }
+
+    /**
+     * 更新其它节点所属的服务的属性
+     * @param attributes
+     * @param serviceID
+     * @param nodeID
+     */
+    @Override
+    public void updateOtherServiceAttributes(Map<String, String> attributes, Integer serviceID, Integer nodeID) {
+        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
+
+        factoryBean.setAddress(Constants.NODE_PREFIX + nodeID);
+        factoryBean.setServiceClass(NodeWebService.class);
+        NodeWebService service = factoryBean.create(NodeWebService.class);
+        service.updateServiceAttributes(attributes,serviceID);
     }
 
     /**
@@ -187,7 +221,7 @@ public class NodeWebServiceImpl implements NodeWebService {
         ResultInfoWithoutContent results = new ResultInfoWithoutContent();
         if(type == 1){
             long startTime = System.currentTimeMillis();
-            results = recommendMethodTest01ByWebservice(keyword);
+            results = recommendMethodTest01ByWebservice(keyword,0.5f);
             long endTime = System.currentTimeMillis();
             System.out.println("************************  运行时间:" + (endTime - startTime) + "ms  ***************");
         }else if (type == 2){
@@ -235,32 +269,63 @@ public class NodeWebServiceImpl implements NodeWebService {
      * @param keyword
      * @return
      */
-    public ResultInfoWithoutContent recommendMethodTest01ByWebservice(String keyword){
+    public ResultInfoWithoutContent recommendMethodTest01ByWebservice(String keyword,float limit){
 
         ResultInfoWithoutContent resultInfoWithoutContent = new ResultInfoWithoutContent();
-
-        //首先，检查自己的服务列表有没有符合要求服务
         if(serviceInfoList!= null && serviceInfoList.values() != null){
-            resultInfoWithoutContent.add(sortNodeServiceListItem(new ArrayList<>(serviceInfoList.values()),keyword));
-        }
 
-        if ( nodeServiceInfo.getAssociatedNodeServiceInfos() != null){
-            //遍历关联节点
-            for(AssociatedNodeServiceInfo associatedNode : nodeServiceInfo.getAssociatedNodeServiceInfos()){
+            //初始化attributes中的————temp_Nextlist:[{},{},~~~]
+            for(NodeServiceListItem service_item : serviceInfoList.values()){
+                service_item.getAttributes().put("temp_Nextlist","");
+                updateServiceAttributes(service_item.getAttributes(),service_item.getId());
+            }
+            //用于存储所有服务的邻接表 service：service邻接表
+            //service邻接表格式：ArrayList<Map<String,String>>
+            //Map<String,String>———— "id":id,"Sim":sim
+            Map<NodeServiceListItem,ArrayList<Map<String,String>>> L =new HashMap<>();
+            for(NodeServiceListItem service_item : serviceInfoList.values()){
+                ArrayList<Map<String,String>> item_Nextlist=new ArrayList<>();
+                item_Nextlist.clear();
+                L.put(service_item,item_Nextlist);
+            }
 
-                //获取关联节点的节点信息
-                NodeServiceInfo associatedNodeInfo = getNodeServiceInfo(associatedNode.getServiceAddress());
+            //计算Sim
+            for(NodeServiceListItem service_item : serviceInfoList.values())
+            {
+                int id=service_item.getId();
+                float[] vec=util.String_2_floatList(service_item.getAttributes().get("vec"));
+                for(NodeServiceListItem service_item_2 : serviceInfoList.values())
+                {
+                    int id_2=service_item_2.getId();
+                    float[] vec_2=util.String_2_floatList(service_item_2.getAttributes().get("vec"));
+                    if(id != id_2)
+                    {
+                        float Sim=util.dot(vec,vec_2);
+                        if(Sim>limit)
+                        {
+                            //向service_item中添加邻接顶点（服务）
+                            Map<String,String> next_service2=new HashMap<>();
+                            next_service2.put("id",Integer.toString(id_2));
+                            next_service2.put("Sim",Float.toString(Sim));
+                            L.get(service_item).add(next_service2);
 
-                //获取关联节点的服务列表
-                List<NodeServiceListItem> associatedNodeServicesList = getServiceList(associatedNode.getServiceAddress());
-
-                if (associatedNodeServicesList!=null){
-                    resultInfoWithoutContent.add(sortNodeServiceListItem(associatedNodeServicesList,keyword));
+                            //向service_item_2中添加邻接顶点（服务）
+                            Map<String,String> next_service1=new HashMap<>();
+                            next_service1.put("id",Integer.toString(id));
+                            next_service1.put("Sim",Float.toString(Sim));
+                            L.get(service_item_2).add(next_service1);
+                        }
+                    }
                 }
+            }
 
+            Gson gson=new Gson();
+            //对L中的所有邻接表添加到相应service的attributes中。
+            for(NodeServiceListItem service_item : serviceInfoList.values()){
+                service_item.getAttributes().put("temp_Nextlist",gson.toJson(L.get(service_item)));
+                updateServiceAttributes(service_item.getAttributes(),service_item.getId());
             }
         }
-
         return resultInfoWithoutContent;
     }
 
