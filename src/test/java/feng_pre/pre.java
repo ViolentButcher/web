@@ -18,6 +18,7 @@ import com.hankcs.hanlp.mining.word2vec.Vector;
 import com.hankcs.hanlp.mining.word2vec.Word2VecTrainer;
 import com.hankcs.hanlp.mining.word2vec.WordVectorModel;
 import com.hankcs.hanlp.utility.TestUtility;
+import feng.util;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -187,7 +188,6 @@ public class pre {
         for (int i = 0; i < strings.length; i++) {
             fs[i] = Float.parseFloat(strings[i]);
         }
-
         return fs;
     }
 
@@ -240,40 +240,61 @@ public class pre {
     }
 
     public static void main(String args[]) {
-        Connection con = null;
-        Statement stmt = null;
-        ResultSet re = null;
-        try {
-            Class.forName("com.mysql.jdbc.Driver");//注册JDBC驱动
-            con = DriverManager.getConnection(DB_URL, USER, PASS);//利用信息链接数据库
-            stmt = con.createStatement();
-            if (!con.isClosed()) {
-                System.out.println("与数据库成功建立连接！");
-            }
+        ArrayList<String> L =new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
 
-            Map<Integer, ArrayList<Map<String, String>>> mapList = new HashMap<>();
-            for (int i = 1; i <= 105; i++) {
-                ArrayList<Map<String, String>> L_item = new ArrayList<Map<String, String>>();
-                mapList.put(i,L_item);
-            }
-            ArrayList<Map<String, String>> L = fetchData(con);
-            for (int i = 0; i < L.size(); i++) {
-                int node =Integer.parseInt(L.get(i).get("node"));
-                mapList.get(node).add(L.get(i));
-            }
-            for (int i = 0; i <mapList.get(1).size() ; i++) {
-                System.out.println(i);
-            }
-
-
-            con.close();
-        } catch (SQLException se) {
-            se.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            System.out.println("执行结束！");
+           Map<String,String> item_Nextlist=new HashMap<>();
+           item_Nextlist.put(Integer.toString(i),"asdasd");
+           item_Nextlist.put(Integer.toString(i+10),"wqeqwe");
+           String temp=util.map2json(item_Nextlist);
+           L.add(temp);
         }
+        System.out.println(L.toString());
+
+        Gson gson =new Gson();
+        String A=gson.toJson(L);
+
+        ArrayList<String> res = gson.fromJson(A, new TypeToken<ArrayList<String>>() {
+        }.getType());
+        System.out.println();
+//        ArrayList<Map<String,String>> B=new ArrayList<Map<String,String>>(A);
+//        for (int i = 0; i <A.split(",").length ; i++) {
+//            System.out.println(A.split(",")[i]);
+//        }
+//        Connection con = null;
+//        Statement stmt = null;
+//        ResultSet re = null;
+//        try {
+//            Class.forName("com.mysql.jdbc.Driver");//注册JDBC驱动
+//            con = DriverManager.getConnection(DB_URL, USER, PASS);//利用信息链接数据库
+//            stmt = con.createStatement();
+//            if (!con.isClosed()) {
+//                System.out.println("与数据库成功建立连接！");
+//            }
+//
+//            Map<Integer, ArrayList<Map<String, String>>> mapList = new HashMap<>();
+//            for (int i = 1; i <= 105; i++) {
+//                ArrayList<Map<String, String>> L_item = new ArrayList<Map<String, String>>();
+//                mapList.put(i,L_item);
+//            }
+//            ArrayList<Map<String, String>> L = fetchData(con);
+//            for (int i = 0; i < L.size(); i++) {
+//                int node =Integer.parseInt(L.get(i).get("node"));
+//                mapList.get(node).add(L.get(i));
+//            }
+//            for (int i = 0; i <mapList.get(1).size() ; i++) {
+//                System.out.println(i);
+//            }
+//
+//
+//            con.close();
+//        } catch (SQLException se) {
+//            se.printStackTrace();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        } finally {
+//            System.out.println("执行结束！");
+//        }
     }
 }
 //1. 查询

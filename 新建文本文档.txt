@@ -1,0 +1,15 @@
+该环境（某个节点）下拥有的属性说明：
+serviceInfoList：字典类型，键为从1开始的整数，值为NodeServiceListItem类的对象，该属性表示了模拟节点中的服务列表，每一个NodeServiceListItem类的对象都是一条服务的“索引”，所谓“索引”是指NodeServiceListItem类里面不包括服务的内容，只包括属性等数据（目前最大长度为1000）
+
+nodeServiceInfo：NodeServiceInfo类的对象，用来存储当前节点的各种属性该环境下拥有的方法：
+
+getServiceInfo：输入服务的地址（可从NodeServiceListItem类的对象中获得），返回ServiceServiceInfo的对象。其中ServiceServiceInfo类与NodeServiceListItem类类似，区别在于其中包含服务内容（该方法需要消耗大量时间，一般只在确定目标服务后再用该方法获取服务内容）
+getNodeServiceInfo：输入节点的地址，返回NodeServiceInfo对象
+getServiceList：输入节点的地址，返回NodeServiceListItem类组成的列表
+
+常用类的说明：
+
+NodeServiceListItem：该类对应不包含内容的服务，节点的服务目录中用的就是这个类的对象
+ServiceServiceInfo类：该类对应包含内容的服务，是搜索和推荐返回的结果
+NodeServiceInfo类：该类用于存储节点的各种信息
+AssociatedNodeServiceInfo类：保存当前节点的一个关联节点的信息，包括了关联节点id、关联类型（例如是parent还是child）、关联节点的地址。在nodeServiceInfo属性中，associatedNodeServiceInfos属性用于存放关联节点的列表，而列表中的元素就是这个类

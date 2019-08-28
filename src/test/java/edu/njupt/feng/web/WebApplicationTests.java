@@ -7,8 +7,6 @@ import edu.njupt.feng.web.entity.database.ServiceInfo;
 import edu.njupt.feng.web.entity.service.NodeServiceListItem;
 import edu.njupt.feng.web.management.ClusterManagement;
 import edu.njupt.feng.web.mapper.NodeMapper;
-import edu.njupt.feng.web.mapper.ServiceMapper;
-import edu.njupt.feng.web.mapper.TestMapper;
 import edu.njupt.feng.web.service.ClusterService;
 import edu.njupt.feng.web.service.NodeService;
 import edu.njupt.feng.web.test.TestService;
@@ -38,18 +36,11 @@ public class WebApplicationTests {
     private TestService testService;
 
     @Autowired
-    private TestMapper testMapper;
-
-    @Autowired
     private ClusterService clusterService;
-
-    @Autowired
-    private ServiceMapper serviceMapper;
-
 
     @Test
     public void contextLoads() {
-//
+
 //        List<AssociatedNodeInfo> associatedNodeInfos = new ArrayList<>();
 //
 //        for (int i : nodeMapper.getNodeListsByClusterID(1)){
@@ -65,38 +56,9 @@ public class WebApplicationTests {
 //
 //        nodeService.updateAssoicatedNodes(1,associatedNodeInfos);
 
-//        testService.createServices();
-//        clusterService.updateAllNodeNumver();
+        testService.createServices();
+        clusterService.updateAllNodeNumver();
 
-//        for (ServiceInfo serviceInfo : testMapper.updateNodeGreater1200()){
-//            serviceMapper.updateNode(serviceInfo.getNode()-600,serviceInfo.getId());
-//        }
-//        clusterService.updateAllNodeNumver();
-//        for(ClusterInfo clusterInfo : clusterService.getClusterListWithoutPageInfo()){
-//            clusterService.deleteCluster(clusterInfo.getId());
-//        }
-//        testService.createCluster(2,"集中集群2",5);
-//        List<AssociatedNodeInfo> associatedNodeInfos = new ArrayList<>();
-//
-//        for (int i : nodeMapper.getNodeListsByClusterID(2)){
-//            if(i!=101){
-//                AssociatedNodeInfo info = new AssociatedNodeInfo();
-//
-//                info.setId(i);
-//
-//                associatedNodeInfos.add(info);
-//            }
-//        }
-//
-//        nodeService.updateAssoicatedNodes(101,associatedNodeInfos);
-        JaxWsProxyFactoryBean factoryBean = new JaxWsProxyFactoryBean();
-        factoryBean.setAddress(Constants.NODE_PREFIX + 466);
-        factoryBean.setServiceClass(NodeWebService.class);
-        NodeWebService service = factoryBean.create(NodeWebService.class);
-        for (NodeServiceListItem item :service.getNodeServiceList()){
-            System.out.println(item.getName());
-            System.out.println(item.getAttributes());
-        }
     }
 
 }
