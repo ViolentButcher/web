@@ -11,6 +11,8 @@ import edu.njupt.feng.web.entity.service.ServiceServiceInfo;
 
 import javax.jws.WebService;
 import java.util.Date;
+import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -119,7 +121,7 @@ public interface NodeWebService {
      * @param keyword
      * @return
      */
-    public ResultInfoWithoutContent testSearch(String keyword, Integer type);
+    public ResultInfoWithoutContent testSearch(String keyword, Integer type) throws IOException;
 
     /**
      * 推荐测试示例
