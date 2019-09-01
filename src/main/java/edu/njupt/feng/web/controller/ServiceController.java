@@ -205,4 +205,12 @@ public class ServiceController {
         return data;
     }
 
+
+    @RequestMapping("/api/service/service_info")
+    public JsonData getServiceInfo(Integer serviceID){
+        JsonData data = new JsonData();
+        data.setData(serviceService.getServiceInfo(serviceID));
+        return data;
+    }
+
 }

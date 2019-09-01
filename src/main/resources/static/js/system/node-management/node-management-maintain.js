@@ -18,20 +18,14 @@ function nodeManagementMaintain() {
 
     $("#main_content").html('');
     $("#main_content").html('<h4>现有节点列表：</h4>' +
+        '<div>' +
+            '<label>排序关键字：<select id="node_management_maintain_node_sort_keyword"><option value="id">id</option><option value="name">name</option><option value="attributes">attributes</option><option value="service_number">service_number</option><option value="position">position</option><option value="cluster">cluster</option><option value="associated_nodes">associated_nodes</option><option value="level">level</option><option value="create_time">create_time</option><option value="modify_time">modify_time</option></select></label>' +
+            '<label>升降序<input type="checkbox" id="node_management_maintain_node_sort_asc"></label>' +
+            '<button onclick="nodeManagementMaitainNodeSort()">排序</button>' +
+        '</div>' +
         '<div class="row div-row">' +
             '<table id="node_management_maintain_node_table" class="table table-bordered table-hover table-responsive">' +
-                '<tr>' +
-                    '<th order="id" onclick="nodeManagementMaintainNodeOrder(this)">ID</th>' +
-                    '<th order="name" onclick="nodeManagementMaintainNodeOrder(this)">名称</th>' +
-                    '<th order="attributes" onclick="nodeManagementMaintainNodeOrder(this)">属性</th>' +
-                    '<th order="service_number" onclick="nodeManagementMaintainNodeOrder(this)">服务个数</th>' +
-                    '<th order="position" onclick="nodeManagementMaintainNodeOrder(this)">坐标</th>' +
-                    '<th order="cluster" onclick="nodeManagementMaintainNodeOrder(this)">所属集群</th>' +
-                    '<th order="associated_nodes" onclick="nodeManagementMaintainNodeOrder(this)">关联节点</th>' +
-                    '<th order="level" onclick="nodeManagementMaintainNodeOrder(this)">等级</th>' +
-                    '<th order="create_time" onclick="nodeManagementMaintainNodeOrder(this)">创建时间</th>' +
-                    '<th order="modify_time" onclick="nodeManagementMaintainNodeOrder(this)">修改时间</th>' +
-                '</tr>' +
+                '<tr></tr>' +
             '</table>' +
         '</div>' +
         '<div class="row div-row">' +
@@ -107,12 +101,31 @@ function nodeManagementMaintain() {
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' data-dismiss='modal' onclick='nodeManagementMaintainNodeModify()'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
-
+    $("#main_content").append($("<div class='modal fade' id='node_management_maintain_node_detail_modal' tabindex='-1' role='dialog' aria-labelledby='modal_detail_title' aria-hidden='true'/>")
+        .append($("<div class='modal-dialog'/>")
+            .append($("<div class='modal-content'/>")
+                .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_detail_title'/>").html("详细信息")))
+                .append($("<div class='modal-body'/>")
+                    .append($("<div class='row' id='node_management_maintain_node_detail_modal_detail_content'/>")))
+                .append($("<div class='modal-footer'/>")
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("确定"))
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
     $("#location").html('');
 
     //展示位置信息
     $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='nodeManagementMaintain()'/>").html(">> 节点维护"));
 
+    nodeManagementMaintainNodeRequest(1);
+}
+
+function nodeManagementMaitainNodeSort() {
+    node_management_maintain_node_orderBy = $("#node_management_maintain_node_sort_keyword option:selected").val();
+
+    if($("#node_management_maintain_node_sort_asc").is(":checked")){
+        node_management_maintain_node_desc = "asc";
+    }else {
+        node_management_maintain_node_desc = "desc";
+    }
     nodeManagementMaintainNodeRequest(1);
 }
 
@@ -166,6 +179,29 @@ function nodeManagementMaintainNodeModify() {
 
 }
 
+function nodeManagementMaintainNodeDBClick(obj) {
+    $.ajax({
+        type : "GET",
+        data : {"nodeID" : $(obj).attr("node_id")},
+        url  : "/api/node/node_info",
+        dataType : "json",
+        success : function (data) {
+            $("#node_management_maintain_node_detail_modal_detail_content").html(
+                "节点id：" + data.data.id +"<br/>"
+                + "节点名称：" + data.data.name + "<br/>"
+                + "节点属性：" + parseAttribute(data.data.attributes) + "<br/>"
+                + "节点服务数量：" +data.data.serviceNumber + "<br/>"
+                + "节点位置：" + data.data.position + "<br/>"
+                + "节点关联节点：" + parseAssociatedNode(data.data.associatedNodeServiceInfos) + "<br/>"
+                + "节点等级：" + data.data.level + "<br/>"
+                + "节点创建时间：" + new Date(data.data.createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                + "节点修改时间：" + new Date(data.data.modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+            );
+            $("#node_management_maintain_node_detail_modal").modal();
+        }
+    });
+}
+
 /**
  * 查看节点信息
  */
@@ -178,17 +214,17 @@ function nodeManagementMaintainNodeRequest(pageNum) {
         success : function (data) {
             $("#node_management_maintain_node_table tr").nextAll().remove();
             for(var i=0;i<data.data.list.length;i++){
-                $("#node_management_maintain_node_table").append($("<tr onclick='nodeManagementMaintainNodeTRClick(this)'/>")
-                    .append($("<td/>").html(data.data.list[i].id))
-                    .append($("<td/>").html(data.data.list[i].name))
-                    .append($("<td/>").html(data.data.list[i].attributes))
-                    .append($("<td/>").html(data.data.list[i].serviceNumber))
-                    .append($("<td/>").html(data.data.list[i].position))
-                    .append($("<td/>").html(data.data.list[i].cluster))
-                    .append($("<td/>").html(data.data.list[i].associatedNodes))
-                    .append($("<td/>").html(data.data.list[i].level))
-                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
-                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("node_id",data.data.list[i].id));
+                $("#node_management_maintain_node_table").append($("<tr onclick='nodeManagementMaintainNodeTRClick(this)' ondblclick='nodeManagementMaintainNodeDBClick(this)'/>").html(
+                    "节点id：" + data.data.list[i].id +"<br/>"
+                    + "节点名称：" + data.data.list[i].name + "<br/>"
+                    + "节点属性：" + parseSimpleAttribute(data.data.list[i].attributes) + "<br/>"
+                    + "节点服务数量：" +data.data.list[i].serviceNumber + "<br/>"
+                    + "节点位置：" + data.data.list[i].position + "<br/>"
+                    + "节点关联节点：" + parseSimpleAssociatedNode(data.data.list[i].associatedNodes) + "<br/>"
+                    + "节点等级：" + data.data.list[i].level + "<br/>"
+                    + "节点创建时间：" + new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                    + "节点修改时间：" + new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                ).append($("<hr/>")).attr("node_id",data.data.list[i].id));
             }
             $("#node_management_maintain_node_pagination").html("");
             if(data.data.isFirstPage){
@@ -285,17 +321,14 @@ function nodeManagementMaintainNodeDetailLoad() {
 
     $("#main_content").html('');
     $("#main_content").html('<h3>现有服务列表</h3> ' +
+        '<div class="div-row row">' +
+            '<label>排序关键字：<select id="node_management_maintain_service_sort_keyword"><option value="id">id</option><option value="name">name</option><option value="attributes">attributes</option><option value="node">node</option><option value="cluster">cluster</option><option value="content">content</option><option value="create_time">create_time</option><option value="modify_time">modify_time</option></select></label>' +
+            '<label>升降序<input type="checkbox" id="node_management_maintain_service_sort_asc"></label>' +
+            '<button onclick="nodeManagementMaintainServiceSort()">排序</button>' +
+        '</div>' +
         '<div class="row div-row">' +
             '<table id="node_management_maintain_service_table" class="table table-bordered table-hover table-responsive">' +
                 '<tr>' +
-                    '<th order="id" onclick="nodeManagementMaintainServiceOrder(this)">ID</th>' +
-                    '<th order="name" onclick="nodeManagementMaintainServiceOrder(this)">名称</th>' +
-                    '<th order="attributes" onclick="nodeManagementMaintainServiceOrder(this)">属性</th>' +
-                    '<th order="node" onclick="nodeManagementMaintainServiceOrder(this)">所属集群</th>' +
-                    '<th order="cluster" onclick="nodeManagementMaintainServiceOrder(this)">所属节点</th>' +
-                    '<th order="content" onclick="nodeManagementMaintainServiceOrder(this)">内容</th>' +
-                    '<th order="create_time" onclick="nodeManagementMaintainServiceOrder(this)">创建时间</th>' +
-                    '<th order="modify_time" onclick="nodeManagementMaintainServiceOrder(this)">修改时间</th>' +
                 '</tr>' +
             '</table>' +
         '</div>' +
@@ -339,6 +372,48 @@ function nodeManagementMaintainNodeDetailLoad() {
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='nodeManagementMaintainServiceExport()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
+    $("#main_content").append($("<div class='modal fade' id='node_management_maintain_service_detail_modal' tabindex='-1' role='dialog' aria-labelledby='modal_detail_title' aria-hidden='true'/>")
+        .append($("<div class='modal-dialog'/>")
+            .append($("<div class='modal-content'/>")
+                .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_detail_title'/>").html("详细信息")))
+                .append($("<div class='modal-body'/>")
+                    .append($("<div class='row' id='node_management_maintain_service_detail_modal_detail_content'/>")))
+                .append($("<div class='modal-footer'/>")
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("确定"))
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
+    nodeManagementMaintainServiceRefresh(1);
+}
+
+function nodeManagementMaintainServiceDBClick(obj) {
+    $.ajax({
+        type : "GET",
+        data : {"serviceID" : $(obj).attr("service_id")},
+        url  : "/api/service/service_info",
+        dataType : "json",
+        success : function (data) {
+            $("#node_management_maintain_service_detail_modal_detail_content").html(
+                "服务id：" + data.data.id +"<br/>"
+                + "服务名称：" + data.data.name + "<br/>"
+                + "服务属性：" + parseAttribute(data.data.attributes) + "<br/>"
+                + "服务内容： " + data.data.content + "<br/>"
+                + "服务所属节点： " + data.data.node + "<br/>"
+                + "服务所属集群：" + data.data.cluster + "<br/>"
+                + "服务创建时间：" + new Date(data.data.createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                + "服务修改时间：" + new Date(data.data.modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+            );
+            $("#node_management_maintain_service_detail_modal").modal();
+        }
+    });
+}
+
+function nodeManagementMaintainServiceSort() {
+    node_management_maintain_service_orderBy = $("#node_management_maintain_service_sort_keyword option:selected").val();
+
+    if($("#node_management_maintain_service_sort_asc").is(":checked")){
+        node_management_maintain_service_desc = "asc";
+    }else {
+        node_management_maintain_service_desc = "desc";
+    }
 
     nodeManagementMaintainServiceRefresh(1);
 }
@@ -369,15 +444,16 @@ function nodeManagementMaintainServiceRefresh(pageNum) {
         success : function (data) {
             $("#node_management_maintain_service_table tr").nextAll().remove();
             for(var i=0;i<data.data.list.length;i++){
-                $("#node_management_maintain_service_table").append($("<tr onclick='nodeManagementMaintainServiceTRClick(this)'/>")
-                    .append($("<td/>").html(data.data.list[i].id))
-                    .append($("<td/>").html(data.data.list[i].name))
-                    .append($("<td/>").html(data.data.list[i].attributes))
-                    .append($("<td/>").html(data.data.list[i].cluster))
-                    .append($("<td/>").html(data.data.list[i].node))
-                    .append($("<td/>").html(data.data.list[i].content))
-                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
-                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("service_id",data.data.list[i].id));
+                $("#node_management_maintain_service_table").append($("<tr onclick='nodeManagementMaintainServiceTRClick(this)' ondblclick='nodeManagementMaintainServiceDBClick(this)'/>").html(
+                    "服务id：" + data.data.list[i].id +"<br/>"
+                    + "服务名称：" + data.data.list[i].name + "<br/>"
+                    + "服务属性：" + parseAttribute(data.data.list[i].attributes) + "<br/>"
+                    + "服务内容： " + simplifyServiceContent(data.data.list[i].content) + "<br/>"
+                    + "服务所属节点： " + data.data.list[i].node + "<br/>"
+                    + "服务所属集群：" + data.data.list[i].cluster + "<br/>"
+                    + "服务创建时间：" + new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                    + "服务修改时间：" + new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                ).attr("service_id",data.data.list[i].id));
             }
 
             $("#node_management_maintain_service_pagination").html("");

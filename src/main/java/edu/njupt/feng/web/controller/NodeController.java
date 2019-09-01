@@ -318,4 +318,11 @@ public class NodeController {
         return data;
     }
 
+    @RequestMapping("/api/node/node_info")
+    public JsonData getNodeInfo(Integer nodeID){
+        JsonData data = new JsonData();
+        data.setData(nodeService.getNodeServiceInfo(nodeID));
+        return data;
+    }
+
 }
