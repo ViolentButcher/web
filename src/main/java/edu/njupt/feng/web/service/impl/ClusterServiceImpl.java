@@ -49,6 +49,7 @@ public class ClusterServiceImpl implements ClusterService {
     @Override
     public PageInfo getClusterInfoList(Integer pageNum, String filter, String order, String desc) {
         PageHelper.startPage(pageNum,10);
+        System.out.println(filter + "," + order + "," + desc);
         List<ClusterInfo> clusterInfos = clusterMapper.getClusterListWithParams(filter, order, desc);
         PageInfo<ClusterInfo> pageInfo = new PageInfo<ClusterInfo>(clusterInfos);
         return pageInfo;

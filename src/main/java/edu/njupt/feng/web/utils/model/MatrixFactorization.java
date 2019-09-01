@@ -13,9 +13,9 @@ public class MatrixFactorization {
                 {0.0,2.0,4.0,0.0,5.0,0.0,0.0,0.0,0.0,0.0},
                 {0.0,0.0,6.0,3.0,0.0,0.0,1.0,0.0,7.0,0.0}};
         Map result = gradAscent(dataMatrix, 5);
-        double[][] p = (double[][]) result.get("p");
-        double[][] q = (double[][]) result.get("q");
-        double[][] product = (double[][]) result.get("product");
+        Double[][] p = (Double[][]) result.get("p");
+        Double[][] q = (Double[][]) result.get("q");
+        Double[][] product = (Double[][]) result.get("product");
         display(p);
         display(q);
         display(product);
@@ -23,18 +23,18 @@ public class MatrixFactorization {
 
     public static Map gradAscent(Double[][] data, int K) {
         int m = data.length, n = data[0].length;
-        double[][] p = new double[m][K];
-        double[][] q = new double[K][n];
+        Double[][] p = new Double[m][K];
+        Double[][] q = new Double[K][n];
 
         Random random=new Random();
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < K; j++) {
-                p[i][j] = random.nextFloat();
+                p[i][j] = random.nextDouble();
             }
         }
         for (int i = 0; i < K; i++) {
             for (int j = 0; j < n; j++) {
-                q[i][j] = random.nextFloat();
+                q[i][j] = random.nextDouble();
             }
         }
 
@@ -72,12 +72,13 @@ public class MatrixFactorization {
             }
             if (loss < 0.001)
                 break;
-            System.out.println("step=" + step + ", loss=" + loss);
+//            System.out.println("step=" + step + ", loss=" + loss);
         }
 
-        double[][] product = new double[m][n];
+        Double[][] product = new Double[m][n];
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
+                product[i][j] = 0.0;
                 for (int k = 0; k < K; k++) {
                     product[i][j] += p[i][k] * q[k][j];
                 }
@@ -91,7 +92,7 @@ public class MatrixFactorization {
         return result;
     }
 
-    public static void display(double[][] matrix) {
+    public static void display(Double[][] matrix) {
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
                 System.out.print(matrix[i][j] + "\t");

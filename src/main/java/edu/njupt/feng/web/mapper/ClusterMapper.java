@@ -35,7 +35,7 @@ public interface ClusterMapper {
             @Result(column = "modify_time" , property = "modifyTime"),
             @Result(column = "node_number" , property = "nodeNumber")
     })
-    public List<ClusterInfo> getClusterListWithParams(@Param("filter")String filter,@Param("order")String order,@Param("desc")String desc);
+    public List<ClusterInfo> getClusterListWithParams(String filter,String order,String desc);
 
     /**
      * 获取数据库中所有集群信息
