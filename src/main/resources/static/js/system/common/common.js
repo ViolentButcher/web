@@ -20,3 +20,131 @@ Date.prototype.Format = function(fmt) {
     return fmt;
 
 };
+
+String.prototype.replaceAll = function (FindText, RepText) {
+    return this.replace(new RegExp(FindText, "g"), RepText);
+};
+
+function parseSimpleAttribute(attributes) {
+
+    if (attributes != null && attributes.length > 0) {
+        var result = new Array();
+
+        var start = 0;
+        var end = 0;
+        var count = 0;
+
+        for (var i=0;i<attributes.length;i++){
+            if(attributes[i] == "{"){
+                start = i;
+
+                while (end <= start || i <= attributes.length ){
+                    if (attributes[i] == "}"){
+                        end = i;
+                        result[count++] = attributes.slice(start+1,end).replaceAll("\"","");
+                        break;
+                    }
+                    i++;
+                }
+                if(count >= 3){
+                    result[count++] = "...";
+                    break;
+                }
+            }
+        }
+        if (result.length != 0){
+            return "<br/>" + result.join("<br/>");
+        }
+        return "无"
+    }
+
+    return "无";
+
+};
+
+function parseSimpleAssociatedNode(associatedNodes) {
+    if (associatedNodes != null && associatedNodes.length > 0) {
+        var result = new Array();
+
+        var start = 0;
+        var end = 0;
+        var count = 0;
+
+        for (var i=0;i<associatedNodes.length;i++){
+            if(associatedNodes[i] == "{"){
+                start = i;
+
+                while (end < start || i <= associatedNodes.length ){
+                    if (associatedNodes[i] == "}"){
+                        end = i;
+                        result[count++] = associatedNodes.slice(start+1,end).replaceAll("\"","");
+                        break;
+                    }
+                    i++;
+                }
+                if(count >= 3){
+                    result[count++] = "...";
+                    break;
+                }
+            }
+        }
+        if (result.length != 0){
+            return "<br/>" + result.join("<br/>");
+        }
+        return "无"
+    }
+
+    return "无";
+};
+
+function parseAttribute(attributes) {
+
+    if (attributes != null && attributes.length > 0) {
+        var result = new Array();
+
+        var start = 0;
+        var end = 0;
+        var count = 0;
+
+        for (var i=0;i<attributes.length;i++){
+            if(attributes[i] == "{"){
+                start = i;
+
+                while (end <= start || i <= attributes.length ){
+                    if (attributes[i] == "}"){
+                        end = i;
+                        result[count++] = attributes.slice(start+1,end).replaceAll("\"","");
+                        break;
+                    }
+                    i++;
+                }
+            }
+        }
+        if (result.length != 0){
+            return "<br/>" + result.join("<br/>");
+        }
+        return "无"
+    }
+
+    return "无";
+
+};
+
+function parseAssociatedNode(associatedNodes) {
+    var result = new Array();
+
+    if (associatedNodes != null) {
+        for (var i=0;i<associatedNodes.length;i++) {
+            result[i] = "&nbsp&nbsp id:" + associatedNodes[i].id + ",associatedType:" + associatedNodes[i].associatedType + ",serviceAddress:" + associatedNodes[i].serviceAddress;
+        }
+        return "<br/>" + result.join("<br/>");
+    }
+    return "无";
+};
+
+function simplifyServiceContent(content) {
+    if(content != null && content.length > 100){
+        return content.slice(0,100) + "...";
+    }
+    return content;
+}

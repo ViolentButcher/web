@@ -12,18 +12,13 @@ function serviceManagementMaintain() {
 
     $("#main_content").html('');
     $("#main_content").html('<h4>现有服务列表：</h4>' +
+        '<div>' +
+            '<label>排序关键字：<select id="service_management_maintain_sort_keyword"><option value="id">id</option><option value="name">name</option><option value="attributes">attributes</option><option value="node">node</option><option value="cluster">cluster</option><option value="content">content</option><option value="create_time">create_time</option><option value="modify_time">modify_time</option></select></label>' +
+            '<label>升降序<input type="checkbox" id="service_management_maintain_sort_asc"></label>' +
+            '<button onclick="serviceManagementMaintainSort()">排序</button>' +
+        '</div>' +
         '<div class="row div-row">' +
             '<table id="service_management_maintain_table" class="table-responsive table table-bordered table-hover">' +
-                '<tr>' +
-                    '<th order="id" onclick="serviceManagementMaintainOrder(this)">ID</th>' +
-                    '<th order="name" onclick="serviceManagementMaintainOrder(this)">名称</th>' +
-                    '<th order="attributes" onclick="serviceManagementMaintainOrder(this)">属性</th>' +
-                    '<th order="cluster" onclick="serviceManagementMaintainOrder(this)">所属集群</th>' +
-                    '<th order="node" onclick="serviceManagementMaintainOrder(this)">所属节点</th>' +
-                    '<th order="content" onclick="serviceManagementMaintainOrder(this)">内容</th>' +
-                    '<th order="create_time" onclick="serviceManagementMaintainOrder(this)">创建时间</th>' +
-                    '<th order="modify_time" onclick="serviceManagementMaintainOrder(this)">修改时间</th>' +
-                '</tr>' +
             '</table>' +
         '</div>' +
         '<div class="row div-row">' +
@@ -105,13 +100,33 @@ function serviceManagementMaintain() {
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
-
+    $("#main_content").append($("<div class='modal fade' id='service_management_maintain_detail_modal' tabindex='-1' role='dialog' aria-labelledby='modal_detail_title' aria-hidden='true'/>")
+        .append($("<div class='modal-dialog'/>")
+            .append($("<div class='modal-content'/>")
+                .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_detail_title'/>").html("详细信息")))
+                .append($("<div class='modal-body'/>")
+                    .append($("<div class='row' id='service_management_maintain_detail_modal_detail_content'/>")))
+                .append($("<div class='modal-footer'/>")
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("确定"))
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
     serviceManagementMaintainRefresh(1);
 
     $("#location").html('');
 
     //展示位置信息
     $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='serviceManagementMaintain()'/>").html(">> 服务维护"));
+}
+
+function serviceManagementMaintainSort() {
+    service_management_maintain_orderBy= $("#service_management_maintain_sort_keyword option:selected").val();
+
+    if($("#service_management_view_maintain_sort_asc").is(":checked")){
+        service_management_maintain_desc = "asc";
+    }else {
+        service_management_maintain_desc = "desc";
+    }
+
+    serviceManagementMaintainRefresh(1);
 }
 
 /**
@@ -126,6 +141,29 @@ function serviceManagementMaintainOrder(obj) {
         service_management_maintain_desc = "asc";
     }
     serviceManagementMaintainRefresh(1);
+}
+
+function serviceManagementMaintainDBClick(obj){
+    $.ajax({
+        type : "GET",
+        data : {"serviceID" : $(obj).attr("service_id")},
+        url  : "/api/service/service_info",
+        dataType : "json",
+        success : function (data) {
+            $("#service_management_maintain_detail_modal_detail_content").html(
+                "服务id：" + data.data.id +"<br/>"
+                + "服务名称：" + data.data.name + "<br/>"
+                + "服务属性：" + parseAttribute(data.data.attributes) + "<br/>"
+                + "服务内容： " + data.data.content + "<br/>"
+                + "服务所属节点： " + data.data.node + "<br/>"
+                + "服务所属集群：" + data.data.cluster + "<br/>"
+                + "服务创建时间：" + new Date(data.data.createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                + "服务修改时间：" + new Date(data.data.modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+            );
+            $("#service_management_maintain_detail_modal").modal();
+        }
+    });
+
 }
 
 /**
@@ -146,15 +184,16 @@ function serviceManagementMaintainRefresh(pageNum) {
         success: function (data) {
             $("#service_management_maintain_table tr").nextAll().remove();
             for (var i = 0; i < data.data.list.length; i++) {
-                $("#service_management_maintain_table").append($("<tr onclick='serviceManagementMaintainTRClick(this)'/>")
-                    .append($("<td/>").html(data.data.list[i].id))
-                    .append($("<td/>").html(data.data.list[i].name))
-                    .append($("<td/>").html(data.data.list[i].attributes))
-                    .append($("<td/>").html(data.data.list[i].cluster))
-                    .append($("<td/>").html(data.data.list[i].node))
-                    .append($("<td/>").html(data.data.list[i].content))
-                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
-                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("service_id", data.data.list[i].id));
+                $("#service_management_maintain_table").append($("<tr onclick='serviceManagementMaintainTRClick(this)' ondblclick='serviceManagementMaintainDBClick(this)'/>").html(
+                    "服务id：" + data.data.list[i].id +"<br/>"
+                    + "服务名称：" + data.data.list[i].name + "<br/>"
+                    + "服务属性：" + parseAttribute(data.data.list[i].attributes) + "<br/>"
+                    + "服务内容： " + simplifyServiceContent(data.data.list[i].content) + "<br/>"
+                    + "服务所属节点： " + data.data.list[i].node + "<br/>"
+                    + "服务所属集群：" + data.data.list[i].cluster + "<br/>"
+                    + "服务创建时间：" + new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                    + "服务修改时间：" + new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                ).append($("<hr/>")).attr("service_id", data.data.list[i].id));
             }
 
             $("#service_management_maintain_pagination").html("");

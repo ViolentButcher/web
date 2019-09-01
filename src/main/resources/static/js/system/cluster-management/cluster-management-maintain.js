@@ -26,8 +26,11 @@ function clusterManagementMaintain() {
     $("#main_content").html('');
     $("#location").html('');
     $("#location").append($("<label/>").html("位置：")).append($("<button class='btn btn-link btn-xs' onclick='clusterManagementMaintain()'/>").html(">> 集群维护"));
-    $("#main_content").append($("<div class='row div-row'/>").append($("<table id='cluster_management_maintain_cluster_table' class='table table-bordered table-responsive'/>")
-        .append($("<tr/>").append($("<th order='id' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("ID")).append($("<th order='name' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("名称")).append($("<th order='attribute' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("属性")).append($("<th  order='node_number' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("节点个数")).append($("<th  order='configuration' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("节点关系配置")).append($("<th  order='create_time' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("创建时间")).append($("<th  order='modify_time' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("修改时间")).append($("<th  order='state' onclick='clusterManagementMaintainClusterOrder(this)'/>").html("节点加载状态")))));
+    $("#main_content").append($("<div/>").html(
+        '<label>排序关键字：<select id="cluster_management_maintain_cluster_sort_keyword"><option value="id">id</option><option value="name">name</option><option value="attribute">attribute</option><option value="configuration">configuration</option><option value="type">type</option><option value="state">state</option><option value="node_number">node_number</option><option value="create_time">create_time</option><option value="modify_time">modify_time</option></select></label>' +
+        '<label>升降序<input type="checkbox" id="cluster_management_maintain_cluster_sort_asc"></label>' +
+        '<button onclick="clusterManagementMaintainClusterSort()">排序</button>'
+    )).append($("<div class='row div-row'/>").append($("<table id='cluster_management_maintain_cluster_table' class='table table-bordered table-responsive'/>").append($("<tr/>"))));
 
     $("#main_content").append($("<div class='row div-row'/>")
         .html('<label for="cluster_management_maintain_cluster_filter_label">当前筛选条件：</label>' +
@@ -81,7 +84,38 @@ function clusterManagementMaintain() {
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='clusterManagementFilter()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
+    $("#main_content").append($("<div class='modal fade' id='cluster_management_maintain_cluster_detail_modal' tabindex='-1' role='dialog' aria-labelledby='modal_detail_title' aria-hidden='true'/>")
+        .append($("<div class='modal-dialog'/>")
+            .append($("<div class='modal-content'/>")
+                .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_detail_title'/>").html("详细信息")))
+                .append($("<div class='modal-body'/>")
+                    .append($("<div class='row' id='cluster_management_maintain_cluster_detail_modal_content'/>")))
+                .append($("<div class='modal-footer'/>")
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("确定"))
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
     clusterManagementMaintainClusterRefresh(1);
+}
+
+function clusterManagementMaintainClusterDBClick(obj) {
+    $.ajax({
+        type : "GET",
+        data : {"clusterID" : $(obj).attr("cluster_id")},
+        url  : "/api/cluster/cluster_info",
+        dataType : "json",
+        success : function (data) {
+            $("#cluster_management_maintain_cluster_detail_modal_content").html(
+                "集群id：" + data.data.id +"<br/>"
+                + "节点名称：" + data.data.name + "<br/>"
+                + "节点属性：" + parseAttribute(data.data.attribute) + "<br/>"
+                + "集群配置：" +data.data.configuration + "<br/>"
+                + "集群状态：" + data.data.state + "<br/>"
+                + "节点数量：" + data.data.nodeNumber + "<br/>"
+                + "集群创建时间：" + new Date(data.data.createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                + "集群修改时间：" + new Date(data.data.modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+            );
+            $("#cluster_management_maintain_cluster_detail_modal").modal();
+        }
+    });
 }
 
 /**
@@ -94,6 +128,17 @@ function clusterManagementMaintainClusterOrder(obj) {
         cluster_management_maintain_cluster_desc = "desc";
     }else {
         cluster_management_maintain_cluster_desc = "asc";
+    }
+    clusterManagementMaintainClusterRefresh(1);
+}
+
+function clusterManagementMaintainClusterSort() {
+    cluster_management_maintain_cluster_orderBy = $("#cluster_management_maintain_cluster_sort_keyword option:selected").val();
+
+    if($("#cluster_management_maintain_cluster_sort_asc").is(":checked")){
+        cluster_management_maintain_cluster_desc = "asc";
+    }else {
+        cluster_management_maintain_cluster_desc = "desc";
     }
     clusterManagementMaintainClusterRefresh(1);
 }
@@ -116,15 +161,16 @@ function clusterManagementMaintainClusterRefresh(pageNum) {
                 }else if (data.data.list[i].state == 0) {
                     state = "未加载";
                 }
-                $("#cluster_management_maintain_cluster_table").append($("<tr onclick='clusterManagementMaintainClusterTRClick(this)'/>")
-                    .append($("<td/>").html(data.data.list[i].id))
-                    .append($("<td/>").html(data.data.list[i].name))
-                    .append($("<td/>").html(data.data.list[i].attribute))
-                    .append($("<td/>").html(data.data.list[i].nodeNumber))
-                    .append($("<td/>").html(data.data.list[i].configuration))
-                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
-                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss")))
-                    .append($("<td/>").html(data.data.list[i].state)).attr("cluster_id",data.data.list[i].id));
+                $("#cluster_management_maintain_cluster_table").append($("<tr onclick='clusterManagementMaintainClusterTRClick(this)' ondblclick='clusterManagementMaintainClusterDBClick(this)'/>").html(
+                    "集群id：" + data.data.list[i].id +"<br/>"
+                    + "节点名称：" + data.data.list[i].name + "<br/>"
+                    + "节点属性：" + parseAttribute(data.data.list[i].attribute) + "<br/>"
+                    + "集群配置：" +data.data.list[i].configuration + "<br/>"
+                    + "集群状态：" + state + "<br/>"
+                    + "节点数量：" + data.data.list[i].nodeNumber + "<br/>"
+                    + "集群创建时间：" + new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                    + "集群修改时间：" + new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                ).append($("<hr/>")).attr("cluster_id",data.data.list[i].id));
             }
 
             $("#cluster_management_maintain_cluster_pagination").html("");
@@ -272,8 +318,14 @@ function clusterManagementMaintainConfigureLoad(){
         .append($("<div class='div-row row'/>").append($("<label/>").html("当前集群属性：")).append($("<label id='cluster_management_maintain_node_cluster_attr'/>").html("无")))
         .append($("<div class='div-row row'/>").append($("<label/>").html("当前集群配置规则：")).append($("<label id='cluster_management_maintain_node_cluster_rule'/>").html("无")));
 
-    $("#main_content").append($("<div class='row div-row'/>").append($("<table id='cluster_management_maintain_configuration_node_table' class='table table-bordered table-responsive'/>")
-        .append($("<tr/>").append($("<th order='id' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("ID")).append($("<th order='name' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("名称")).append($("<th order='attributes' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("属性")).append($("<th order='service_number' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("服务个数")).append($("<th order='position' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("坐标")).append($("<th order='associated_nodes' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("关联节点")).append($("<th order='level' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("等级")).append($("<th order='create_time' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("创建时间")).append($("<th order='modify_time' onclick='clusterManagementMaintainNodeRefreshOrder(this)'/>").html("修改时间")))));
+    $("#main_content").append($("<div/>").html(
+        '<div class="div-row row">' +
+            '<label>排序关键字：<select id="cluster_management_maintain_node_sort_keyword"><option value="id">id</option><option value="name">name</option><option value="attributes">attributes</option><option value="node">node</option><option value="cluster">cluster</option><option value="content">content</option><option value="create_time">create_time</option><option value="modify_time">modify_time</option></select></label>' +
+            '<label>升降序<input type="checkbox" id="cluster_management_maintain_node_sort_asc"></label>' +
+            '<button onclick="clusterManagementMaintainNodeSort()">排序</button>' +
+        '</div>'
+    )).append($("<div class='row div-row'/>").append($("<table id='cluster_management_maintain_configuration_node_table' class='table table-bordered table-hover table-responsive'/>")
+        .append($("<tr/>"))));
 
     $("#main_content").append($("<div class='row div-row'/>").append($("<label/>").html("当前筛选条件：")).append("<label id='cluster_management_maintain_node_filter_show'>"));
 
@@ -321,6 +373,16 @@ function clusterManagementMaintainConfigureLoad(){
                     .append($("<button class='btn btn-default' onclick='clusterManagementMaintainNodeAutoConfigureAssociatedNode()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
 
+    $("#main_content").append($("<div class='modal fade' id='cluster_management_maintain_node_detail_modal' tabindex='-1' role='dialog' aria-labelledby='modal_detail_title' aria-hidden='true'/>")
+        .append($("<div class='modal-dialog'/>")
+            .append($("<div class='modal-content'/>")
+                .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_detail_title'/>").html("详细信息")))
+                .append($("<div class='modal-body'/>")
+                    .append($("<div class='row' id='cluster_management_maintain_node_detail_modal_detail_content'/>")))
+                .append($("<div class='modal-footer'/>")
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("确定"))
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
+
     clusterManagementMaintainNodeRefresh(1);
 
     $.ajax({
@@ -336,6 +398,75 @@ function clusterManagementMaintainConfigureLoad(){
             $("#cluster_management_maintain_node_cluster_rule").html(data.data.configuration);
         }
     });
+}
+
+function clusterManagementMaintainNodeSort() {
+    cluster_management_maintain_node_orderBy = $("#cluster_management_maintain_node_sort_keyword option:selected").val();
+
+    if($("#cluster_management_maintain_node_sort_asc").is(":checked")){
+        cluster_management_maintain_node_desc = "asc";
+    }else {
+        cluster_management_maintain_node_desc = "desc";
+    }
+
+    clusterManagementMaintainNodeRefresh(1);
+}
+
+function clusterManagementMaintainNodeDBClick(obj){
+    $.ajax({
+        type : "GET",
+        data : {"nodeID" : $(obj).attr("node_id")},
+        url  : "/api/node/node_info",
+        dataType : "json",
+        success : function (data) {
+            $("#cluster_management_maintain_node_detail_modal_detail_content").html(
+                "节点id：" + data.data.id +"<br/>"
+                + "节点名称：" + data.data.name + "<br/>"
+                + "节点属性：" + parseAttribute(data.data.attributes) + "<br/>"
+                + "节点服务数量：" +data.data.serviceNumber + "<br/>"
+                + "节点位置：" + data.data.position + "<br/>"
+                + "节点关联节点：" + parseAssociatedNode(data.data.associatedNodeServiceInfos) + "<br/>"
+                + "节点等级：" + data.data.level + "<br/>"
+                + "节点创建时间：" + new Date(data.data.createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                + "节点修改时间：" + new Date(data.data.modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+            );
+            $("#cluster_management_maintain_node_detail_modal").modal();
+        }
+    });
+}
+
+function clusterManagementMaintainServiceDBClick(obj) {
+    $.ajax({
+        type : "GET",
+        data : {"serviceID" : $(obj).attr("service_id")},
+        url  : "/api/service/service_info",
+        dataType : "json",
+        success : function (data) {
+            $("#cluster_management_maintain_service_detail_modal_detail_content").html(
+                "服务id：" + data.data.id +"<br/>"
+                + "服务名称：" + data.data.name + "<br/>"
+                + "服务属性：" + parseAttribute(data.data.attributes) + "<br/>"
+                + "服务内容： " + data.data.content + "<br/>"
+                + "服务所属节点： " + data.data.node + "<br/>"
+                + "服务所属集群：" + data.data.cluster + "<br/>"
+                + "服务创建时间：" + new Date(data.data.createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                + "服务修改时间：" + new Date(data.data.modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+            );
+            $("#cluster_management_maintain_service_detail_modal").modal();
+        }
+    });
+}
+
+function clusterManagementMaintainServiceSort(){
+    cluster_management_maintain_service_orderBy = $("#cluster_management_maintain_service_sort_keyword option:selected").val();
+
+    if($("#cluster_management_maintain_service_sort_asc").is(":checked")){
+        cluster_management_maintain_service_desc = "asc";
+    }else {
+        cluster_management_maintain_service_desc = "desc";
+    }
+
+    clusterManagementMaintainServiceRefresh(1);
 }
 
 /**
@@ -365,16 +496,17 @@ function clusterManagementMaintainNodeRefresh(pageNum) {
         success : function (data) {
             $("#cluster_management_maintain_configuration_node_table tr").nextAll().remove();
             for(var i=0;i<data.data.list.length;i++){
-                $("#cluster_management_maintain_configuration_node_table").append($("<tr onclick='clusterManagementMaintainNodeTRClick(this)'/>")
-                    .append($("<td/>").html(data.data.list[i].id))
-                    .append($("<td/>").html(data.data.list[i].name))
-                    .append($("<td/>").html(data.data.list[i].attrs))
-                    .append($("<td/>").html(data.data.list[i].serviceNumber))
-                    .append($("<td/>").html(data.data.list[i].position))
-                    .append($("<td/>").html(data.data.list[i].associatedNodes))
-                    .append($("<td/>").html(data.data.list[i].level))
-                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
-                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("node_id",data.data.list[i].id));
+                $("#cluster_management_maintain_configuration_node_table").append($("<tr onclick='clusterManagementMaintainNodeTRClick(this)' ondblclick='clusterManagementMaintainNodeDBClick(this)'/>").html(
+                    "节点id：" + data.data.list[i].id +"<br/>"
+                    + "节点名称：" + data.data.list[i].name + "<br/>"
+                    + "节点属性：" + parseSimpleAttribute(data.data.list[i].attributes) + "<br/>"
+                    + "节点服务数量：" +data.data.list[i].serviceNumber + "<br/>"
+                    + "节点位置：" + data.data.list[i].position + "<br/>"
+                    + "节点关联节点：" + parseSimpleAssociatedNode(data.data.list[i].associatedNodes) + "<br/>"
+                    + "节点等级：" + data.data.list[i].level + "<br/>"
+                    + "节点创建时间：" + new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                    + "节点修改时间：" + new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                ).append($("<hr/>")).attr("node_id",data.data.list[i].id));
             }
             $("#cluster_management_maintain_node_pagination").html("");
             if(data.data.isFirstPage){
@@ -474,17 +606,15 @@ function clusterManagementMaintainNodeAutoConfigureAssociatedNode() {
 function clusterManagementMaintainNodeDetailLoad() {
     $("#main_content").html('');
     $("#main_content").html('<h3>现有服务列表</h3> ' +
+        '<div class="div-row row">' +
+            '<label>排序关键字：<select id="cluster_management_maintain_service_sort_keyword"><option value="id">id</option><option value="name">name</option><option value="attributes">attributes</option><option value="node">node</option><option value="cluster">cluster</option><option value="content">content</option><option value="create_time">create_time</option><option value="modify_time">modify_time</option></select></label>' +
+            '<label>升降序<input type="checkbox" id="cluster_management_maintain_service_sort_asc"></label>' +
+            '<button onclick="clusterManagementMaintainServiceSort()">排序</button>' +
+        '</div>' +
         '<div class="row div-row">' +
             '<table id="cluster_management_maintain_service_table" class="table table-bordered table-hover table-responsive">' +
                 '<tr>' +
-                    '<th order="id" onclick="clusterManagementMaintainServiceOrder(this)">ID</th>' +
-                    '<th order="name" onclick="clusterManagementMaintainServiceOrder(this)">名称</th>' +
-                    '<th order="attributes" onclick="clusterManagementMaintainServiceOrder(this)">属性</th>' +
-                    '<th order="cluster" onclick="clusterManagementMaintainServiceOrder(this)">所属集群</th>' +
-                    '<th order="node" onclick="clusterManagementMaintainServiceOrder(this)">所属节点</th>' +
-                    '<th order="content" onclick="clusterManagementMaintainServiceOrder(this)">内容</th>' +
-                    '<th order="create_time" onclick="clusterManagementMaintainServiceOrder(this)">创建时间</th>' +
-                    '<th order="modify_time" onclick="clusterManagementMaintainServiceOrder(this)">修改时间</th>' +
+
                 '</tr>' +
             '</table>' +
         '</div>' +
@@ -529,7 +659,15 @@ function clusterManagementMaintainNodeDetailLoad() {
                 .append($("<div class='modal-footer'/>")
                     .append($("<button class='btn btn-default' onclick='clusterManagementMaintainServiceExport()' data-dismiss='modal'/>").html("确定"))
                     .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
-
+    $("#main_content").append($("<div class='modal fade' id='cluster_management_maintain_service_detail_modal' tabindex='-1' role='dialog' aria-labelledby='modal_detail_title' aria-hidden='true'/>")
+        .append($("<div class='modal-dialog'/>")
+            .append($("<div class='modal-content'/>")
+                .append($("<div class='modal-header'/>").append($("<h4 class='modal-title' id='modal_detail_title'/>").html("详细信息")))
+                .append($("<div class='modal-body'/>")
+                    .append($("<div class='row' id='cluster_management_maintain_service_detail_modal_detail_content'/>")))
+                .append($("<div class='modal-footer'/>")
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("确定"))
+                    .append($("<button class='btn btn-default' data-dismiss='modal'/>").html("取消"))))));
     clusterManagementMaintainServiceRefresh(1);
 }
 
@@ -560,15 +698,16 @@ function clusterManagementMaintainServiceRefresh(pageNum) {
         success : function (data) {
             $("#cluster_management_maintain_service_table tr").nextAll().remove();
             for(var i=0;i<data.data.list.length;i++){
-                $("#cluster_management_maintain_service_table").append($("<tr onclick='nodeeManagementMaintainServiceTRClick(this)'/>")
-                    .append($("<td/>").html(data.data.list[i].id))
-                    .append($("<td/>").html(data.data.list[i].name))
-                    .append($("<td/>").html(data.data.list[i].attributes))
-                    .append($("<td/>").html(data.data.list[i].cluster))
-                    .append($("<td/>").html(data.data.list[i].node))
-                    .append($("<td/>").html(data.data.list[i].content))
-                    .append($("<td/>").html(new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss")))
-                    .append($("<td/>").html(new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss"))).attr("service_id",data.data.list[i].id));
+                $("#cluster_management_maintain_service_table").append($("<tr onclick='nodeeManagementMaintainServiceTRClick(this)' ondblclick='clusterManagementMaintainServiceDBClick(this)'/>").html(
+                    "服务id：" + data.data.list[i].id +"<br/>"
+                    + "服务名称：" + data.data.list[i].name + "<br/>"
+                    + "服务属性：" + parseAttribute(data.data.list[i].attributes) + "<br/>"
+                    + "服务内容： " + simplifyServiceContent(data.data.list[i].content) + "<br/>"
+                    + "服务所属节点： " + data.data.list[i].node + "<br/>"
+                    + "服务所属集群：" + data.data.list[i].cluster + "<br/>"
+                    + "服务创建时间：" + new Date(data.data.list[i].createTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                    + "服务修改时间：" + new Date(data.data.list[i].modifyTime).Format("yyyy-MM-dd hh:mm:ss") + "<br/>"
+                ).append($("<hr/>")).attr("service_id",data.data.list[i].id));
             }
 
             $("#cluster_management_maintain_service_pagination").html("");
